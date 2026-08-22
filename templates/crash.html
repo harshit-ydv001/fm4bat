@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Flight Arena - Dual Mode</title>
+    <link rel="stylesheet" href="/static/css/style.main.css">
+    <style>
+        .history-bar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .history-pill { font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
+        .pill-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .aviator-canvas-container { position: relative; width: 100%; height: 320px; background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #1e293b; }
+        .plane-icon { position: absolute; bottom: 30px; left: 30px; font-size: 40px; transition: transform 0.1s linear; will-change: transform; filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.7)); z-index: 5; }
+        .live-bets-sidebar { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 15px; max-height: 420px; overflow-y: auto; }
+        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid #1f2937; }
+        .bet-row span { color: #9ca3af; }
+        .cashed-tag { color: #34d399 !important; font-weight: bold; }
+        .mode-switcher { display: flex; background: #030712; border: 1px solid #374151; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+        .mode-btn { flex: 1; background: transparent; border: none; color: #9ca3af; padding: 8px; font-weight: bold; font-size: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .mode-btn.active-token { background: #1f2937; color: #34d399; }
+        .mode-btn.active-real { background: #059669; color: #ffffff; }
+    </style>
+</head>
+<body class="dashboard-body">
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <a href="/dashboard" style="color: #9ca3af; text-decoration: none; font-size: 13px; margin-right: 15px;">← Lobby</a>
+            <span class="brand-icon">✈️</span>
+            <span class="brand-title">AVIATOR ARENA</span>
+        </div>
+        <div class="nav-right">
+            <div class="token-pill">
+                <span id="balance-label" class="token-label">Token Balance:</span>
+                <span id="token-balance" class="token-value">1000.00</span> <span id="currency-symbol">🪙</span>
+            </div>
+            <button onclick="openAddMoneyModal()" class="btn-add-money">+ Add Money</button>
+        </div>
+    </header>
+
+    <main class="lobby-container" style="max-width: 1100px;">
+        <div id="history-bar" class="history-bar"></div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <div class="game-card" style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <span id="game-status" class="card-badge soon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">WAITING FOR TAKE OFF</span>
+                    <span id="active-mode-tag" style="font-size: 11px; color: #34d399; font-weight: bold;">MODE: TOKEN (🪙)</span>
+                </div>
+
+                <div class="aviator-canvas-container" id="canvas-box">
+                    <!-- Plane element with explicit id="plane" -->
+                    <div id="plane" class="plane-icon">✈️</div>
+                    <div style="text-align: center; z-index: 10;">
+                        <h1 id="multiplier-display" style="font-size: 56px; font-weight: 900; margin: 0; color: #34d399;">1.00x</h1>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <div class="mode-switcher">
+                        <button id="btn-token-mode" onclick="switchGameMode('token')" class="mode-btn active-token">🎮 Token Mode (🪙)</button>
+                        <button id="btn-real-mode" onclick="switchGameMode('real')" class="mode-btn">💸 Real Money Mode (₹)</button>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 10px; align-items: center;">
+                    <div>
+                        <label id="wager-label" style="font-size: 11px; color: #9ca3af; display: block; margin-bottom: 5px;">Bet Amount (Tokens)</label>
+                        <input type="number" id="bet-amount" value="50" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 5px;">
+                            <button onclick="setBet(10)" class="btn-otp" style="padding: 6px; font-size: 10px;">10</button>
+                            <button onclick="setBet(50)" class="btn-otp" style="padding: 6px; font-size: 10px;">50</button>
+                            <button onclick="setBet(100)" class="btn-otp" style="padding: 6px; font-size: 10px;">100</button>
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-action" onclick="handleWagerAction()" class="btn-play" style="width: 100%; margin-top: 15px; cursor: pointer;">PLACE BET</button>
+            </div>
+
+            <div class="live-bets-sidebar">
+                <h3 style="margin-top: 0; font-size: 14px; border-bottom: 1px solid #1f2937; padding-bottom: 10px;">Live Players (<span id="player-count">0</span>)</h3>
+                <div id="live-bets-list">
+                    <p style="color: #6b7280; font-size: 12px; text-align: center;">Waiting for bets...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Deposit Modal -->
+    <div id="add-money-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: #111827; border: 1px solid #1f2937; padding: 25px; border-radius: 16px; width: 340px; text-align: center;">
+            <h3 style="margin-top: 0; color: #34d399; font-size: 16px;">Add Real Money (UPI QR)</h3>
+            <p style="color: #9ca3af; font-size: 11px; margin-bottom: 15px;">Scan QR to pay and submit UTR reference.</p>
+            <div style="background: white; padding: 10px; border-radius: 10px; display: inline-block; margin-bottom: 15px;">
+                <div style="width: 140px; height: 140px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #111827; font-weight: bold; font-size: 12px; border-radius: 6px;">SCAN QR HERE</div>
+            </div>
+            <input type="number" id="deposit-amount" placeholder="Enter Amount (₹)" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 13px; margin-bottom: 10px; box-sizing: border-box; text-align: center;">
+            <input type="text" id="utr-number" placeholder="Enter 12-digit UTR / Ref Number" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 13px; margin-bottom: 15px; box-sizing: border-box; text-align: center;">
+            <button onclick="submitDepositRequest()" class="btn-play" style="width: 100%; margin-bottom: 10px; cursor: pointer; font-size: 13px; padding: 10px;">SUBMIT DEPOSIT</button>
+            <button onclick="closeAddMoneyModal()" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 12px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Link external JS -->
+    <script src="/static/js/crash.js"></script>
+</body>
+</html>

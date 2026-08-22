@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup - fm4bat</title>
+    <style>
+        body { background-color: #030712; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: #111827; border: 1px solid #1f2937; padding: 30px; border-radius: 16px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .brand-logo { text-align: center; font-size: 24px; font-weight: bold; color: #34d399; margin-bottom: 5px; letter-spacing: 1px; }
+        h2 { text-align: center; color: #9ca3af; font-size: 15px; margin-top: 0; margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; background: #030712; border: 1px solid #374151; padding: 10px 12px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #34d399; }
+        .password-container { position: relative; }
+        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; }
+        .btn-submit { width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; transition: background 0.2s; }
+        .btn-submit:hover { background: #047857; }
+        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 18px; }
+        .toggle-text span { color: #34d399; font-weight: bold; cursor: pointer; }
+        .toggle-text span:hover { text-decoration: underline; }
+        .otp-hint { font-size: 11px; color: #34d399; margin-top: 4px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="brand-logo">⚡ fm4bat</div>
+        <h2 id="form-title">Login to your account</h2>
+        
+        <form action="/login" method="POST" id="auth-form">
+            
+            <!-- Signup Fields -->
+            <div class="form-group" id="username-field" style="display: none;">
+                <label>Choose Username</label>
+                <input type="text" name="username" id="input-username" placeholder="e.g. fm4bat_user">
+            </div>
+
+            <div class="form-group" id="identifier-field">
+                <label id="identifier-label">Username / Email / Phone</label>
+                <input type="text" name="identifier" id="input-identifier" required placeholder="Enter username, email or phone">
+            </div>
+
+            <div class="form-group" id="password-group">
+                <label>Password</label>
+                <div class="password-container">
+                    <input type="password" name="password" id="password-input" required placeholder="Enter password">
+                    <span class="eye-icon" id="eye-toggle" onclick="togglePassword()">👁️‍🗨️</span>
+                </div>
+            </div>
+
+            <!-- OTP Verification Field (Hidden initially during Signup) -->
+            <div class="form-group" id="otp-field" style="display: none;">
+                <label>Enter 4-Digit OTP</label>
+                <input type="text" name="entered_otp" id="input-otp" maxlength="4" placeholder="Enter code received">
+                <span class="otp-hint" id="otp-display-hint"></span>
+            </div>
+
+            <button type="button" class="btn-submit" id="submit-btn" onclick="handleAuthAction()">Login</button>
+        </form>
+
+        <div class="toggle-text" id="toggle-container">
+            Don't have an account? <span onclick="toggleAuthMode()">Sign Up</span>
+        </div>
+    </div>
+
+    <script>
+        let isLogin = true;
+        let otpStep = false; // Track if we are waiting for OTP verification during signup
+        let generatedOtp = "";
+
+        function togglePassword() {
+            const pwdInput = document.getElementById("password-input");
+            const eye = document.getElementById("eye-toggle");
+            if (pwdInput.type === "password") {
+                pwdInput.type = "text";
+                eye.innerText = "👁️";
+            } else {
+                pwdInput.type = "password";
+                eye.innerText = "👁️‍🗨️";
+            }
+        }
+
+        function toggleAuthMode() {
+            isLogin = !isLogin;
+            otpStep = false;
+            const title = document.getElementById("form-title");
+            const btn = document.getElementById("submit-btn");
+            const usernameField = document.getElementById("username-field");
+            const identifierLabel = document.getElementById("identifier-label");
+            const identifierInput = document.getElementById("input-identifier");
+            const passwordGroup = document.getElementById("password-group");
+            const otpField = document.getElementById("otp-field");
+            const toggleContainer = document.getElementById("toggle-container");
+
+            otpField.style.display = "none";
+            passwordGroup.style.display = "block";
+
+            if (isLogin) {
+                title.innerText = "Login to your account";
+                btn.innerText = "Login";
+                usernameField.style.display = "none";
+                document.getElementById("input-username").required = false;
+                
+                identifierLabel.innerText = "Username / Email / Phone";
+                identifierInput.placeholder = "Enter username, email or phone";
+                
+                toggleContainer.innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
+            } else {
+                title.innerText = "Create New Account";
+                btn.innerText = "Send OTP";
+                usernameField.style.display = "block";
+                document.getElementById("input-username").required = true;
+                
+                identifierLabel.innerText = "Gmail ID or Phone Number";
+                identifierInput.placeholder = "Enter email or phone number";
+                
+                toggleContainer.innerHTML = 'Already have an account? <span onclick="toggleAuthMode()">Login</span>';
+            }
+        }
+
+        function handleAuthAction() {
+            const form = document.getElementById("auth-form");
+            
+            if (isLogin) {
+                form.action = "/login";
+                form.submit();
+            } else {
+                if (!otpStep) {
+                    // Step 1 of Signup: Generate dummy OTP and show input field
+                    const identifierVal = document.getElementById("input-identifier").value;
+                    const usernameVal = document.getElementById("input-username").value;
+                    const passwordVal = document.getElementById("password-input").value;
+
+                    if (!identifierVal || !usernameVal || !passwordVal) {
+                        alert("Please fill in all fields first!");
+                        return;
+                    }
+
+                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+                    
+                    // Show OTP input and change button text
+                    document.getElementById("otp-field").style.display = "block";
+                    document.getElementById("otp-display-hint").innerText = `Mock OTP sent to ${identifierVal}: [ ${generatedOtp} ]`;
+                    document.getElementById("submit-btn").innerText = "Verify & Register";
+                    otpStep = true;
+                } else {
+                    // Step 2 of Signup: Verify OTP
+                    const enteredOtp = document.getElementById("input-otp").value;
+                    if (enteredOtp === generatedOtp) {
+                        form.action = "/signup";
+                        form.submit();
+                    } else {
+                        alert("Invalid OTP! Please check the code shown above.");
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

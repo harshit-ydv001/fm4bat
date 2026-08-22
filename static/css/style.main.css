@@ -1,0 +1,413 @@
+/* Global Reset & Body Styles */
+body, body.dashboard-body {
+    margin: 0;
+    padding: 0;
+    background-color: #030712;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Login Card Styling */
+.login-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    padding: 40px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    margin: auto;
+}
+
+.arcade-logo {
+    font-size: 32px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+h1 {
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0 0 5px 0;
+    letter-spacing: 1px;
+}
+
+.subtitle {
+    color: #9ca3af;
+    font-size: 11px;
+    margin-bottom: 30px;
+}
+
+.btn-google {
+    width: 100%;
+    background: #ffffff;
+    color: #111827;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background 0.2s;
+    box-sizing: border-box;
+}
+
+.btn-google:hover {
+    background: #f3f4f6;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #1f2937;
+}
+
+.divider span {
+    padding: 0 10px;
+    color: #6b7280;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.phone-group input, .otp-group input {
+    width: 100%;
+    background: #030712;
+    border: 1px solid #1f2937;
+    padding: 12px;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.phone-group input:focus, .otp-group input:focus {
+    border-color: #10b981;
+    outline: none;
+}
+
+.btn-otp, .btn-verify {
+    width: 100%;
+    background: #1f2937;
+    color: #f3f4f6;
+    border: 1px solid #374151;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-otp:hover {
+    background: #374151;
+}
+
+.btn-verify {
+    background: #059669;
+    border: none;
+    color: white;
+}
+
+.btn-verify:hover {
+    background: #047857;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #111827;
+    border-bottom: 1px solid #1f2937;
+    padding: 15px 30px;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-icon {
+    font-size: 20px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.brand-title {
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.token-pill {
+    background: #1f2937;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    border: 1px solid #374151;
+}
+
+.token-label {
+    color: #9ca3af;
+    margin-right: 5px;
+}
+
+.token-value {
+    color: #34d399;
+    font-weight: bold;
+}
+
+.btn-add-money {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-money:hover {
+    background: rgba(16, 185, 129, 0.3);
+}
+
+.btn-logout {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* Lobby Container & Cards */
+.lobby-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.lobby-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 5px 0;
+}
+
+.lobby-header p {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.game-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 16px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.game-card.active-card:hover {
+    border-color: #10b981;
+    transform: translateY(-3px);
+    box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1);
+}
+
+.game-card.coming-soon {
+    opacity: 0.65;
+    background: rgba(17, 24, 39, 0.6);
+}
+
+.card-badge {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: max-content;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.card-badge.play {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.card-badge.soon {
+    background: rgba(107, 114, 128, 0.15);
+    color: #9ca3af;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.game-icon-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.game-logo-box {
+    font-size: 24px;
+    background: #1f2937;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid #374151;
+}
+
+.game-icon-title h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.game-icon-title p {
+    margin: 2px 0 0 0;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.game-desc {
+    color: #9ca3af;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.btn-play {
+    display: block;
+    text-align: center;
+    background: #059669;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 12px;
+    border-radius: 10px;
+    transition: background 0.2s;
+    border: none;
+}
+
+.btn-play:hover {
+    background: #047857;
+}
+
+.btn-disabled {
+    width: 100%;
+    background: #1f2937;
+    color: #6b7280;
+    border: none;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: not-allowed;
+}
+
+/* Aviator Game Specific Styles */
+.aviator-canvas-container {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #1e293b;
+}
+
+.plane-icon {
+    position: absolute;
+    font-size: 36px;
+    transition: transform 0.1s linear;
+    filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.5));
+}
+
+.live-bets-sidebar {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 16px;
+    padding: 15px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.bet-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #1f2937;
+}
+
+.bet-row span {
+    color: #9ca3af;
+}
+
+.cashed-tag {
+    color: #34d399 !important;
+    font-weight: bold;
+}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup - fm4bat</title>
+    <style>
+        body { background-color: #030712; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: #111827; border: 1px solid #1f2937; padding: 30px; border-radius: 16px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .brand-logo { text-align: center; font-size: 24px; font-weight: bold; color: #34d399; margin-bottom: 5px; letter-spacing: 1px; }
+        h2 { text-align: center; color: #9ca3af; font-size: 15px; margin-top: 0; margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; background: #030712; border: 1px solid #374151; padding: 10px 12px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #34d399; }
+        .password-container { position: relative; }
+        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; }
+        .btn-submit { width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; transition: background 0.2s; }
+        .btn-submit:hover { background: #047857; }
+        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 18px; }
+        .toggle-text span { color: #34d399; font-weight: bold; cursor: pointer; }
+        .toggle-text span:hover { text-decoration: underline; }
+        .otp-hint { font-size: 11px; color: #34d399; margin-top: 4px; display: block; }
+        .forgot-link { text-align: right; font-size: 12px; margin-top: -10px; margin-bottom: 15px; }
+        .forgot-link span { color: #9ca3af; cursor: pointer; }
+        .forgot-link span:hover { color: #34d399; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="brand-logo">⚡ fm4bat</div>
+        <h2 id="form-title">Login to your account</h2>
+        
+        <form action="/login" method="POST" id="auth-form">
+            
+            <!-- Signup Username Field -->
+            <div class="form-group" id="username-field" style="display: none;">
+                <label>Choose Username</label>
+                <input type="text" name="username" id="input-username" placeholder="e.g. fm4bat_user">
+            </div>
+
+            <!-- Identifier (Login ID / Signup Email/Phone / Forgot ID) -->
+            <div class="form-group" id="identifier-field">
+                <label id="identifier-label">Username / Email / Phone</label>
+                <input type="text" name="identifier" id="input-identifier" required placeholder="Enter identifier">
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group" id="password-group">
+                <label id="password-label">Password</label>
+                <div class="password-container">
+                    <input type="password" name="password" id="password-input" required placeholder="Enter password">
+                    <span class="eye-icon" id="eye-toggle" onclick="togglePassword()">👁️‍🗨️</span>
+                </div>
+            </div>
+
+            <!-- Forgot Password Link -->
+            <div class="forgot-link" id="forgot-password-link">
+                <span onclick="showForgotPassword()">Forgot Password?</span>
+            </div>
+
+            <!-- OTP Field (For Signup & Forgot Password) -->
+            <div class="form-group" id="otp-field" style="display: none;">
+                <label>Enter 4-Digit OTP</label>
+                <input type="text" name="entered_otp" id="input-otp" maxlength="4" placeholder="Enter code">
+                <span class="otp-hint" id="otp-display-hint"></span>
+            </div>
+
+            <button type="button" class="btn-submit" id="submit-btn" onclick="handleAuthAction()">Login</button>
+        </form>
+
+        <div class="toggle-text" id="toggle-container">
+            Don't have an account? <span onclick="toggleAuthMode()">Sign Up</span>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = "login"; // "login", "signup", "forgot"
+        let otpStep = false; 
+        let generatedOtp = "";
+
+        function togglePassword() {
+            const pwdInput = document.getElementById("password-input");
+            const eye = document.getElementById("eye-toggle");
+            if (pwdInput.type === "password") {
+                pwdInput.type = "text";
+                eye.innerText = "👁️";
+            } else {
+                pwdInput.type = "password";
+                eye.innerText = "👁️‍🗨️";
+            }
+        }
+
+        function toggleAuthMode() {
+            otpStep = false;
+            const title = document.getElementById("form-title");
+            const btn = document.getElementById("submit-btn");
+            const usernameField = document.getElementById("username-field");
+            const identifierLabel = document.getElementById("identifier-label");
+            const identifierInput = document.getElementById("input-identifier");
+            const passwordGroup = document.getElementById("password-group");
+            const passwordLabel = document.getElementById("password-label");
+            const otpField = document.getElementById("otp-field");
+            const forgotLink = document.getElementById("forgot-password-link");
+            const toggleContainer = document.getElementById("toggle-container");
+
+            otpField.style.display = "none";
+            passwordGroup.style.display = "block";
+
+            if (currentMode === "signup" || currentMode === "forgot") {
+                // Switch to Login
+                currentMode = "login";
+                title.innerText = "Login to your account";
+                btn.innerText = "Login";
+                usernameField.style.display = "none";
+                forgotLink.style.display = "block";
+                document.getElementById("input-username").required = false;
+                passwordLabel.innerText = "Password";
+                
+                identifierLabel.innerText = "Username / Email / Phone";
+                identifierInput.placeholder = "Enter username, email or phone";
+                
+                toggleContainer.innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
+            } else {
+                // Switch to Sign Up
+                currentMode = "signup";
+                title.innerText = "Create New Account";
+                btn.innerText = "Send OTP";
+                usernameField.style.display = "block";
+                forgotLink.style.display = "none";
+                document.getElementById("input-username").required = true;
+                passwordLabel.innerText = "Password";
+                
+                identifierLabel.innerText = "Gmail ID or Phone Number";
+                identifierInput.placeholder = "Enter email or phone number";
+                
+                toggleContainer.innerHTML = 'Already have an account? <span onclick="toggleAuthMode()">Login</span>';
+            }
+        }
+
+        function showForgotPassword() {
+            currentMode = "forgot";
+            otpStep = false;
+            document.getElementById("form-title").innerText = "Reset Password";
+            document.getElementById("submit-btn").innerText = "Send Reset OTP";
+            document.getElementById("username-field").style.display = "none";
+            document.getElementById("forgot-password-link").style.display = "none";
+            document.getElementById("password-group").style.display = "none"; // Hide old password, will show new password after OTP
+            document.getElementById("identifier-label").innerText = "Registered Email or Phone";
+            document.getElementById("identifier-input").placeholder = "Enter your registered email/phone";
+            document.getElementById("toggle-container").innerHTML = 'Remember password? <span onclick="toggleAuthMode()">Login</span>';
+        }
+
+        function handleAuthAction() {
+            const form = document.getElementById("auth-form");
+            
+            if (currentMode === "login") {
+                form.action = "/login";
+                form.submit();
+            } 
+            else if (currentMode === "signup") {
+                if (!otpStep) {
+                    const identifierVal = document.getElementById("input-identifier").value;
+                    const usernameVal = document.getElementById("input-username").value;
+                    const passwordVal = document.getElementById("password-input").value;
+
+                    if (!identifierVal || !usernameVal || !passwordVal) {
+                        alert("Please fill in all fields!");
+                        return;
+                    }
+
+                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+                    document.getElementById("otp-field").style.display = "block";
+                    document.getElementById("otp-display-hint").innerText = `Mock OTP: [ ${generatedOtp} ]`;
+                    document.getElementById("submit-btn").innerText = "Verify & Register";
+                    otpStep = true;
+                } else {
+                    const enteredOtp = document.getElementById("input-otp").value;
+                    if (enteredOtp === generatedOtp) {
+                        form.action = "/signup";
+                        form.submit();
+                    } else {
+                        alert("Invalid OTP!");
+                    }
+                }
+            }
+            else if (currentMode === "forgot") {
+                if (!otpStep) {
+                    const identifierVal = document.getElementById("input-identifier").value;
+                    if (!identifierVal) {
+                        alert("Please enter your registered email or phone!");
+                        return;
+                    }
+
+                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+                    document.getElementById("otp-field").style.display = "block";
+                    document.getElementById("otp-display-hint").innerText = `Reset OTP: [ ${generatedOtp} ]`;
+                    
+                    // Show new password field now for resetting
+                    document.getElementById("password-group").style.display = "block";
+                    document.getElementById("password-label").innerText = "New Password";
+                    document.getElementById("password-input").placeholder = "Enter new password";
+                    
+                    document.getElementById("submit-btn").innerText = "Verify & Reset Password";
+                    otpStep = true;
+                } else {
+                    const enteredOtp = document.getElementById("input-otp").value;
+                    const newPassword = document.getElementById("password-input").value;
+                    
+                    if (enteredOtp === generatedOtp) {
+                        if (!newPassword) {
+                            alert("Please enter a new password!");
+                            return;
+                        }
+                        form.action = "/forgot-password";
+                        form.submit();
+                    } else {
+                        alert("Invalid OTP!");
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

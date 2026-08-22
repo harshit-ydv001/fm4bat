@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - fm4bat</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #030712 0%, #0f172a 100%); 
+            color: #ffffff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh;
+        }
+        
+        /* Modern Glass Header */
+        .dashboard-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px 40px; 
+            background: rgba(17, 24, 39, 0.85); 
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .brand { 
+            font-size: 22px; 
+            font-weight: 800; 
+            color: #34d399; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
+        }
+        .brand-logo-icon {
+            background: linear-gradient(135deg, #059669, #34d399);
+            color: #030712;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+        }
+
+        .user-actions { display: flex; align-items: center; gap: 18px; }
+        
+        .user-welcome { 
+            font-size: 13px; 
+            color: #94a3b8; 
+            background: rgba(30, 41, 59, 0.7); 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        
+        .balance-badge { 
+            background: rgba(30, 41, 59, 0.9); 
+            padding: 9px 18px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #fbbf24; 
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+        }
+        
+        .btn-logout { 
+            background: linear-gradient(135deg, #ef4444, #dc2626); 
+            color: white; 
+            border: none; 
+            padding: 9px 20px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 13px; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-logout:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Main Container */
+        .main-content { max-width: 1100px; margin: 45px auto; padding: 0 25px; }
+        
+        .section-header {
+            margin-bottom: 25px;
+        }
+        .section-title { 
+            font-size: 22px; 
+            font-weight: 700; 
+            color: #f8fafc; 
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 22px;
+            background: #34d399;
+            border-radius: 3px;
+            box-shadow: 0 0 10px #34d399;
+        }
+
+        /* Games Grid */
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        
+        .game-card { 
+            background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.95)); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+            border-radius: 18px; 
+            padding: 30px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            text-decoration: none; 
+            color: inherit; 
+            display: block; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, #34d399, transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .game-card:hover { 
+            transform: translateY(-6px); 
+            border-color: rgba(52, 211, 153, 0.4); 
+            box-shadow: 0 15px 40px rgba(5, 150, 105, 0.15);
+        }
+        
+        .game-card:hover::before { opacity: 1; }
+
+        .game-icon-box {
+            width: 60px;
+            height: 60px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+        }
+
+        .game-card h3 { margin: 0 0 8px 0; font-size: 22px; color: #ffffff; font-weight: 700; }
+        .game-card p { color: #94a3b8; font-size: 14px; margin: 0; line-height: 1.5; }
+        
+        .badge-coming { 
+            display: inline-block; 
+            background: rgba(245, 158, 11, 0.15); 
+            color: #fbbf24; 
+            font-size: 11px; 
+            font-weight: 700; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .play-btn-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 20px;
+            color: #34d399;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="brand">
+            <div class="brand-logo-icon">⚡</div>
+            <span>fm4bat</span>
+        </div>
+        <div class="user-actions">
+            <div class="user-welcome">👤 {{ username }}</div>
+            <div class="balance-badge">
+                Balance: <span id="user-balance">1000.00</span> 🪙
+            </div>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="section-header">
+            <div class="section-title">Featured Casino Arena</div>
+        </div>
+        
+        <div class="games-grid">
+            <!-- Crash Game Card -->
+            <a href="/games/crash" class="game-card">
+                <div class="game-icon-box">🚀</div>
+                <h3>Aviator Crash</h3>
+                <p>Watch the multiplier soar, cash out in real-time before the plane crashes, and multiply your tokens or cash!</p>
+                <div class="play-btn-hint">Play Now &rarr;</div>
+            </a>
+
+            <!-- Galaxy Spin Card (Coming Soon) -->
+            <div class="game-card" style="opacity: 0.75; cursor: not-allowed;">
+                <span class="badge-coming">COMING SOON</span>
+                <div class="game-icon-box" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2);">🪐</div>
+                <h3>Galaxy Spin</h3>
+                <p>Spin the quantum wheel across the galaxy for massive bonus entertainment tokens and mysterious prizes.</p>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
