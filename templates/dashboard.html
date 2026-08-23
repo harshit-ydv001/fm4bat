@@ -53,9 +53,8 @@
         }
 
         .user-actions { display: flex; align-items: center; gap: 10px; }
-        .user-welcome { font-size: 12px; color: #94a3b8; background: #242833; padding: 6px 10px; border-radius: 6px; }
-        .balance-badge { background: #242833; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #00e676; }
-        .btn-logout { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; text-decoration: none; font-size: 12px; }
+        .profile-icon-btn { background: #242833; border: 1px solid #2a2e39; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #34d399; text-decoration: none; }
+        .balance-badge { background: #242833; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #00e676; border: 1px solid #2a2e39; }
 
         /* Category Tabs Bar */
         .category-bar {
@@ -181,9 +180,8 @@
             <span>fm4bat</span>
         </div>
         <div class="user-actions">
-            <div class="user-welcome">👤 {{ username }}</div>
+            <a href="/account" class="profile-icon-btn">👤</a>
             <div class="balance-badge">1000.00 🪙</div>
-            <a href="/logout" class="btn-logout">Logout</a>
         </div>
     </header>
 
