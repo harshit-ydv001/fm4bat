@@ -306,7 +306,7 @@
         let currentWager = 0;
         let isPlaying = false;
         let hasCashedOut = false;
-        let roundInProgress = true; // Start as true until server confirms ready state
+        let roundInProgress = true;
 
         function connectWebSocket() {
             const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -348,7 +348,6 @@
                         actionBtn.style.background = "#f59e0b";
                         actionBtn.disabled = false;
                     } else if (!isPlaying) {
-                        roundInProgress = true;
                         actionBtn.innerText = "WAIT FOR NEXT ROUND";
                         actionBtn.style.background = "#1f2937";
                         actionBtn.disabled = true;
@@ -410,11 +409,13 @@
                 return;
             }
 
+            // CASE 1: Agar round chal raha hai aur user ne bet nahi lagayi thi, toh kuch mat karo
             if (roundInProgress && !isPlaying) {
-                return; // Do nothing if round is already running
+                return; 
             }
 
-            if (!isPlaying) {
+            // CASE 2: Naye round ke shuru hone par bet lagana
+            if (!roundInProgress && !isPlaying) {
                 if (amount > balance) { 
                     alert("Insufficient Token Balance!"); 
                     return; 
@@ -434,6 +435,7 @@
                     ws.send(JSON.stringify({ action: "PLACE_BET", amount: amount, mode: "token" }));
                 }
             } 
+            // CASE 3: Flight chal rahi hai aur user ne bet lagayi thi -> CASH OUT karna!
             else if (roundInProgress && isPlaying && !hasCashedOut) {
                 hasCashedOut = true;
                 let currentMult = parseFloat(document.getElementById("multiplier-display").innerText);
