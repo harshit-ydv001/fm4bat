@@ -102,7 +102,7 @@
             z-index: 3;
         }
         
-        /* Fixed Plane Flight Path & Animation */
+        /* Plane Animation */
         .plane-container {
             position: absolute;
             bottom: 0;
@@ -132,7 +132,6 @@
             background: #121418;
         }
 
-        /* Single Bet Panel */
         .bet-panel {
             background: #1a1d24;
             border: 1px solid #2a2e39;
@@ -262,7 +261,6 @@
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
         <div class="multiplier-display" id="multiplier-display">1.00x</div>
         
-        <!-- Proper Plane Path Container -->
         <div class="plane-container">
             <div class="plane" id="plane">✈️</div>
         </div>
@@ -299,16 +297,14 @@
     <script>
         let ws;
         let balance = 1000.00;
-        let realBalance = 0.00;
         let currentWager = 0;
         let isPlaying = false;
         let hasCashedOut = false;
         let roundInProgress = false;
-        let currentMode = 'token';
 
         function connectWebSocket() {
             const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-            ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/crash?mode=${currentMode}`);
+            ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/crash?mode=token`);
 
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
@@ -347,7 +343,7 @@
                         actionBtn.style.background = "#f59e0b";
                         actionBtn.style.cursor = "pointer";
                         actionBtn.disabled = false;
-                    } else {
+                    } else if (!isPlaying) {
                         actionBtn.innerText = "WAIT FOR NEXT ROUND";
                         actionBtn.style.background = "#1f2937";
                         actionBtn.style.cursor = "not-allowed";
@@ -359,13 +355,13 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    // Smooth diagonal upward movement for plane
                     let xPos = Math.min((data.multiplier - 1) * 90, 280);
                     let yPos = Math.min((data.multiplier - 1) * 60, 150);
                     if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(-18deg)`;
 
                     if (isPlaying && !hasCashedOut && actionBtn) {
-                        actionBtn.innerText = `CASH OUT (${(currentWager * data.multiplier).toFixed(2)})`;
+                        let currentWin = (currentWager * data.multiplier).toFixed(2);
+                        actionBtn.innerText = `CASH OUT (${currentWin})`;
                         actionBtn.style.background = "#f59e0b";
                         actionBtn.disabled = false;
                     }
@@ -380,8 +376,15 @@
                     status.style.color = "#f87171";
                     if(plane) plane.style.transform = `translate(320px, 80px) rotate(50deg)`;
 
+                    if (isPlaying && !hasCashedOut) {
+                        // User missed cash out before crash (Lost bet)
+                        isPlaying = false;
+                        hasCashedOut = false;
+                    }
+
                     isPlaying = false;
                     hasCashedOut = false;
+                    
                     if(actionBtn) {
                         actionBtn.innerText = "PLACE BET";
                         actionBtn.style.background = "#059669";
@@ -412,12 +415,11 @@
                 return;
             }
 
-            if (amount > balance) { 
-                alert("Insufficient Token Balance!"); 
-                return; 
-            }
-
             if (!roundInProgress && !isPlaying) {
+                if (amount > balance) { 
+                    alert("Insufficient Token Balance!"); 
+                    return; 
+                }
                 currentWager = amount;
                 balance -= amount;
                 updateBalanceDisplay();
@@ -430,12 +432,13 @@
                 actionBtn.disabled = true;
 
                 if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: "PLACE_BET", amount: amount, mode: currentMode }));
+                    ws.send(JSON.stringify({ action: "PLACE_BET", amount: amount, mode: "token" }));
                 }
             } 
             else if (roundInProgress && isPlaying && !hasCashedOut) {
                 hasCashedOut = true;
-                let winAmount = currentWager * parseFloat(document.getElementById("multiplier-display").innerText);
+                let currentMult = parseFloat(document.getElementById("multiplier-display").innerText);
+                let winAmount = currentWager * currentMult;
                 
                 balance += winAmount;
                 updateBalanceDisplay();
@@ -445,7 +448,7 @@
                 actionBtn.disabled = true;
 
                 if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: "CASH_OUT", mode: currentMode }));
+                    ws.send(JSON.stringify({ action: "CASH_OUT", mode: "token" }));
                 }
             }
         }
