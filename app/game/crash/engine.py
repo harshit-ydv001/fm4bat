@@ -29,7 +29,6 @@ class CrashGameInstance:
             if r < 0.08:
                 self.target_crash = 1.00
             else:
-                # Capping max crash to 25.00x so it never freezes for too long
                 raw_crash = 0.98 / (1.0 - random.random())
                 self.target_crash = round(max(1.01, min(raw_crash, 25.00)), 2)
 
@@ -44,14 +43,18 @@ class CrashGameInstance:
             "Rohit_Bet",
             "Sahil_K",
             "Deepak_99",
+            "Vikram_77",
+            "Neha_Win",
+            "Karan_X",
         ]
         selected_bots = random.sample(
-            bot_names, random.randint(3, min(5, len(bot_names)))
+            bot_names, random.randint(4, min(7, len(bot_names)))
         )
         for bot in selected_bots:
             bot_uid = f"bot_{self.mode}_{random.randint(1000,9999)}"
-            bet_amt = random.choice([50, 100, 200, 500])
-            bot_cashout_target = round(random.uniform(1.2, 4.0), 2)
+            # Random large and varying bet amounts for bots
+            bet_amt = random.choice([50, 100, 150, 200, 300, 500, 1000])
+            bot_cashout_target = round(random.uniform(1.2, 8.0), 2)
             self.active_bets[bot_uid] = {
                 "username": bot,
                 "amount": bet_amt,
@@ -98,7 +101,7 @@ class CrashGameInstance:
                     elapsed = (
                         asyncio.get_event_loop().time() - start_time
                     )
-                    self.multiplier = round(1.00 + (elapsed ** 1.3) * 0.12, 2)  # Slightly faster rise
+                    self.multiplier = round(1.00 + (elapsed ** 1.3) * 0.12, 2)
 
                     for data in self.active_bets.values():
                         if (

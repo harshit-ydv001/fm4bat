@@ -19,259 +19,73 @@
             align-items: center;
             min-height: 100vh;
         }
-        /* Top Navigation */
         .navbar {
-            width: 100%;
-            max-width: 480px;
-            background: #1a1d24;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #2a2e39;
+            width: 100%; max-width: 480px; background: #1a1d24; display: flex;
+            justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #2a2e39;
         }
         .user-welcome-badge {
-            font-size: 12px;
-            color: #94a3b8;
-            background: rgba(30, 41, 59, 0.7);
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 12px; color: #94a3b8; background: rgba(30, 41, 59, 0.7);
+            padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .balance-box {
-            background: #242833;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            color: #00e676;
-            font-weight: 600;
-        }
-        .logout-link {
-            color: #b0bec5;
-            text-decoration: none;
-            font-size: 13px;
-        }
+        .balance-box { background: #242833; padding: 5px 12px; border-radius: 20px; font-size: 14px; color: #00e676; font-weight: 600; }
+        .logout-link { color: #b0bec5; text-decoration: none; font-size: 13px; }
 
-        /* Multiplier History Bar */
         .history-bar {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            gap: 6px;
-            padding: 8px 12px;
-            background: #161920;
-            overflow-x: auto;
-            white-space: nowrap;
+            width: 100%; max-width: 480px; display: flex; gap: 6px; padding: 8px 12px; background: #161920; overflow-x: auto; white-space: nowrap;
         }
-        .history-pill {
-            background: #242833;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            color: #00e676;
-        }
+        .history-pill { background: #242833; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: #00e676; }
         .history-pill.pill-red { color: #ff5252; }
         .history-pill.pill-green { color: #00e676; }
 
-        /* Main Game Screen */
         .game-container {
-            width: 100%;
-            max-width: 480px;
-            background: radial-gradient(circle at bottom left, #1e222d 0%, #0f1115 70%);
-            height: 240px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border-bottom: 2px solid #2a2e39;
+            width: 100%; max-width: 480px; background: radial-gradient(circle at bottom left, #1e222d 0%, #0f1115 70%);
+            height: 240px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #2a2e39;
         }
-        .multiplier-display {
-            font-size: 46px;
-            font-weight: 900;
-            color: #34d399;
-            z-index: 3;
-            text-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
-        }
-        .status-text {
-            font-size: 12px;
-            color: #fbbf24;
-            font-weight: bold;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-            z-index: 3;
-        }
+        .multiplier-display { font-size: 46px; font-weight: 900; color: #34d399; z-index: 3; text-shadow: 0 0 15px rgba(52, 211, 153, 0.3); }
+        .status-text { font-size: 12px; color: #fbbf24; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; z-index: 3; }
         
-        /* Plane Animation Container */
-        .plane-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-        }
-        .plane {
-            position: absolute;
-            bottom: 20px;
-            left: 30px;
-            font-size: 32px;
-            transition: transform 0.1s linear;
-            will-change: transform;
-        }
+        .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+        .plane { position: absolute; bottom: 20px; left: 30px; font-size: 32px; transition: transform 0.1s linear; will-change: transform; }
 
-        /* Betting Panels Section */
-        .betting-section {
-            width: 100%;
-            max-width: 480px;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #121418;
-        }
+        .betting-section { width: 100%; max-width: 480px; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: #121418; }
+        .bet-panel { background: #1a1d24; border: 1px solid #2a2e39; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .bet-controls-row { display: flex; justify-content: space-between; align-items: center; }
+        .amount-control { display: flex; background: #121418; border-radius: 8px; border: 1px solid #2a2e39; align-items: center; overflow: hidden; }
+        .amount-btn { background: #242833; color: #fff; border: none; padding: 8px 12px; font-size: 16px; cursor: pointer; }
+        .amount-input { width: 70px; background: transparent; border: none; color: #fff; text-align: center; font-size: 14px; font-weight: bold; outline: none; }
+        .action-btn { flex: 1; margin-left: 10px; background: #059669; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; text-align: center; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3); }
+        .action-btn:disabled { background: #1f2937 !important; color: #9ca3af !important; cursor: not-allowed !important; box-shadow: none; }
+        .quick-presets { display: flex; gap: 5px; }
+        .preset-pill { background: #242833; border: none; color: #b0bec5; padding: 4px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; flex: 1; text-align: center; }
 
-        .bet-panel {
-            background: #1a1d24;
-            border: 1px solid #2a2e39;
-            border-radius: 10px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .bet-controls-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .amount-control {
-            display: flex;
-            background: #121418;
-            border-radius: 8px;
-            border: 1px solid #2a2e39;
-            align-items: center;
-            overflow: hidden;
-        }
-        .amount-btn {
-            background: #242833;
-            color: #fff;
-            border: none;
-            padding: 8px 12px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .amount-input {
-            width: 70px;
-            background: transparent;
-            border: none;
-            color: #fff;
-            text-align: center;
-            font-size: 14px;
-            font-weight: bold;
-            outline: none;
-        }
-        .action-btn {
-            flex: 1;
-            margin-left: 10px;
-            background: #059669;
-            color: #fff;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
-        }
-        .action-btn:disabled {
-            background: #1f2937 !important;
-            color: #9ca3af !important;
-            cursor: not-allowed !important;
-            box-shadow: none;
-        }
-        .quick-presets {
-            display: flex;
-            gap: 5px;
-        }
-        .preset-pill {
-            background: #242833;
-            border: none;
-            color: #b0bec5;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-
-        /* Live Bets / Stats Tabs */
-        .stats-section {
-            width: 100%;
-            max-width: 480px;
-            background: #1a1d24;
-            border-top: 1px solid #2a2e39;
-            margin-top: 5px;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #2a2e39;
-        }
-        .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
-            color: #8c9eff;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .bets-list {
-            max-height: 140px;
-            overflow-y: auto;
-            padding: 5px 10px;
-        }
-        .bet-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            padding: 6px 0;
-            border-bottom: 1px solid #222630;
-            color: #b0bec5;
-        }
+        .stats-section { width: 100%; max-width: 480px; background: #1a1d24; border-top: 1px solid #2a2e39; margin-top: 5px; }
+        .tabs { display: flex; border-bottom: 1px solid #2a2e39; }
+        .tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; color: #8c9eff; background: none; border: none; cursor: pointer; font-weight: bold; }
+        .bets-list { max-height: 140px; overflow-y: auto; padding: 5px 10px; }
+        .bet-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #222630; color: #b0bec5; }
+        
+        /* Real user red highlight */
         .bet-row.my-bet {
-            background: rgba(0, 230, 118, 0.08);
-            padding-left: 5px;
-            padding-right: 5px;
-            border-radius: 4px;
-            color: #fff;
-        }
-        .cashed-tag {
-            color: #34d399;
+            color: #ef4444 !important;
             font-weight: bold;
+            background: rgba(239, 68, 68, 0.08);
+            padding-left: 6px;
+            padding-right: 6px;
+            border-radius: 4px;
         }
+        .cashed-tag { color: #34d399; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Top Navbar -->
     <div class="navbar">
         <a href="/dashboard" class="logout-link">← Lobby</a>
         <div class="user-welcome-badge">👤 {{ username }}</div>
         <div class="balance-box"><span id="token-balance">1000.00</span> 🪙</div>
     </div>
 
-    <!-- History Multipliers Bar -->
     <div class="history-bar" id="history-bar"></div>
 
-    <!-- Game Screen / Multiplier Area -->
     <div class="game-container">
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
         <div class="multiplier-display" id="multiplier-display">1.00x</div>
@@ -281,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Betting Panels Section -->
     <div class="betting-section">
         <div class="bet-panel">
             <div class="bet-controls-row">
@@ -301,7 +114,6 @@
         </div>
     </div>
 
-    <!-- Live Stats & Bets -->
     <div class="stats-section">
         <div class="tabs">
             <button class="tab active">Live Bets (<span id="player-count">0</span>)</button>
@@ -369,10 +181,8 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    // Continuous floating wave effect so the plane never freezes or looks stuck
                     let timeFactor = Date.now() / 300;
                     let hoverEffect = Math.sin(timeFactor) * 12;
-                    
                     let progress = Math.log(data.multiplier) * 1.2;
                     let xPos = 40 + (progress * 50) % 220;
                     let yPos = 30 + (progress * 30) % 100 + hoverEffect;
