@@ -110,7 +110,7 @@
             z-index: 3;
         }
         
-        /* Plane Animation */
+        /* Plane Animation Container */
         .plane-container {
             position: absolute;
             bottom: 0;
@@ -125,11 +125,11 @@
             bottom: 20px;
             left: 30px;
             font-size: 32px;
-            transition: transform 0.15s ease-out;
+            transition: transform 0.1s linear;
             will-change: transform;
         }
 
-        /* Betting Panels Container */
+        /* Betting Panels Section */
         .betting-section {
             width: 100%;
             max-width: 480px;
@@ -316,7 +316,6 @@
     </div>
 
     <script>
-        // Real session username injected directly from backend
         const currentUsername = "{{ username }}";
 
         let ws;
@@ -376,9 +375,13 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    let xPos = Math.min((data.multiplier - 1) * 90, 280);
-                    let yPos = Math.min((data.multiplier - 1) * 60, 150);
-                    if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(-18deg)`;
+                    // Continuous smooth flight calculation based on multiplier growth
+                    let progress = Math.log(data.multiplier) * 1.5;
+                    let xPos = Math.min(progress * 110, 310);
+                    let yPos = Math.min(progress * 70, 180);
+                    let angle = Math.max(-35, -15 - (data.multiplier * 2));
+                    
+                    if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(${angle}deg)`;
 
                     if (isPlaying && !hasCashedOut && actionBtn) {
                         let currentWin = (currentWager * data.multiplier).toFixed(2);
@@ -395,7 +398,7 @@
                     }
                     status.innerText = "ROUND CRASHED 💥";
                     status.style.color = "#f87171";
-                    if(plane) plane.style.transform = `translate(320px, 80px) rotate(50deg)`;
+                    if(plane) plane.style.transform = `translate(340px, 100px) rotate(55deg)`;
 
                     isPlaying = false;
                     hasCashedOut = false;
