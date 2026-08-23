@@ -3,222 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Signup - fm4bat</title>
+    <title>Aviator - Play 100% Free!</title>
     <style>
-        body { background-color: #030712; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-card { background: #111827; border: 1px solid #1f2937; padding: 30px; border-radius: 16px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .brand-logo { text-align: center; font-size: 24px; font-weight: bold; color: #34d399; margin-bottom: 5px; letter-spacing: 1px; }
-        h2 { text-align: center; color: #9ca3af; font-size: 15px; margin-top: 0; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; background: #030712; border: 1px solid #374151; padding: 10px 12px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
-        input:focus { border-color: #34d399; }
-        .password-container { position: relative; }
-        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; }
-        .btn-submit { width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; transition: background 0.2s; }
-        .btn-submit:hover { background: #047857; }
-        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 18px; }
-        .toggle-text span { color: #34d399; font-weight: bold; cursor: pointer; }
-        .toggle-text span:hover { text-decoration: underline; }
-        .otp-hint { font-size: 11px; color: #34d399; margin-top: 4px; display: block; }
-        .forgot-link { text-align: right; font-size: 12px; margin-top: -10px; margin-bottom: 15px; }
-        .forgot-link span { color: #9ca3af; cursor: pointer; }
-        .forgot-link span:hover { color: #34d399; text-decoration: underline; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #121418;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* Top Navigation */
+        .navbar {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d24;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2e39;
+        }
+        .logo {
+            color: #e53935;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+        .balance-box {
+            background: #242833;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #00e676;
+            font-weight: 600;
+        }
+
+        /* Multiplier History Bar */
+        .history-bar {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #161920;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .history-pill {
+            background: #242833;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #00e676;
+        }
+        .history-pill.red { color: #ff5252; }
+
+        /* Main Game Screen */
+        .game-container {
+            width: 100%;
+            max-width: 480px;
+            background: #0f1115;
+            height: 240px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-bottom: 2px solid #2a2e39;
+        }
+        .multiplier-display {
+            font-size: 42px;
+            font-weight: 900;
+            color: #fff;
+            z-index: 2;
+        }
+        .status-text {
+            font-size: 14px;
+            color: #ff5252;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* Betting Panels Container */
+        .betting-section {
+            width: 100%;
+            max-width: 480px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #121418;
+        }
+
+        /* Single Bet Panel */
+        .bet-panel {
+            background: #1a1d24;
+            border: 1px solid #2a2e39;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .bet-controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .amount-control {
+            display: flex;
+            background: #121418;
+            border-radius: 8px;
+            border: 1px solid #2a2e39;
+            align-items: center;
+            overflow: hidden;
+        }
+        .amount-btn {
+            background: #242833;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .amount-input {
+            width: 70px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+        }
+        .action-btn {
+            flex: 1;
+            margin-left: 10px;
+            background: #00c853;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
+        }
+        .action-btn.cancel {
+            background: #ff5252;
+            box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
+        }
+        .quick-presets {
+            display: flex;
+            gap: 5px;
+        }
+        .preset-pill {
+            background: #242833;
+            border: none;
+            color: #b0bec5;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Live Bets / Stats Tabs */
+        .stats-section {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d24;
+            border-top: 1px solid #2a2e39;
+            margin-top: 5px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #2a2e39;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #8c9eff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab.active {
+            border-bottom: 2px solid #00e676;
+            color: #fff;
+        }
+        .bets-list {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 5px 10px;
+        }
+        .bet-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid #222630;
+            color: #b0bec5;
+        }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
-        <div class="brand-logo">⚡ fm4bat</div>
-        <h2 id="form-title">Login to your account</h2>
+    <!-- Top Navbar -->
+    <div class="navbar">
+        <div class="logo">Aviator</div>
+        <div class="balance-box" id="userBalance">49,990.00 INR</div>
+    </div>
+
+    <!-- History Multipliers Bar -->
+    <div class="history-bar">
+        <span class="history-pill">1.89x</span>
+        <span class="history-pill red">1.00x</span>
+        <span class="history-pill">2.28x</span>
+        <span class="history-pill">1.36x</span>
+        <span class="history-pill">15.40x</span>
+    </div>
+
+    <!-- Game Screen / Multiplier Area -->
+    <div class="game-container">
+        <div class="status-text" id="gameStatus">FLEW AWAY!</div>
+        <div class="multiplier-display" id="multiplier">1.89x</div>
+    </div>
+
+    <!-- Double Betting Panels Section -->
+    <div class="betting-section">
         
-        <form action="/login" method="POST" id="auth-form">
-            
-            <!-- Signup Username Field -->
-            <div class="form-group" id="username-field" style="display: none;">
-                <label>Choose Username</label>
-                <input type="text" name="username" id="input-username" placeholder="e.g. fm4bat_user">
-            </div>
-
-            <!-- Identifier (Login ID / Signup Email/Phone / Forgot ID) -->
-            <div class="form-group" id="identifier-field">
-                <label id="identifier-label">Username / Email / Phone</label>
-                <input type="text" name="identifier" id="input-identifier" required placeholder="Enter identifier">
-            </div>
-
-            <!-- Password Field -->
-            <div class="form-group" id="password-group">
-                <label id="password-label">Password</label>
-                <div class="password-container">
-                    <input type="password" name="password" id="password-input" required placeholder="Enter password">
-                    <span class="eye-icon" id="eye-toggle" onclick="togglePassword()">👁️‍🗨️</span>
+        <!-- Panel 1 -->
+        <div class="bet-panel">
+            <div class="bet-controls-row">
+                <div class="amount-control">
+                    <button class="amount-btn" onclick="adjustBet(1, -10)">-</button>
+                    <input type="text" id="betInput1" class="amount-input" value="10.00">
+                    <button class="amount-btn" onclick="adjustBet(1, 10)">+</button>
                 </div>
+                <button class="action-btn" id="betBtn1" onclick="toggleBet(1)">BET</button>
             </div>
-
-            <!-- Forgot Password Link -->
-            <div class="forgot-link" id="forgot-password-link">
-                <span onclick="showForgotPassword()">Forgot Password?</span>
+            <div class="quick-presets">
+                <button class="preset-pill" onclick="setPreset(1, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(1, 200)">200</button>
+                <button class="preset-pill" onclick="setPreset(1, 500)">500</button>
+                <button class="preset-pill" onclick="setPreset(1, 1000)">1000</button>
             </div>
+        </div>
 
-            <!-- OTP Field (For Signup & Forgot Password) -->
-            <div class="form-group" id="otp-field" style="display: none;">
-                <label>Enter 4-Digit OTP</label>
-                <input type="text" name="entered_otp" id="input-otp" maxlength="4" placeholder="Enter code">
-                <span class="otp-hint" id="otp-display-hint"></span>
+        <!-- Panel 2 -->
+        <div class="bet-panel">
+            <div class="bet-controls-row">
+                <div class="amount-control">
+                    <button class="amount-btn" onclick="adjustBet(2, -10)">-</button>
+                    <input type="text" id="betInput2" class="amount-input" value="10.00">
+                    <button class="amount-btn" onclick="adjustBet(2, 10)">+</button>
+                </div>
+                <button class="action-btn" id="betBtn2" onclick="toggleBet(2)">BET</button>
             </div>
+            <div class="quick-presets">
+                <button class="preset-pill" onclick="setPreset(2, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(2, 200)">200</button>
+                <button class="preset-pill" onclick="setPreset(2, 500)">500</button>
+                <button class="preset-pill" onclick="setPreset(2, 1000)">1000</button>
+            </div>
+        </div>
 
-            <button type="button" class="btn-submit" id="submit-btn" onclick="handleAuthAction()">Login</button>
-        </form>
+    </div>
 
-        <div class="toggle-text" id="toggle-container">
-            Don't have an account? <span onclick="toggleAuthMode()">Sign Up</span>
+    <!-- Live Stats & Bets -->
+    <div class="stats-section">
+        <div class="tabs">
+            <button class="tab active">All Bets</button>
+            <button class="tab">Previous</button>
+            <button class="tab">Top</button>
+        </div>
+        <div class="bets-list" id="liveBetsList">
+            <div class="bet-row"><span>d***6</span><span>8,000.00</span><span>2.10x</span></div>
+            <div class="bet-row"><span>a***7</span><span>1,500.00</span><span>1.45x</span></div>
+            <div class="bet-row"><span>s***3</span><span>500.00</span><span>--</span></div>
         </div>
     </div>
 
     <script>
-        let currentMode = "login"; // "login", "signup", "forgot"
-        let otpStep = false; 
-        let generatedOtp = "";
+        function adjustBet(panelNum, amount) {
+            const input = document.getElementById(`betInput${panelNum}`);
+            let val = parseFloat(input.value) + amount;
+            if (val < 10) val = 10;
+            input.value = val.toFixed(2);
+        }
 
-        function togglePassword() {
-            const pwdInput = document.getElementById("password-input");
-            const eye = document.getElementById("eye-toggle");
-            if (pwdInput.type === "password") {
-                pwdInput.type = "text";
-                eye.innerText = "👁️";
+        function setPreset(panelNum, amount) {
+            document.getElementById(`betInput${panelNum}`).value = amount.toFixed(2);
+        }
+
+        function toggleBet(panelNum) {
+            const btn = document.getElementById(`betBtn${panelNum}`);
+            if (btn.innerText === "BET") {
+                btn.innerText = "CANCEL";
+                btn.classList.add("cancel");
             } else {
-                pwdInput.type = "password";
-                eye.innerText = "👁️‍🗨️";
-            }
-        }
-
-        function toggleAuthMode() {
-            otpStep = false;
-            const title = document.getElementById("form-title");
-            const btn = document.getElementById("submit-btn");
-            const usernameField = document.getElementById("username-field");
-            const identifierLabel = document.getElementById("identifier-label");
-            const identifierInput = document.getElementById("input-identifier");
-            const passwordGroup = document.getElementById("password-group");
-            const passwordLabel = document.getElementById("password-label");
-            const otpField = document.getElementById("otp-field");
-            const forgotLink = document.getElementById("forgot-password-link");
-            const toggleContainer = document.getElementById("toggle-container");
-
-            otpField.style.display = "none";
-            passwordGroup.style.display = "block";
-
-            if (currentMode === "signup" || currentMode === "forgot") {
-                // Switch to Login
-                currentMode = "login";
-                title.innerText = "Login to your account";
-                btn.innerText = "Login";
-                usernameField.style.display = "none";
-                forgotLink.style.display = "block";
-                document.getElementById("input-username").required = false;
-                passwordLabel.innerText = "Password";
-                
-                identifierLabel.innerText = "Username / Email / Phone";
-                identifierInput.placeholder = "Enter username, email or phone";
-                
-                toggleContainer.innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
-            } else {
-                // Switch to Sign Up
-                currentMode = "signup";
-                title.innerText = "Create New Account";
-                btn.innerText = "Send OTP";
-                usernameField.style.display = "block";
-                forgotLink.style.display = "none";
-                document.getElementById("input-username").required = true;
-                passwordLabel.innerText = "Password";
-                
-                identifierLabel.innerText = "Gmail ID or Phone Number";
-                identifierInput.placeholder = "Enter email or phone number";
-                
-                toggleContainer.innerHTML = 'Already have an account? <span onclick="toggleAuthMode()">Login</span>';
-            }
-        }
-
-        function showForgotPassword() {
-            currentMode = "forgot";
-            otpStep = false;
-            document.getElementById("form-title").innerText = "Reset Password";
-            document.getElementById("submit-btn").innerText = "Send Reset OTP";
-            document.getElementById("username-field").style.display = "none";
-            document.getElementById("forgot-password-link").style.display = "none";
-            document.getElementById("password-group").style.display = "none"; // Hide old password, will show new password after OTP
-            document.getElementById("identifier-label").innerText = "Registered Email or Phone";
-            document.getElementById("identifier-input").placeholder = "Enter your registered email/phone";
-            document.getElementById("toggle-container").innerHTML = 'Remember password? <span onclick="toggleAuthMode()">Login</span>';
-        }
-
-        function handleAuthAction() {
-            const form = document.getElementById("auth-form");
-            
-            if (currentMode === "login") {
-                form.action = "/login";
-                form.submit();
-            } 
-            else if (currentMode === "signup") {
-                if (!otpStep) {
-                    const identifierVal = document.getElementById("input-identifier").value;
-                    const usernameVal = document.getElementById("input-username").value;
-                    const passwordVal = document.getElementById("password-input").value;
-
-                    if (!identifierVal || !usernameVal || !passwordVal) {
-                        alert("Please fill in all fields!");
-                        return;
-                    }
-
-                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-                    document.getElementById("otp-field").style.display = "block";
-                    document.getElementById("otp-display-hint").innerText = `Mock OTP: [ ${generatedOtp} ]`;
-                    document.getElementById("submit-btn").innerText = "Verify & Register";
-                    otpStep = true;
-                } else {
-                    const enteredOtp = document.getElementById("input-otp").value;
-                    if (enteredOtp === generatedOtp) {
-                        form.action = "/signup";
-                        form.submit();
-                    } else {
-                        alert("Invalid OTP!");
-                    }
-                }
-            }
-            else if (currentMode === "forgot") {
-                if (!otpStep) {
-                    const identifierVal = document.getElementById("input-identifier").value;
-                    if (!identifierVal) {
-                        alert("Please enter your registered email or phone!");
-                        return;
-                    }
-
-                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-                    document.getElementById("otp-field").style.display = "block";
-                    document.getElementById("otp-display-hint").innerText = `Reset OTP: [ ${generatedOtp} ]`;
-                    
-                    // Show new password field now for resetting
-                    document.getElementById("password-group").style.display = "block";
-                    document.getElementById("password-label").innerText = "New Password";
-                    document.getElementById("password-input").placeholder = "Enter new password";
-                    
-                    document.getElementById("submit-btn").innerText = "Verify & Reset Password";
-                    otpStep = true;
-                } else {
-                    const enteredOtp = document.getElementById("input-otp").value;
-                    const newPassword = document.getElementById("password-input").value;
-                    
-                    if (enteredOtp === generatedOtp) {
-                        if (!newPassword) {
-                            alert("Please enter a new password!");
-                            return;
-                        }
-                        form.action = "/forgot-password";
-                        form.submit();
-                    } else {
-                        alert("Invalid OTP!");
-                    }
-                }
+                btn.innerText = "BET";
+                btn.classList.remove("cancel");
             }
         }
     </script>
