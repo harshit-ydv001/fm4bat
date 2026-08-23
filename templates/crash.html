@@ -186,6 +186,12 @@
             text-align: center;
             box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
         }
+        .action-btn:disabled {
+            background: #1f2937 !important;
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+            box-shadow: none;
+        }
         .quick-presets {
             display: flex;
             gap: 5px;
@@ -328,7 +334,6 @@
                     if (!isPlaying) {
                         actionBtn.innerText = "PLACE BET";
                         actionBtn.style.background = "#059669";
-                        actionBtn.style.cursor = "pointer";
                         actionBtn.disabled = false;
                     }
                 } 
@@ -341,12 +346,11 @@
                     if (isPlaying && !hasCashedOut) {
                         actionBtn.innerText = "CASH OUT";
                         actionBtn.style.background = "#f59e0b";
-                        actionBtn.style.cursor = "pointer";
                         actionBtn.disabled = false;
                     } else if (!isPlaying) {
+                        // Agar round chal raha hai aur user ne bet nahi lagayi, toh disable rakho!
                         actionBtn.innerText = "WAIT FOR NEXT ROUND";
                         actionBtn.style.background = "#1f2937";
-                        actionBtn.style.cursor = "not-allowed";
                         actionBtn.disabled = true;
                     }
                 } 
@@ -376,21 +380,12 @@
                     status.style.color = "#f87171";
                     if(plane) plane.style.transform = `translate(320px, 80px) rotate(50deg)`;
 
-                    if (isPlaying && !hasCashedOut) {
-                        // User missed cash out before crash (Lost bet)
-                        isPlaying = false;
-                        hasCashedOut = false;
-                    }
-
                     isPlaying = false;
                     hasCashedOut = false;
                     
-                    if(actionBtn) {
-                        actionBtn.innerText = "PLACE BET";
-                        actionBtn.style.background = "#059669";
-                        actionBtn.style.cursor = "pointer";
-                        actionBtn.disabled = false;
-                    }
+                    actionBtn.innerText = "WAIT FOR NEXT ROUND";
+                    actionBtn.style.background = "#1f2937";
+                    actionBtn.disabled = true;
                 }
 
                 if (data.bets || data.active_bets) {
@@ -415,7 +410,13 @@
                 return;
             }
 
-            if (!roundInProgress && !isPlaying) {
+            // Agar round chal raha hai toh beech me bet nahi lagne denge
+            if (roundInProgress) {
+                alert("Please wait for the next round to place a bet!");
+                return;
+            }
+
+            if (!isPlaying) {
                 if (amount > balance) { 
                     alert("Insufficient Token Balance!"); 
                     return; 
