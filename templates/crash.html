@@ -3,108 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Flight Arena - Dual Mode</title>
-    <link rel="stylesheet" href="/static/css/style.main.css">
+    <title>Aviator Arena - Live Game</title>
     <style>
-        .history-bar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .history-pill { font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 12px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1); }
-        .pill-red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .pill-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .aviator-canvas-container { position: relative; width: 100%; height: 320px; background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #1e293b; }
-        .plane-icon { position: absolute; bottom: 30px; left: 30px; font-size: 40px; transition: transform 0.1s linear; will-change: transform; filter: drop-shadow(0 0 12px rgba(52, 211, 153, 0.7)); z-index: 5; }
-        .live-bets-sidebar { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 15px; max-height: 420px; overflow-y: auto; }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 8px 10px; border-bottom: 1px solid #1f2937; }
-        .bet-row span { color: #9ca3af; }
-        .cashed-tag { color: #34d399 !important; font-weight: bold; }
-        .mode-switcher { display: flex; background: #030712; border: 1px solid #374151; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-        .mode-btn { flex: 1; background: transparent; border: none; color: #9ca3af; padding: 8px; font-weight: bold; font-size: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        .mode-btn.active-token { background: #1f2937; color: #34d399; }
-        .mode-btn.active-real { background: #059669; color: #ffffff; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #121418;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* Top Navigation */
+        .navbar {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d24;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2e39;
+        }
+        .logo {
+            color: #ff5252;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        .balance-box {
+            background: #242833;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #00e676;
+            font-weight: 600;
+        }
+        .logout-link {
+            color: #b0bec5;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        /* Multiplier History Bar */
+        .history-bar {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #161920;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .history-pill {
+            background: #242833;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #00e676;
+        }
+        .history-pill.red { color: #ff5252; }
+
+        /* Main Game Screen */
+        .game-container {
+            width: 100%;
+            max-width: 480px;
+            background: #0f1115;
+            height: 220px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-bottom: 2px solid #2a2e39;
+        }
+        .multiplier-display {
+            font-size: 42px;
+            font-weight: 900;
+            color: #fff;
+            z-index: 2;
+        }
+        .status-text {
+            font-size: 13px;
+            color: #ff5252;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* Betting Panels Container (Double Bet) */
+        .betting-section {
+            width: 100%;
+            max-width: 480px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #121418;
+        }
+
+        /* Single Bet Panel */
+        .bet-panel {
+            background: #1a1d24;
+            border: 1px solid #2a2e39;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .bet-controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .amount-control {
+            display: flex;
+            background: #121418;
+            border-radius: 8px;
+            border: 1px solid #2a2e39;
+            align-items: center;
+            overflow: hidden;
+        }
+        .amount-btn {
+            background: #242833;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .amount-input {
+            width: 70px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+        }
+        .action-btn {
+            flex: 1;
+            margin-left: 10px;
+            background: #00c853;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
+        }
+        .action-btn.cancel {
+            background: #ff5252;
+            box-shadow: 0 4px 10px rgba(255, 82, 82, 0.3);
+        }
+        .quick-presets {
+            display: flex;
+            gap: 5px;
+        }
+        .preset-pill {
+            background: #242833;
+            border: none;
+            color: #b0bec5;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Live Bets / Stats Tabs */
+        .stats-section {
+            width: 100%;
+            max-width: 480px;
+            background: #1a1d24;
+            border-top: 1px solid #2a2e39;
+            margin-top: 5px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #2a2e39;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #8c9eff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tab.active {
+            border-bottom: 2px solid #00e676;
+            color: #fff;
+        }
+        .bets-list {
+            max-height: 140px;
+            overflow-y: auto;
+            padding: 5px 10px;
+        }
+        .bet-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid #222630;
+            color: #b0bec5;
+        }
     </style>
 </head>
-<body class="dashboard-body">
+<body>
 
-    <header class="navbar">
-        <div class="nav-brand">
-            <a href="/dashboard" style="color: #9ca3af; text-decoration: none; font-size: 13px; margin-right: 15px;">← Lobby</a>
-            <span class="brand-icon">✈️</span>
-            <span class="brand-title">AVIATOR ARENA</span>
-        </div>
-        <div class="nav-right">
-            <div class="token-pill">
-                <span id="balance-label" class="token-label">Token Balance:</span>
-                <span id="token-balance" class="token-value">1000.00</span> <span id="currency-symbol">🪙</span>
+    <!-- Top Navbar -->
+    <div class="navbar">
+        <a href="/dashboard" class="logout-link">← Lobby</a>
+        <div class="logo">AVIATOR ARENA</div>
+        <div class="balance-box" id="userBalance">1000.00 🪙</div>
+    </div>
+
+    <!-- History Multipliers Bar -->
+    <div class="history-bar">
+        <span class="history-pill">1.89x</span>
+        <span class="history-pill red">1.00x</span>
+        <span class="history-pill">2.28x</span>
+        <span class="history-pill">1.36x</span>
+        <span class="history-pill">15.40x</span>
+    </div>
+
+    <!-- Game Screen / Multiplier Area -->
+    <div class="game-container">
+        <div class="status-text" id="gameStatus">MULTIPLIER RISING 🚀</div>
+        <div class="multiplier-display" id="multiplier">1.64x</div>
+    </div>
+
+    <!-- Double Betting Panels Section -->
+    <div class="betting-section">
+        
+        <!-- Panel 1 -->
+        <div class="bet-panel">
+            <div class="bet-controls-row">
+                <div class="amount-control">
+                    <button class="amount-btn" onclick="adjustBet(1, -10)">-</button>
+                    <input type="text" id="betInput1" class="amount-input" value="50.00">
+                    <button class="amount-btn" onclick="adjustBet(1, 10)">+</button>
+                </div>
+                <button class="action-btn" id="betBtn1" onclick="toggleBet(1)">PLACE BET</button>
             </div>
-            <button onclick="openAddMoneyModal()" class="btn-add-money">+ Add Money</button>
-        </div>
-    </header>
-
-    <main class="lobby-container" style="max-width: 1100px;">
-        <div id="history-bar" class="history-bar"></div>
-
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-            <div class="game-card" style="padding: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span id="game-status" class="card-badge soon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">WAITING FOR TAKE OFF</span>
-                    <span id="active-mode-tag" style="font-size: 11px; color: #34d399; font-weight: bold;">MODE: TOKEN (🪙)</span>
-                </div>
-
-                <div class="aviator-canvas-container" id="canvas-box">
-                    <!-- Plane element with explicit id="plane" -->
-                    <div id="plane" class="plane-icon">✈️</div>
-                    <div style="text-align: center; z-index: 10;">
-                        <h1 id="multiplier-display" style="font-size: 56px; font-weight: 900; margin: 0; color: #34d399;">1.00x</h1>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <div class="mode-switcher">
-                        <button id="btn-token-mode" onclick="switchGameMode('token')" class="mode-btn active-token">🎮 Token Mode (🪙)</button>
-                        <button id="btn-real-mode" onclick="switchGameMode('real')" class="mode-btn">💸 Real Money Mode (₹)</button>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 10px; align-items: center;">
-                    <div>
-                        <label id="wager-label" style="font-size: 11px; color: #9ca3af; display: block; margin-bottom: 5px;">Bet Amount (Tokens)</label>
-                        <input type="number" id="bet-amount" value="50" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box;">
-                    </div>
-                    <div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 5px;">
-                            <button onclick="setBet(10)" class="btn-otp" style="padding: 6px; font-size: 10px;">10</button>
-                            <button onclick="setBet(50)" class="btn-otp" style="padding: 6px; font-size: 10px;">50</button>
-                            <button onclick="setBet(100)" class="btn-otp" style="padding: 6px; font-size: 10px;">100</button>
-                        </div>
-                    </div>
-                </div>
-                <button id="btn-action" onclick="handleWagerAction()" class="btn-play" style="width: 100%; margin-top: 15px; cursor: pointer;">PLACE BET</button>
-            </div>
-
-            <div class="live-bets-sidebar">
-                <h3 style="margin-top: 0; font-size: 14px; border-bottom: 1px solid #1f2937; padding-bottom: 10px;">Live Players (<span id="player-count">0</span>)</h3>
-                <div id="live-bets-list">
-                    <p style="color: #6b7280; font-size: 12px; text-align: center;">Waiting for bets...</p>
-                </div>
+            <div class="quick-presets">
+                <button class="preset-pill" onclick="setPreset(1, 10)">10</button>
+                <button class="preset-pill" onclick="setPreset(1, 50)">50</button>
+                <button class="preset-pill" onclick="setPreset(1, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(1, 500)">500</button>
             </div>
         </div>
-    </main>
 
-    <!-- Deposit Modal -->
-    <div id="add-money-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: #111827; border: 1px solid #1f2937; padding: 25px; border-radius: 16px; width: 340px; text-align: center;">
-            <h3 style="margin-top: 0; color: #34d399; font-size: 16px;">Add Real Money (UPI QR)</h3>
-            <p style="color: #9ca3af; font-size: 11px; margin-bottom: 15px;">Scan QR to pay and submit UTR reference.</p>
-            <div style="background: white; padding: 10px; border-radius: 10px; display: inline-block; margin-bottom: 15px;">
-                <div style="width: 140px; height: 140px; background: #e5e7eb; display: flex; align-items: center; justify-content: center; color: #111827; font-weight: bold; font-size: 12px; border-radius: 6px;">SCAN QR HERE</div>
+        <!-- Panel 2 -->
+        <div class="bet-panel">
+            <div class="bet-controls-row">
+                <div class="amount-control">
+                    <button class="amount-btn" onclick="adjustBet(2, -10)">-</button>
+                    <input type="text" id="betInput2" class="amount-input" value="50.00">
+                    <button class="amount-btn" onclick="adjustBet(2, 10)">+</button>
+                </div>
+                <button class="action-btn" id="betBtn2" onclick="toggleBet(2)">PLACE BET</button>
             </div>
-            <input type="number" id="deposit-amount" placeholder="Enter Amount (₹)" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 13px; margin-bottom: 10px; box-sizing: border-box; text-align: center;">
-            <input type="text" id="utr-number" placeholder="Enter 12-digit UTR / Ref Number" style="width: 100%; background: #030712; border: 1px solid #374151; padding: 10px; border-radius: 8px; color: white; font-size: 13px; margin-bottom: 15px; box-sizing: border-box; text-align: center;">
-            <button onclick="submitDepositRequest()" class="btn-play" style="width: 100%; margin-bottom: 10px; cursor: pointer; font-size: 13px; padding: 10px;">SUBMIT DEPOSIT</button>
-            <button onclick="closeAddMoneyModal()" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 12px;">Cancel</button>
+            <div class="quick-presets">
+                <button class="preset-pill" onclick="setPreset(2, 10)">10</button>
+                <button class="preset-pill" onclick="setPreset(2, 50)">50</button>
+                <button class="preset-pill" onclick="setPreset(2, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(2, 500)">500</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Live Stats & Bets -->
+    <div class="stats-section">
+        <div class="tabs">
+            <button class="tab active">All Bets</button>
+            <button class="tab">Previous</button>
+            <button class="tab">Top</button>
+        </div>
+        <div class="bets-list" id="liveBetsList">
+            <div class="bet-row"><span>Rahul_99</span><span>50.00</span><span style="color:#00e676;">1.40x</span></div>
+            <div class="bet-row"><span>Priya_Vip</span><span>100.00</span><span style="color:#00e676;">1.51x</span></div>
+            <div class="bet-row"><span>Sahil_K</span><span>200.00</span><span>--</span></div>
         </div>
     </div>
 
-    <!-- Link external JS -->
-    <script src="/static/js/crash.js"></script>
+    <script>
+        function adjustBet(panelNum, amount) {
+            const input = document.getElementById(`betInput${panelNum}`);
+            let val = parseFloat(input.value) + amount;
+            if (val < 10) val = 10;
+            input.value = val.toFixed(2);
+        }
+
+        function setPreset(panelNum, amount) {
+            document.getElementById(`betInput${panelNum}`).value = amount.toFixed(2);
+        }
+
+        function toggleBet(panelNum) {
+            const btn = document.getElementById(`betBtn${panelNum}`);
+            if (btn.innerText === "PLACE BET") {
+                btn.innerText = "CANCEL";
+                btn.classList.add("cancel");
+            } else {
+                btn.innerText = "PLACE BET";
+                btn.classList.remove("cancel");
+            }
+        }
+    </script>
 </body>
 </html>
