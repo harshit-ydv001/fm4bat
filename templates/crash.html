@@ -37,7 +37,6 @@
             width: 100%; max-width: 480px; background: #141822; display: flex; justify-content: space-between; padding: 4px 12px; font-size: 11px; color: #8a99ad; border-bottom: 1px solid #1e222d;
         }
 
-        /* Game Screen with Exact Red Flight Curve */
         .game-container {
             width: 100%; max-width: 480px; 
             background: linear-gradient(135deg, #18080c 0%, #0d0f15 100%);
@@ -50,7 +49,6 @@
             background-size: 20px 20px; pointer-events: none; z-index: 1;
         }
 
-        /* Dynamic SVG Flight Curve Line & Fill Area */
         .flight-svg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 2;
@@ -59,8 +57,18 @@
         .multiplier-display { font-size: 44px; font-weight: 900; color: #fff; z-index: 4; text-shadow: 0 0 15px rgba(255, 59, 48, 0.5); }
         .status-text { font-size: 11px; color: #e74c3c; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; z-index: 4; text-transform: uppercase; }
         
+        /* Larger, Styled, Vibrant Red Plane */
         .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
-        .plane { position: absolute; bottom: 10px; left: 15px; font-size: 30px; color: #ff3b30; transition: transform 0.05s linear; will-change: transform; z-index: 5; }
+        .plane { 
+            position: absolute; 
+            bottom: 10px; 
+            left: 15px; 
+            font-size: 38px; 
+            filter: drop-shadow(0 0 10px rgba(255, 59, 48, 0.8));
+            transition: transform 0.04s linear; 
+            will-change: transform; 
+            z-index: 5; 
+        }
 
         .betting-section { width: 100%; max-width: 480px; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #0b0e14; }
         .bet-panel { background: #141822; border: 1px solid #1e222d; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
@@ -116,14 +124,14 @@
                 </linearGradient>
             </defs>
             <path id="area-path" d="M 0 220 L 0 220 L 480 220 Z" fill="url(#curveGradient)" />
-            <path id="line-path" d="M 0 220 L 0 220" fill="none" stroke="#ff3b30" stroke-width="3" />
+            <path id="line-path" d="M 0 220 L 0 220" fill="none" stroke="#ff3b30" stroke-width="3.5" />
         </svg>
 
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
         <div class="multiplier-display" id="multiplier-display">1.00x</div>
         
         <div class="plane-container">
-            <div class="plane" id="plane">✈️</div>
+            <div class="plane" id="plane">🛩️</div>
         </div>
     </div>
 
@@ -229,26 +237,26 @@
                     status.innerText = "MULTIPLIER RISING";
                     status.style.color = "#2ecc71";
                     
-                    // Smooth Spribe Aviator exponential flight path calculation
-                    let progress = Math.min(Math.log(data.multiplier) * 1.4, 3.2);
-                    let xPos = 15 + (progress * 110);
-                    let yPos = 15 + (progress * 58);
+                    // Continuous smooth scaling flight path (No freezing at high multipliers)
+                    let progress = Math.log(data.multiplier) * 1.1;
+                    let xPos = 15 + (progress * 130);
+                    let yPos = 15 + (progress * 65);
                     
-                    if (xPos > 400) xPos = 400;
-                    if (yPos > 175) yPos = 175;
+                    if (xPos > 415) xPos = 415;
+                    if (yPos > 185) yPos = 185;
                     
                     let svgX = xPos + 10;
                     let svgY = 220 - yPos;
 
-                    let angle = 22 - (progress * 2);
-                    if (angle < 8) angle = 8;
+                    let angle = 20 - (progress * 1.5);
+                    if (angle < 6) angle = 6;
                     
                     if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(${angle}deg)`;
 
                     if(linePath && areaPath) {
-                        let pathString = `M 15 205 Q ${svgX * 0.5} 205, ${svgX} ${svgY}`;
+                        let pathString = `M 15 205 Q ${svgX * 0.45} 205, ${svgX} ${svgY}`;
                         linePath.setAttribute("d", pathString);
-                        areaPath.setAttribute("d", `M 15 220 L 15 205 Q ${svgX * 0.5} 205, ${svgX} ${svgY} L ${svgX} 220 Z`);
+                        areaPath.setAttribute("d", `M 15 220 L 15 205 Q ${svgX * 0.45} 205, ${svgX} ${svgY} L ${svgX} 220 Z`);
                     }
 
                     if (isPlaying && !hasCashedOut && actionBtn) {
@@ -266,7 +274,7 @@
                     }
                     status.innerText = "FLEW AWAY!";
                     status.style.color = "#e74c3c";
-                    if(plane) plane.style.transform = `translate(410px, 25px) rotate(65deg)`;
+                    if(plane) plane.style.transform = `translate(420px, 20px) rotate(65deg)`;
 
                     isPlaying = false;
                     hasCashedOut = false;
@@ -335,7 +343,7 @@
                 balance += winAmount;
                 updateBalanceDisplay();
 
-                actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)})`;
+                actionBtn.innerText = `CASH OUT (${winAmount.toFixed(2)})`;
                 actionBtn.style.background = "#2ecc71";
                 actionBtn.disabled = true;
 
