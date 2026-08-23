@@ -64,11 +64,11 @@
         .bets-list { max-height: 140px; overflow-y: auto; padding: 5px 10px; }
         .bet-row { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid #222630; color: #b0bec5; }
         
-        /* Real user red highlight */
+        /* Real user red highlight and pinned to top */
         .bet-row.my-bet {
             color: #ef4444 !important;
             font-weight: bold;
-            background: rgba(239, 68, 68, 0.08);
+            background: rgba(239, 68, 68, 0.12);
             padding-left: 6px;
             padding-right: 6px;
             border-radius: 4px;
@@ -316,10 +316,24 @@
             let keys = Object.keys(betsObj);
             countEl.innerText = keys.length;
 
+            let myBets = [];
+            let botBets = [];
+
             keys.forEach(uid => {
                 let bet = betsObj[uid];
+                let isMe = (bet.username === currentUsername);
+                if (isMe) {
+                    myBets.push(bet);
+                } else {
+                    botBets.push(bet);
+                }
+            });
+
+            // Pinned to the top
+            let sortedBets = [...myBets, ...botBets];
+
+            sortedBets.forEach(bet => {
                 let row = document.createElement("div");
-                
                 let isMe = (bet.username === currentUsername);
                 row.className = "bet-row " + (isMe ? "my-bet" : "");
 
