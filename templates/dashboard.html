@@ -16,156 +16,44 @@
             align-items: center;
         }
         
-        /* Modern Top Header */
         .dashboard-header { 
-            width: 100%;
-            max-width: 480px;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 12px 16px; 
-            background: #1a1d24; 
-            border-bottom: 1px solid #2a2e39;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px 16px; background: #1a1d24; border-bottom: 1px solid #2a2e39; position: sticky; top: 0; z-index: 100;
         }
-        
-        .brand { 
-            font-size: 20px; 
-            font-weight: 800; 
-            color: #34d399; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            letter-spacing: 1px;
-        }
-        .brand-logo-icon {
-            background: #059669;
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-weight: 900;
-        }
+        .brand { font-size: 20px; font-weight: 800; color: #34d399; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
+        .brand-logo-icon { background: #059669; color: #fff; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; }
 
         .user-actions { display: flex; align-items: center; gap: 10px; }
         .profile-icon-btn { background: #242833; border: 1px solid #2a2e39; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #34d399; text-decoration: none; }
         .balance-badge { background: #242833; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; color: #00e676; border: 1px solid #2a2e39; }
 
-        /* Category Tabs Bar */
         .category-bar {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            gap: 8px;
-            padding: 10px 16px;
-            background: #161920;
-            overflow-x: auto;
-            white-space: nowrap;
-            border-bottom: 1px solid #2a2e39;
+            width: 100%; max-width: 480px; display: flex; gap: 8px; padding: 10px 16px; background: #161920; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid #2a2e39;
         }
-        .cat-tab {
-            background: #242833;
-            color: #b0bec5;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
+        .cat-tab { background: #242833; color: #b0bec5; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; }
         .cat-tab.active { background: #3b82f6; color: #fff; }
 
-        /* Main Container & Games Grid */
-        .main-content { 
-            width: 100%;
-            max-width: 480px;
-            padding: 15px; 
-            margin-bottom: 70px;
-        }
-        
-        .section-title { 
-            font-size: 15px; 
-            font-weight: bold; 
-            color: #fff; 
-            margin-bottom: 12px; 
-            display: flex; align-items: center; gap: 6px;
-        }
+        .main-content { width: 100%; max-width: 480px; padding: 15px; margin-bottom: 70px; }
+        .section-title { font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 
         .games-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        
         .game-card { 
-            background: #1a1d24; 
-            border: 1px solid #2a2e39; 
-            border-radius: 12px; 
-            padding: 12px; 
-            text-decoration: none; 
-            color: inherit; 
-            display: flex; 
-            flex-direction: column; 
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.1s;
+            background: #1a1d24; border: 1px solid #2a2e39; border-radius: 12px; padding: 12px; text-decoration: none; color: inherit; display: flex; flex-direction: column; position: relative; overflow: hidden; cursor: pointer;
         }
-        .game-card:active { transform: scale(0.98); }
-
         .game-banner {
-            width: 100%;
-            height: 90px;
-            background: linear-gradient(135deg, #1e222d, #111318);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 8px;
-            position: relative;
+            width: 100%; height: 90px; background: linear-gradient(135deg, #1e222d, #111318); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 8px; position: relative;
         }
-
         .game-card h3 { font-size: 14px; color: #fff; font-weight: bold; margin-bottom: 4px; }
         .rtp-tag { font-size: 11px; color: #34d399; background: rgba(52, 211, 153, 0.1); padding: 2px 6px; border-radius: 4px; width: fit-content; }
-        
         .badge-coming { 
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(245, 158, 11, 0.2); 
-            color: #fbbf24; 
-            font-size: 9px; 
-            font-weight: bold; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            border: 1px solid rgba(245, 158, 11, 0.3);
+            position: absolute; top: 8px; right: 8px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
-        /* Bottom Navigation Bar */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 480px;
-            background: #1a1d24;
-            border-top: 1px solid #2a2e39;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 100;
+            position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #1a1d24; border-top: 1px solid #2a2e39; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
         }
         .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 10px;
-            gap: 4px;
-            cursor: pointer;
-            background: none;
-            border: none;
+            display: flex; flex-direction: column; align-items: center; color: #94a3b8; text-decoration: none; font-size: 10px; gap: 4px; cursor: pointer; background: none; border: none;
         }
         .nav-item.active { color: #34d399; }
         .nav-icon { font-size: 18px; }
@@ -173,7 +61,6 @@
 </head>
 <body>
 
-    <!-- Top Header -->
     <header class="dashboard-header">
         <div class="brand">
             <div class="brand-logo-icon">⚡</div>
@@ -185,75 +72,60 @@
         </div>
     </header>
 
-    <!-- Category Tabs -->
     <div class="category-bar">
-        <button class="cat-tab active">🔥 Popular</button>
-        <button class="cat-tab">🎟️ Lottery</button>
-        <button class="cat-tab">🎰 Casino</button>
-        <button class="cat-tab">🃏 Slots</button>
-        <button class="cat-tab">🚀 Original</button>
+        <button class="cat-tab active" onclick="alert('Category coming soon!')">🔥 Popular</button>
+        <button class="cat-tab" onclick="alert('Category coming soon!')">🎟️ Lottery</button>
+        <button class="cat-tab" onclick="alert('Category coming soon!')">🎰 Casino</button>
+        <button class="cat-tab" onclick="alert('Category coming soon!')">🃏 Slots</button>
+        <button class="cat-tab" onclick="alert('Category coming soon!')">🚀 Original</button>
     </div>
 
-    <!-- Main Content -->
     <main class="main-content">
         <div class="section-title">🔥 Platform recommendation</div>
         
         <div class="games-grid">
-            <!-- Working Aviator Game Card -->
             <a href="/games/crash" class="game-card">
-                <div class="game-banner" style="background: linear-gradient(135deg, #3b2026, #111318);">
-                    ✈️
-                </div>
+                <div class="game-banner" style="background: linear-gradient(135deg, #3b2026, #111318);">✈️</div>
                 <h3>Aviator</h3>
                 <span class="rtp-tag">RTP 96.07%</span>
             </a>
 
-            <!-- Coming Soon: Chicken Road 2 -->
-            <div class="game-card" style="opacity: 0.7;">
+            <div class="game-card" onclick="alert('Chicken Road 2 is Coming Soon!')">
                 <span class="badge-coming">COMING SOON</span>
-                <div class="game-banner" style="background: linear-gradient(135deg, #3b3120, #111318);">
-                    🐔
-                </div>
+                <div class="game-banner" style="background: linear-gradient(135deg, #3b3120, #111318);">🐔</div>
                 <h3>Chicken Road 2</h3>
                 <span class="rtp-tag">RTP 97.18%</span>
             </div>
 
-            <!-- Coming Soon: Vortex -->
-            <div class="game-card" style="opacity: 0.7;">
+            <div class="game-card" onclick="alert('Vortex is Coming Soon!')">
                 <span class="badge-coming">COMING SOON</span>
-                <div class="game-banner" style="background: linear-gradient(135deg, #2b203b, #111318);">
-                    🌀
-                </div>
+                <div class="game-banner" style="background: linear-gradient(135deg, #2b203b, #111318);">🌀</div>
                 <h3>Vortex</h3>
                 <span class="rtp-tag">RTP 95.80%</span>
             </div>
 
-            <!-- Coming Soon: Mines -->
-            <div class="game-card" style="opacity: 0.7;">
+            <div class="game-card" onclick="alert('Mines is Coming Soon!')">
                 <span class="badge-coming">COMING SOON</span>
-                <div class="game-banner" style="background: linear-gradient(135deg, #3b3520, #111318);">
-                    💣
-                </div>
+                <div class="game-banner" style="background: linear-gradient(135deg, #3b3520, #111318);">💣</div>
                 <h3>Mines</h3>
                 <span class="rtp-tag">RTP 96.81%</span>
             </div>
         </div>
     </main>
 
-    <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <a href="/dashboard" class="nav-item active">
             <span class="nav-icon">🏠</span>
             <span>Home</span>
         </a>
-        <a href="/dashboard" class="nav-item" onclick="alert('Activity section coming soon!')">
+        <button class="nav-item" onclick="alert('Activity feature is Coming Soon!')">
             <span class="nav-icon">🎯</span>
             <span>Activity</span>
-        </a>
-        <a href="/dashboard" class="nav-item" onclick="alert('Promotion bonus coming soon!')">
+        </button>
+        <button class="nav-item" onclick="alert('Promotion feature is Coming Soon!')">
             <span class="nav-icon">🎁</span>
             <span>Promotion</span>
-        </a>
+        </button>
         <a href="/account" class="nav-item">
             <span class="nav-icon">👤</span>
             <span>Account</span>

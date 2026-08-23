@@ -59,11 +59,14 @@ async def signup_user(
     identifier: str = Form(...),
     password: str = Form(...),
 ):
+    # Check if identifier (email/phone) already exists strictly
+    if identifier in USERS_DB:
+        return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
+
+    # Check if username already exists
     username_exists = any(u["username"] == username for u in USERS_DB.values())
-    if identifier in USERS_DB or username_exists:
-        return RedirectResponse(
-            url="/?error=UserAlreadyExists", status_code=303
-        )
+    if username_exists:
+        return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
     USERS_DB[identifier] = {"username": username, "password": password}
 
