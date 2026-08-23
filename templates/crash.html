@@ -36,6 +36,14 @@
             font-size: 18px;
             letter-spacing: 1px;
         }
+        .user-welcome-badge {
+            font-size: 12px;
+            color: #94a3b8;
+            background: rgba(30, 41, 59, 0.7);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
         .balance-box {
             background: #242833;
             padding: 5px 12px;
@@ -262,7 +270,7 @@
     <!-- Top Navbar -->
     <div class="navbar">
         <a href="/dashboard" class="logout-link">← Lobby</a>
-        <div class="logo">AVIATOR ARENA</div>
+        <div class="user-welcome-badge">👤 {{ username }}</div>
         <div class="balance-box"><span id="token-balance">1000.00</span> 🪙</div>
     </div>
 
@@ -308,7 +316,7 @@
     </div>
 
     <script>
-        // Real session username injected from FastAPI backend
+        // Real session username injected directly from backend
         const currentUsername = "{{ username }}";
 
         let ws;
