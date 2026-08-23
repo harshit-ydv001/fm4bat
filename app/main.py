@@ -113,7 +113,6 @@ async def crash_game_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    # Passed username context to fix the Internal Server Error
     return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
