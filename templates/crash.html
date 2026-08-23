@@ -43,7 +43,6 @@
             height: 220px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #1e222d;
         }
         
-        /* Moving Background Grid for Real Motion Feel */
         .grid-bg {
             position: absolute; top: 0; left: 0; width: 200%; height: 100%;
             background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
@@ -58,33 +57,21 @@
         }
 
         .text-layer {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-            pointer-events: none;
+            position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; pointer-events: none;
         }
 
         .flight-svg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 3;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3;
         }
 
         .multiplier-display { font-size: 44px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
         .status-text { font-size: 11px; color: #00f0ff; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
         
-        /* Large, Stylish Cyan/Blue Glowing Plane */
         .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         .plane { 
-            position: absolute; 
-            bottom: 15px; 
-            left: 20px; 
-            font-size: 42px; 
+            position: absolute; bottom: 15px; left: 20px; font-size: 42px; 
             filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.9));
-            transition: transform 0.05s linear; 
-            will-change: transform; 
+            transition: transform 0.05s linear; will-change: transform; 
         }
 
         .betting-section { width: 100%; max-width: 480px; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #0b0e14; }
@@ -106,10 +93,31 @@
         .stats-tabs { display: flex; background: #0f1219; border-bottom: 1px solid #1e222d; padding: 0 10px; }
         .stats-tab { padding: 8px 12px; font-size: 11px; color: #8a99ad; background: none; border: none; cursor: pointer; font-weight: bold; }
         .stats-tab.active { color: #fff; border-bottom: 2px solid #e74c3c; }
-        .bets-list { max-height: 130px; overflow-y: auto; padding: 4px 10px; }
-        .bet-row { display: flex; justify-content: space-between; font-size: 11px; padding: 5px 0; border-bottom: 1px solid #181c25; color: #8a99ad; }
-        .bet-row.my-bet { color: #ff3b30 !important; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding-left: 6px; padding-right: 6px; border-radius: 4px; }
-        .cashed-tag { color: #2ecc71; font-weight: bold; }
+        
+        .bets-header {
+            display: flex; justify-content: space-between; padding: 6px 12px; font-size: 10px; color: #5a6882; background: #141822; border-bottom: 1px solid #1a1e29; font-weight: bold;
+        }
+        .bets-list { max-height: 140px; overflow-y: auto; padding: 0 12px; }
+        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 0; border-bottom: 1px solid #181c25; color: #8a99ad; }
+        
+        .bet-row.my-bet {
+            color: #00f0ff !important;
+            font-weight: bold;
+            background: rgba(0, 240, 255, 0.08);
+            padding-left: 8px; padding-right: 8px;
+            border-radius: 4px;
+        }
+        .col-user { width: 40%; text-align: left; }
+        .col-bet { width: 30%; text-align: center; }
+        .col-cashout { width: 30%; text-align: right; }
+        
+        .cashed-badge {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -163,7 +171,7 @@
             <div class="bet-controls-row">
                 <div class="amount-control">
                     <button class="amount-btn" onclick="adjustBet(-10)">-</button>
-                    <input type="text" id="bet-amount" class="amount-input" value="10.00">
+                    <input type="text" id="bet-amount" class="amount-input" value="50.00">
                     <button class="amount-btn" onclick="adjustBet(10)">+</button>
                 </div>
                 <button class="action-btn" id="btn-action" onclick="handleWagerAction()" disabled>WAIT FOR NEXT ROUND</button>
@@ -182,6 +190,11 @@
             <button class="stats-tab active">All Bets (<span id="player-count">0</span>)</button>
             <button class="stats-tab">My Bets</button>
             <button class="stats-tab">Top</button>
+        </div>
+        <div class="bets-header">
+            <span class="col-user">User</span>
+            <span class="col-bet">Bet (🪙)</span>
+            <span class="col-cashout">Cash out (🪙)</span>
         </div>
         <div class="bets-list" id="live-bets-list"></div>
     </div>
@@ -231,7 +244,8 @@
                     if(linePath) linePath.setAttribute("d", "M 15 205 L 15 205");
                     if(areaPath) areaPath.setAttribute("d", "M 15 220 L 15 205 L 15 220 Z");
                     
-                    actionBtn.innerText = "BET 10.00 INR";
+                    let currentVal = document.getElementById("bet-amount").value;
+                    actionBtn.innerText = `BET ${parseFloat(currentVal).toFixed(2)} 🪙`;
                     actionBtn.style.background = "#2ecc71";
                     actionBtn.disabled = false;
                 } 
@@ -256,7 +270,6 @@
                     status.innerText = "MULTIPLIER RISING";
                     status.style.color = "#00f0ff";
                     
-                    // Safe bounded flight path so plane never exits the screen boundaries
                     let progress = Math.log(data.multiplier) * 0.9;
                     let xPos = 15 + (progress * 90);
                     let yPos = 15 + (progress * 45);
@@ -264,7 +277,6 @@
                     if (xPos > 360) xPos = 360;
                     if (yPos > 140) yPos = 140;
                     
-                    // Add subtle floating hover effect so it feels alive
                     let hover = Math.sin(Date.now() / 200) * 4;
                     let finalY = yPos + hover;
 
@@ -284,7 +296,7 @@
 
                     if (isPlaying && !hasCashedOut && actionBtn) {
                         let currentWin = (currentWager * data.multiplier).toFixed(2);
-                        actionBtn.innerText = `CASH OUT (${currentWin})`;
+                        actionBtn.innerText = `CASH OUT (${currentWin} 🪙)`;
                         actionBtn.style.background = "#f1c40f";
                         actionBtn.disabled = false;
                     }
@@ -366,7 +378,7 @@
                 balance += winAmount;
                 updateBalanceDisplay();
 
-                actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)})`;
+                actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
                 actionBtn.style.background = "#2ecc71";
                 actionBtn.disabled = true;
 
@@ -428,8 +440,15 @@
                 let isMe = (bet.username === currentUsername);
                 row.className = "bet-row " + (isMe ? "my-bet" : "");
 
-                let statusText = bet.cashed_out ? `<span class="cashed-tag">${bet.multiplier.toFixed(2)}x</span>` : `<span>${bet.amount} INR</span>`;
-                row.innerHTML = `<strong>${bet.username} ${isMe ? '(You)' : ''}</strong> ${statusText}`;
+                let cashoutDisplay = bet.cashed_out 
+                    ? `<span class="cashed-badge">${bet.multiplier.toFixed(2)}x &nbsp; <b>${bet.payout.toFixed(2)} 🪙</b></span>` 
+                    : `-`;
+
+                row.innerHTML = `
+                    <span class="col-user"><b>${bet.username}</b> ${isMe ? '(You)' : ''}</span>
+                    <span class="col-bet">${bet.amount.toFixed(2)} 🪙</span>
+                    <span class="col-cashout">${cashoutDisplay}</span>
+                `;
                 listContainer.appendChild(row);
             });
         }
@@ -439,12 +458,12 @@
             let val = parseFloat(input.value) + amount;
             if (val < 10) val = 10;
             input.value = val.toFixed(2);
-            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} INR`;
+            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} 🪙`;
         }
 
         function setPreset(val) { 
             document.getElementById("bet-amount").value = val.toFixed(2); 
-            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} INR`;
+            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} 🪙`;
         }
 
         connectWebSocket();
