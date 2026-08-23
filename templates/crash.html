@@ -281,7 +281,7 @@
                     <input type="text" id="bet-amount" class="amount-input" value="50.00">
                     <button class="amount-btn" onclick="adjustBet(10)">+</button>
                 </div>
-                <button class="action-btn" id="btn-action" onclick="handleWagerAction()">PLACE BET</button>
+                <button class="action-btn" id="btn-action" onclick="handleWagerAction()" disabled>WAIT FOR NEXT ROUND</button>
             </div>
             <div class="quick-presets">
                 <button class="preset-pill" onclick="setPreset(10)">10</button>
@@ -306,7 +306,7 @@
         let currentWager = 0;
         let isPlaying = false;
         let hasCashedOut = false;
-        let roundInProgress = false;
+        let roundInProgress = true; // Start as true until server confirms ready state
 
         function connectWebSocket() {
             const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -348,7 +348,7 @@
                         actionBtn.style.background = "#f59e0b";
                         actionBtn.disabled = false;
                     } else if (!isPlaying) {
-                        // Agar round chal raha hai aur user ne bet nahi lagayi, toh disable rakho!
+                        roundInProgress = true;
                         actionBtn.innerText = "WAIT FOR NEXT ROUND";
                         actionBtn.style.background = "#1f2937";
                         actionBtn.disabled = true;
@@ -410,10 +410,8 @@
                 return;
             }
 
-            // Agar round chal raha hai toh beech me bet nahi lagne denge
-            if (roundInProgress) {
-                alert("Please wait for the next round to place a bet!");
-                return;
+            if (roundInProgress && !isPlaying) {
+                return; // Do nothing if round is already running
             }
 
             if (!isPlaying) {
