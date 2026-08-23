@@ -37,25 +37,28 @@
         .history-pill.pill-red { color: #ff5252; }
         .history-pill.pill-green { color: #00e676; }
 
-        /* Game Screen with Moving Cloud Background */
+        /* Game Screen with Real Moving Clouds */
         .game-container {
             width: 100%; max-width: 480px; 
-            background: linear-gradient(135deg, #1e222d 0%, #0f1115 100%);
+            background: linear-gradient(135deg, #1b263b 0%, #0d1b2a 100%);
             height: 240px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #2a2e39;
         }
         
-        /* Stylish Background Moving Clouds Effect */
-        .cloud-bg {
+        /* Real Cloud Layer Animation */
+        .clouds-layer {
             position: absolute;
             top: 0; left: 0; width: 200%; height: 100%;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 2px, transparent 2px), radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-            background-size: 40px 40px, 20px 20px;
-            background-position: 0 0, 10px 10px;
-            animation: moveClouds 20s linear infinite;
+            background-image: 
+                radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 35%);
+            background-repeat: repeat-x;
+            background-size: 300px 240px;
+            animation: driftClouds 25s linear infinite;
             pointer-events: none;
             z-index: 1;
         }
-        @keyframes moveClouds {
+        @keyframes driftClouds {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
@@ -105,8 +108,8 @@
     <div class="history-bar" id="history-bar"></div>
 
     <div class="game-container">
-        <!-- Stylish Moving Cloud/Grid Background Layer -->
-        <div class="cloud-bg"></div>
+        <!-- Real Floating Clouds Background -->
+        <div class="clouds-layer"></div>
 
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
         <div class="multiplier-display" id="multiplier-display">1.00x</div>
@@ -309,8 +312,6 @@
                 }
             }
         }
-
-        function updateBalanceDeserialise() {}
 
         function updateBalanceDisplay() {
             const balanceEl = document.getElementById('token-balance');
