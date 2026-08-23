@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - fm4bat</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #0f1115; 
+            color: #ffffff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .main-content { 
+            width: 100%;
+            max-width: 480px;
+            padding: 15px; 
+            margin-bottom: 70px;
+        }
+        .account-header-card {
+            background: #1a1d24;
+            border: 1px solid #2a2e39;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .account-avatar {
+            width: 55px; height: 55px; background: #3b82f6; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #fff;
+        }
+        .account-meta h3 { font-size: 16px; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+        .vip-badge { background: #374151; color: #fbbf24; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; border: 1px solid rgba(251,191,36,0.3); }
+        .uid-text { font-size: 11px; color: #94a3b8; }
+
+        .wallet-card {
+            background: linear-gradient(135deg, #1e222d, #161920);
+            border: 1px solid #2a2e39;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 15px;
+        }
+        .wallet-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .wallet-top span { font-size: 12px; color: #94a3b8; }
+        .wallet-top h2 { font-size: 22px; color: #00e676; font-weight: bold; }
+        .wallet-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+        .wallet-action-btn { background: #242833; border: 1px solid #2a2e39; border-radius: 10px; padding: 10px 4px; color: #fff; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .wallet-action-btn span { font-size: 16px; }
+
+        .menu-group {
+            background: #1a1d24; border: 1px solid #2a2e39; border-radius: 14px; overflow: hidden; margin-bottom: 15px;
+        }
+        .menu-item {
+            padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #222630; color: #cbd5e1; font-size: 13px; text-decoration: none; cursor: pointer;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item span { color: #94a3b8; }
+        .btn-logout { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; text-decoration: none; font-size: 14px; display: block; text-align: center; width: 100%; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 480px;
+            background: #1a1d24; border-top: 1px solid #2a2e39; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; color: #94a3b8;
+            text-decoration: none; font-size: 10px; gap: 4px; cursor: pointer; background: none; border: none;
+        }
+        .nav-item.active { color: #34d399; }
+        .nav-icon { font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        <!-- Profile Top Box -->
+        <div class="account-header-card">
+            <div class="account-avatar">👤</div>
+            <div class="account-meta">
+                <h3>{{ username }} <span class="vip-badge">VIP 0</span></h3>
+                <span class="uid-text">UID | 98452103</span>
+            </div>
+        </div>
+
+        <!-- Wallet Card -->
+        <div class="wallet-card">
+            <div class="wallet-top">
+                <span>Total balance</span>
+                <h2>1,000.00 🪙</h2>
+            </div>
+            <div class="wallet-actions">
+                <div class="wallet-action-btn"><span>💼</span> ARWallet</div>
+                <div class="wallet-action-btn"><span>💳</span> Deposit</div>
+                <div class="wallet-action-btn"><span>🏦</span> Withdraw</div>
+                <div class="wallet-action-btn"><span>⭐</span> VIP</div>
+            </div>
+        </div>
+
+        <!-- Menu Lists -->
+        <div class="menu-group">
+            <div class="menu-item">Game History <span>&gt;</span></div>
+            <div class="menu-item">Transaction <span>&gt;</span></div>
+            <div class="menu-item">Deposit History <span>&gt;</span></div>
+            <div class="menu-item">Withdraw History <span>&gt;</span></div>
+        </div>
+
+        <div class="menu-group">
+            <div class="menu-item">Notification <span style="background: #ef4444; color: #fff; padding: 1px 6px; border-radius: 10px; font-size: 10px;">1</span></div>
+            <div class="menu-item">Gifts <span>&gt;</span></div>
+            <div class="menu-item">Game statistics <span>&gt;</span></div>
+            <div class="menu-item">Language <span>English &gt;</span></div>
+        </div>
+
+        <div class="menu-group">
+            <div class="menu-item">Settings <span>&gt;</span></div>
+            <div class="menu-item">Customer Service <span>&gt;</span></div>
+            <div class="menu-item">About us <span>&gt;</span></div>
+        </div>
+
+        <a href="/logout" class="btn-logout">Log out</a>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="/dashboard" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="/dashboard" class="nav-item">
+            <span class="nav-icon">🎯</span>
+            <span>Activity</span>
+        </a>
+        <a href="/dashboard" class="nav-item">
+            <span class="nav-icon">🎁</span>
+            <span>Promotion</span>
+        </a>
+        <a href="/account" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span>Account</span>
+        </a>
+    </nav>
+
+</body>
+</html>

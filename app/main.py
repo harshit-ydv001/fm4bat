@@ -101,6 +101,14 @@ async def dashboard_page(request: Request):
     )
 
 
+@app.get("/account", response_class=HTMLResponse)
+async def account_page(request: Request):
+    username = request.cookies.get("session_user")
+    if not username:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse("account.html", {"request": request, "username": username})
+
+
 @app.get("/logout")
 async def logout_user():
     response = RedirectResponse(url="/", status_code=303)
