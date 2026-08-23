@@ -35,12 +35,9 @@ class CrashGameInstance:
         self.multiplier = 1.00
         self.state = "IDLE"
         
-        # Keep existing user bets if any, or clear for new round
-        user_bets = {k: v for k, v in self.active_bets.items() if not v.get("is_bot")}
+        # Clear all active bets completely for a fresh round start
         self.active_bets.clear()
-        self.active_bets.update(user_bets)
 
-        # Generate 18 to 25 realistic bot players every round
         first_names = [
             "Rahul", "Aman", "Priya", "Rohit", "Sahil", "Deepak", "Vikram", "Neha", 
             "Karan", "Simran", "Amit", "Pooja", "Vikas", "Anjali", "Sandeep", "Kunal", 
@@ -52,11 +49,8 @@ class CrashGameInstance:
         
         for i, name in enumerate(selected_names):
             bot_uid = f"bot_{self.mode}_{i}_{random.randint(100,999)}"
-            # Varied realistic bet amounts
             bet_amt = random.choice([50, 100, 150, 200, 250, 300, 500, 1000])
             bot_cashout_target = round(random.uniform(1.2, 10.0), 2)
-            
-            # Avoid duplicate bot names in the same round list if possible
             display_name = f"{name}_{random.randint(10,99)}"
             
             self.active_bets[bot_uid] = {
