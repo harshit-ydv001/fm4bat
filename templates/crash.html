@@ -44,7 +44,7 @@
             height: 240px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #2a2e39;
         }
         
-        /* Moving Fluffy Cloud Layers inspired by the reference image */
+        /* Moving Fluffy Cloud Layers */
         .sky-clouds {
             position: absolute;
             top: 0; left: 0; width: 200%; height: 100%;
@@ -82,7 +82,7 @@
         .status-text { font-size: 12px; color: #fbbf24; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; z-index: 3; }
         
         .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
-        .plane { position: absolute; bottom: 20px; left: 30px; font-size: 32px; transition: transform 0.1s linear; will-change: transform; z-index: 3; }
+        .plane { position: absolute; bottom: 10px; left: 15px; font-size: 32px; transition: transform 0.08s linear; will-change: transform; z-index: 3; }
 
         .betting-section { width: 100%; max-width: 480px; padding: 10px; display: flex; flex-direction: column; gap: 10px; background: #121418; }
         .bet-panel { background: #1a1d24; border: 1px solid #2a2e39; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
@@ -123,9 +123,7 @@
     <div class="history-bar" id="history-bar"></div>
 
     <div class="game-container">
-        <!-- Stylish Background Watermark Title -->
         <div class="game-title-watermark">AVIATOR ARENA</div>
-        <!-- Real Sunset Pink Moving Clouds Background -->
         <div class="sky-clouds"></div>
 
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
@@ -196,7 +194,7 @@
                     status.style.color = "#fbbf24";
                     display.innerText = "1.00x";
                     display.style.color = "#34d399";
-                    if(plane) plane.style.transform = `translate(0px, 0px) rotate(0deg)`;
+                    if(plane) plane.style.transform = `translate(10px, -10px) rotate(15deg)`;
                     
                     actionBtn.innerText = "PLACE BET";
                     actionBtn.style.background = "#059669";
@@ -206,7 +204,7 @@
                     roundInProgress = true;
                     status.innerText = "FLIGHT IN PROGRESS ✈️";
                     status.style.color = "#34d399";
-                    if(plane) plane.style.transform = `translate(0px, 0px) rotate(0deg)`;
+                    if(plane) plane.style.transform = `translate(10px, -10px) rotate(15deg)`;
                     
                     if (isPlaying && !hasCashedOut) {
                         actionBtn.innerText = "CASH OUT";
@@ -223,12 +221,18 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    let timeFactor = Date.now() / 300;
-                    let hoverEffect = Math.sin(timeFactor) * 12;
-                    let progress = Math.log(data.multiplier) * 1.2;
-                    let xPos = 40 + (progress * 50) % 220;
-                    let yPos = 30 + (progress * 30) % 100 + hoverEffect;
-                    let angle = Math.sin(timeFactor * 0.5) * 5 - 15;
+                    // Real Spribe Aviator smooth diagonal flight trajectory (logarithmic curve)
+                    let progress = Math.min(Math.log(data.multiplier) * 1.3, 3.0);
+                    let xPos = 15 + (progress * 90);
+                    let yPos = 10 + (progress * 55);
+                    
+                    // Boundary control
+                    if (xPos > 330) xPos = 330;
+                    if (yPos > 145) yPos = 145;
+                    
+                    // Smooth diagonal upward tilt angle matching flight trajectory
+                    let angle = 22 - (progress * 2);
+                    if (angle < 8) angle = 8;
                     
                     if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(${angle}deg)`;
 
@@ -247,7 +251,7 @@
                     }
                     status.innerText = "ROUND CRASHED 💥";
                     status.style.color = "#f87171";
-                    if(plane) plane.style.transform = `translate(340px, 100px) rotate(55deg)`;
+                    if(plane) plane.style.transform = `translate(340px, 20px) rotate(65deg)`;
 
                     isPlaying = false;
                     hasCashedOut = false;
