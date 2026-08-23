@@ -244,6 +244,13 @@
             border-bottom: 1px solid #222630;
             color: #b0bec5;
         }
+        .bet-row.my-bet {
+            background: rgba(0, 230, 118, 0.08);
+            padding-left: 5px;
+            padding-right: 5px;
+            border-radius: 4px;
+            color: #fff;
+        }
         .cashed-tag {
             color: #34d399;
             font-weight: bold;
@@ -301,6 +308,9 @@
     </div>
 
     <script>
+        // FastAPI session se logged-in user ka username inject hoga
+        const currentUsername = "{{ username if username else 'Player_' + Math.floor(Math.random()*1000).toString() }}";
+
         let ws;
         let balance = 1000.00;
         let currentWager = 0;
@@ -409,12 +419,10 @@
                 return;
             }
 
-            // CASE 1: Agar round chal raha hai aur user ne bet nahi lagayi thi, toh kuch mat karo
             if (roundInProgress && !isPlaying) {
                 return; 
             }
 
-            // CASE 2: Naye round ke shuru hone par bet lagana
             if (!roundInProgress && !isPlaying) {
                 if (amount > balance) { 
                     alert("Insufficient Token Balance!"); 
@@ -432,10 +440,14 @@
                 actionBtn.disabled = true;
 
                 if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: "PLACE_BET", amount: amount, mode: "token" }));
+                    ws.send(JSON.stringify({ 
+                        action: "PLACE_BET", 
+                        amount: amount, 
+                        mode: "token", 
+                        username: currentUsername 
+                    }));
                 }
             } 
-            // CASE 3: Flight chal rahi hai aur user ne bet lagayi thi -> CASH OUT karna!
             else if (roundInProgress && isPlaying && !hasCashedOut) {
                 hasCashedOut = true;
                 let currentMult = parseFloat(document.getElementById("multiplier-display").innerText);
@@ -449,7 +461,11 @@
                 actionBtn.disabled = true;
 
                 if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: "CASH_OUT", mode: "token" }));
+                    ws.send(JSON.stringify({ 
+                        action: "CASH_OUT", 
+                        mode: "token", 
+                        username: currentUsername 
+                    }));
                 }
             }
         }
@@ -485,9 +501,13 @@
             keys.forEach(uid => {
                 let bet = betsObj[uid];
                 let row = document.createElement("div");
-                row.className = "bet-row";
+                
+                // Agar yeh bet logged-in user ki khud ki hai, toh alag highlight style do
+                let isMe = (bet.username === currentUsername);
+                row.className = "bet-row " + (isMe ? "my-bet" : "");
+
                 let statusText = bet.cashed_out ? `<span class="cashed-tag">${bet.multiplier.toFixed(2)}x</span>` : `<span>${bet.amount} 🪙</span>`;
-                row.innerHTML = `<strong>${bet.username}</strong> ${statusText}`;
+                row.innerHTML = `<strong>${bet.username} ${isMe ? '(You)' : ''}</strong> ${statusText}`;
                 listContainer.appendChild(row);
             });
         }
