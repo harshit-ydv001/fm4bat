@@ -74,7 +74,6 @@ async def signup_user(
 
 @app.post("/forgot-password")
 async def forgot_password(identifier: str = Form(...), password: str = Form(...)):
-    # Check if user exists by email/phone or username
     user_key = None
     if identifier in USERS_DB:
         user_key = identifier
@@ -85,7 +84,6 @@ async def forgot_password(identifier: str = Form(...), password: str = Form(...)
                 break
 
     if user_key:
-        # Update password
         USERS_DB[user_key]["password"] = password
         response = RedirectResponse(url="/?success=PasswordReset", status_code=303)
         return response
@@ -115,7 +113,8 @@ async def crash_game_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    return templates.TemplateResponse("crash.html", {"request": request})
+    # Passed username context to fix the Internal Server Error
+    return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
 @app.websocket("/ws/crash")

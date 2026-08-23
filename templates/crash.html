@@ -308,8 +308,8 @@
     </div>
 
     <script>
-        // Safe Client-side Username Generation
-        const currentUsername = "Player_" + Math.floor(1000 + Math.random() * 9000);
+        // Safely capture session username from backend
+        const currentUsername = "{{ username }}";
 
         let ws;
         let balance = 1000.00;
