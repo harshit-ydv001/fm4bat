@@ -39,17 +39,24 @@
 
         .game-container {
             width: 100%; max-width: 480px; 
-            background: linear-gradient(135deg, #18080c 0%, #0d0f15 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #0b0e14 100%);
             height: 220px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #1e222d;
         }
         
+        /* Moving Background Grid for Real Motion Feel */
         .grid-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px; pointer-events: none; z-index: 1;
+            position: absolute; top: 0; left: 0; width: 200%; height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 24px 24px;
+            animation: moveGrid 15s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes moveGrid {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
-        /* Text background layer so text stays behind the plane path */
         .text-layer {
             position: absolute;
             display: flex;
@@ -65,18 +72,18 @@
             pointer-events: none; z-index: 3;
         }
 
-        .multiplier-display { font-size: 44px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(255, 59, 48, 0.5); }
-        .status-text { font-size: 11px; color: #e74c3c; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
+        .multiplier-display { font-size: 44px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+        .status-text { font-size: 11px; color: #00f0ff; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
         
-        /* Large, Stylish Golden-Orange Plane Flying ABOVE Text */
+        /* Large, Stylish Cyan/Blue Glowing Plane */
         .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         .plane { 
             position: absolute; 
-            bottom: 10px; 
-            left: 15px; 
+            bottom: 15px; 
+            left: 20px; 
             font-size: 42px; 
-            filter: drop-shadow(0 0 12px rgba(241, 196, 15, 0.8));
-            transition: transform 0.04s linear; 
+            filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.9));
+            transition: transform 0.05s linear; 
             will-change: transform; 
         }
 
@@ -134,16 +141,16 @@
         <svg class="flight-svg" viewBox="0 0 480 220" preserveAspectRatio="none">
             <defs>
                 <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(231, 76, 60, 0.35)"/>
-                    <stop offset="100%" stop-color="rgba(231, 76, 60, 0.0)"/>
+                    <stop offset="0%" stop-color="rgba(0, 240, 255, 0.25)"/>
+                    <stop offset="100%" stop-color="rgba(0, 240, 255, 0.0)"/>
                 </linearGradient>
             </defs>
             <path id="area-path" d="M 0 220 L 0 220 L 480 220 Z" fill="url(#curveGradient)" />
-            <path id="line-path" d="M 0 220 L 0 220" fill="none" stroke="#ff3b30" stroke-width="3.5" />
+            <path id="line-path" d="M 0 220 L 0 220" fill="none" stroke="#00f0ff" stroke-width="3.5" />
         </svg>
         
         <div class="plane-container">
-            <div class="plane" id="plane">🛩️</div>
+            <div class="plane" id="plane">✈️</div>
         </div>
     </div>
 
@@ -217,7 +224,7 @@
                     hasCashedOut = false;
 
                     status.innerText = "WAITING FOR TAKE OFF";
-                    status.style.color = "#f39c12";
+                    status.style.color = "#00f0ff";
                     display.innerText = "1.00x";
                     display.style.color = "#fff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
@@ -231,7 +238,7 @@
                 else if (data.type === "ROUND_STARTED") {
                     roundInProgress = true;
                     status.innerText = "FLIGHT IN PROGRESS";
-                    status.style.color = "#2ecc71";
+                    status.style.color = "#00f0ff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
                     
                     if (isPlaying && !hasCashedOut) {
@@ -247,23 +254,27 @@
                 else if (data.type === "TICK") {
                     if(display) display.innerText = data.multiplier.toFixed(2) + "x";
                     status.innerText = "MULTIPLIER RISING";
-                    status.style.color = "#2ecc71";
+                    status.style.color = "#00f0ff";
                     
-                    // Continuous smooth scaling flight path
-                    let progress = Math.log(data.multiplier) * 1.1;
-                    let xPos = 15 + (progress * 130);
-                    let yPos = 15 + (progress * 65);
+                    // Safe bounded flight path so plane never exits the screen boundaries
+                    let progress = Math.log(data.multiplier) * 0.9;
+                    let xPos = 15 + (progress * 90);
+                    let yPos = 15 + (progress * 45);
                     
-                    if (xPos > 415) xPos = 415;
-                    if (yPos > 185) yPos = 185;
+                    if (xPos > 360) xPos = 360;
+                    if (yPos > 140) yPos = 140;
                     
-                    let svgX = xPos + 10;
-                    let svgY = 220 - yPos;
+                    // Add subtle floating hover effect so it feels alive
+                    let hover = Math.sin(Date.now() / 200) * 4;
+                    let finalY = yPos + hover;
 
-                    let angle = 20 - (progress * 1.5);
-                    if (angle < 6) angle = 6;
+                    let svgX = xPos + 10;
+                    let svgY = 220 - finalY;
+
+                    let angle = 15 - (progress * 1.2);
+                    if (angle < 4) angle = 4;
                     
-                    if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(${angle}deg)`;
+                    if(plane) plane.style.transform = `translate(${xPos}px, -${finalY}px) rotate(${angle}deg)`;
 
                     if(linePath && areaPath) {
                         let pathString = `M 15 205 Q ${svgX * 0.45} 205, ${svgX} ${svgY}`;
@@ -286,7 +297,7 @@
                     }
                     status.innerText = "FLEW AWAY!";
                     status.style.color = "#e74c3c";
-                    if(plane) plane.style.transform = `translate(420px, 20px) rotate(65deg)`;
+                    if(plane) plane.style.transform = `translate(370px, 20px) rotate(65deg)`;
 
                     isPlaying = false;
                     hasCashedOut = false;
