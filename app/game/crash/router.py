@@ -8,9 +8,11 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/games/crash", response_class=HTMLResponse)
 async def crash_game_page(request: Request):
-    return templates.TemplateResponse("crash.html", {"request": request})
+    username = request.cookies.get("session_user", "Player")
+    return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    username = request.cookies.get("session_user", "Player")
+    return templates.TemplateResponse("dashboard.html", {"request": request, "username": username})
