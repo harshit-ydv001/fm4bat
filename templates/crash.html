@@ -30,12 +30,6 @@
             padding: 10px 15px;
             border-bottom: 1px solid #2a2e39;
         }
-        .logo {
-            color: #ff5252;
-            font-weight: bold;
-            font-size: 18px;
-            letter-spacing: 1px;
-        }
         .user-welcome-badge {
             font-size: 12px;
             color: #94a3b8;
@@ -375,11 +369,14 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    // Continuous smooth flight calculation based on multiplier growth
-                    let progress = Math.log(data.multiplier) * 1.5;
-                    let xPos = Math.min(progress * 110, 310);
-                    let yPos = Math.min(progress * 70, 180);
-                    let angle = Math.max(-35, -15 - (data.multiplier * 2));
+                    // Continuous floating wave effect so the plane never freezes or looks stuck
+                    let timeFactor = Date.now() / 300;
+                    let hoverEffect = Math.sin(timeFactor) * 12;
+                    
+                    let progress = Math.log(data.multiplier) * 1.2;
+                    let xPos = 40 + (progress * 50) % 220;
+                    let yPos = 30 + (progress * 30) % 100 + hoverEffect;
+                    let angle = Math.sin(timeFactor * 0.5) * 5 - 15;
                     
                     if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(${angle}deg)`;
 
