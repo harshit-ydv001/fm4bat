@@ -72,12 +72,12 @@
         .history-pill.pill-red { color: #ff5252; }
         .history-pill.pill-green { color: #00e676; }
 
-        /* Main Game Screen */
+        /* Main Game Screen (Canvas with Plane) */
         .game-container {
             width: 100%;
             max-width: 480px;
-            background: #0f1115;
-            height: 220px;
+            background: radial-gradient(circle at center, #1e222d 0%, #0f1115 100%);
+            height: 240px;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -87,25 +87,34 @@
             border-bottom: 2px solid #2a2e39;
         }
         .multiplier-display {
-            font-size: 42px;
+            font-size: 46px;
             font-weight: 900;
             color: #34d399;
-            z-index: 2;
+            z-index: 3;
+            text-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
         }
         .status-text {
-            font-size: 13px;
+            font-size: 12px;
             color: #fbbf24;
             font-weight: bold;
             margin-bottom: 5px;
             letter-spacing: 1px;
+            z-index: 3;
         }
-        .plane {
+        /* Plane Animation Styling */
+        .plane-wrapper {
             position: absolute;
-            font-size: 24px;
-            transition: transform 0.1s linear;
+            left: 20px;
+            bottom: 20px;
+            z-index: 2;
+            transition: transform 0.1s ease-out;
+        }
+        .plane-icon {
+            font-size: 36px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
         }
 
-        /* Betting Panels Container (Double Bet style structure) */
+        /* Betting Panels Container */
         .betting-section {
             width: 100%;
             max-width: 480px;
@@ -210,10 +219,6 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .tab.active {
-            border-bottom: 2px solid #00e676;
-            color: #fff;
-        }
         .bets-list {
             max-height: 140px;
             overflow-y: auto;
@@ -247,17 +252,19 @@
         <!-- Dynamic History pills -->
     </div>
 
-    <!-- Game Screen / Multiplier Area -->
+    <!-- Game Screen / Multiplier Area with Plane -->
     <div class="game-container">
         <div class="status-text" id="game-status">WAITING FOR TAKE OFF</div>
         <div class="multiplier-display" id="multiplier-display">1.00x</div>
-        <div class="plane" id="plane">✈️</div>
+        
+        <!-- Animated Plane Wrapper -->
+        <div class="plane-wrapper" id="plane">
+            <div class="plane-icon">✈️</div>
+        </div>
     </div>
 
     <!-- Betting Panels Section -->
     <div class="betting-section">
-        
-        <!-- Panel 1 -->
         <div class="bet-panel">
             <div class="bet-controls-row">
                 <div class="amount-control">
@@ -268,13 +275,12 @@
                 <button class="action-btn" id="btn-action" onclick="handleWagerAction()">PLACE BET</button>
             </div>
             <div class="quick-presets">
-                <button class="preset-pill" onclick="setBet(10)">10</button>
+                <button class="preset-pill" onclick="setPreset(10)">10</button>
                 <button class="preset-pill" onclick="setPreset(50)">50</button>
                 <button class="preset-pill" onclick="setPreset(100)">100</button>
                 <button class="preset-pill" onclick="setPreset(500)">500</button>
             </div>
         </div>
-
     </div>
 
     <!-- Live Stats & Bets -->
@@ -350,8 +356,9 @@
                     status.innerText = "MULTIPLIER RISING 🚀";
                     status.style.color = "#34d399";
                     
-                    let xPos = Math.min((data.multiplier - 1) * 70, 260);
-                    let yPos = Math.min((data.multiplier - 1) * 50, 160);
+                    // Smooth Plane Movement Calculation
+                    let xPos = Math.min((data.multiplier - 1) * 80, 300);
+                    let yPos = Math.min((data.multiplier - 1) * 45, 140);
                     if(plane) plane.style.transform = `translate(${xPos}px, -${yPos}px) rotate(-15deg)`;
 
                     if (isPlaying && !hasCashedOut && actionBtn) {
@@ -368,7 +375,7 @@
                     }
                     status.innerText = "ROUND CRASHED 💥";
                     status.style.color = "#f87171";
-                    if(plane) plane.style.transform = `translate(300px, 40px) rotate(45deg)`;
+                    if(plane) plane.style.transform = `translate(320px, 60px) rotate(45deg)`;
 
                     isPlaying = false;
                     hasCashedOut = false;
