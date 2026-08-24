@@ -137,6 +137,14 @@ async def logout_user():
     return response
 
 
+# Extra safety route to forcefully wipe cookies
+@app.get("/force-logout")
+async def force_logout():
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="session_user")
+    return response
+
+
 @app.get("/games/crash", response_class=HTMLResponse)
 async def crash_game_page(request: Request):
     username = request.cookies.get("session_user")
