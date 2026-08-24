@@ -54,53 +54,84 @@
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
-        /* EXACT 100% LUDO BOARD REPLICA */
         .board {
-            width: 350px; height: 350px;
-            background: #12151c;
-            border: 4px solid #1f293d;
+            width: 360px; height: 360px;
+            background: #3a4732;
+            border: 8px solid #232d1e;
             position: relative;
             display: grid;
             grid-template-columns: repeat(15, 1fr);
             grid-template-rows: repeat(15, 1fr);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-            border-radius: 4px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.85);
+            border-radius: 6px;
+            overflow: hidden;
         }
 
-        /* 4 Corner Bases */
-        .base-red { grid-column: 1 / 7; grid-row: 1 / 7; background: #e74c3c; border: 2px solid #c0392b; display: flex; justify-content: center; align-items: center; }
-        .base-green { grid-column: 10 / 16; grid-row: 1 / 7; background: #2ecc71; border: 2px solid #27ae60; display: flex; justify-content: center; align-items: center; }
-        .base-blue { grid-column: 1 / 7; grid-row: 10 / 16; background: #3498db; border: 2px solid #2980b9; display: flex; justify-content: center; align-items: center; }
-        .base-yellow { grid-column: 10 / 16; grid-row: 10 / 16; background: #f1c40f; border: 2px solid #f39c12; display: flex; justify-content: center; align-items: center; }
+        .base-red { 
+            grid-column: 1 / 7; grid-row: 1 / 7; 
+            background: linear-gradient(135deg, #8b251c 0%, #5a140e 100%); 
+            border: 4px solid #3d0d09; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
+        .base-green { 
+            grid-column: 10 / 16; grid-row: 1 / 7; 
+            background: linear-gradient(135deg, #1b5e36 0%, #0f361f 100%); 
+            border: 4px solid #082212; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
+        .base-blue { 
+            grid-column: 1 / 7; grid-row: 10 / 16; 
+            background: linear-gradient(135deg, #164e7a 0%, #0c2d47 100%); 
+            border: 4px solid #061928; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
+        .base-yellow { 
+            grid-column: 10 / 16; grid-row: 10 / 16; 
+            background: linear-gradient(135deg, #8a7314 0%, #52430b 100%); 
+            border: 4px solid #2d2404; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
 
-        /* Inner Dark Square with 4 Token Circles */
         .bunker-box {
-            width: 76%; height: 76%; background: #0c0f16; border-radius: 6px; 
+            width: 78%; height: 78%; 
+            background: radial-gradient(circle, #3d2817 0%, #21150c 100%); 
+            border-radius: 12px; 
             display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
-            padding: 8px; gap: 8px; align-items: center; justify-items: center;
+            padding: 8px; gap: 10px; align-items: center; justify-items: center;
+            box-shadow: inset 0 6px 12px rgba(0,0,0,0.9);
+            border: 3px solid #140d07;
         }
         
-        .token-circle {
-            width: 22px; height: 22px; background: #fff; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 11px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); border: 2px solid #333; cursor: pointer;
+        .token-helmet {
+            width: 30px; height: 30px; background: #222; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.3); 
+            border: 2px solid #555; cursor: pointer;
+            transition: transform 0.2s;
         }
-        .token-circle.active { border-color: #00ffcc; box-shadow: 0 0 8px #00ffcc; }
+        .token-helmet.active-commando { 
+            border-color: #00ffcc; 
+            box-shadow: 0 0 12px #00ffcc, inset 0 2px 4px rgba(255,255,255,0.5); 
+            transform: scale(1.15); 
+        }
 
-        /* Center Home (Trophy) */
         .center-home {
-            grid-column: 7 / 10; grid-row: 7 / 10; background: #111; 
-            display: flex; justify-content: center; align-items: center; font-size: 22px;
-            border: 2px solid #222;
+            grid-column: 7 / 10; grid-row: 7 / 10; 
+            background: #1a1e18; 
+            display: flex; justify-content: center; align-items: center; font-size: 26px;
+            border: 3px solid #0f120e;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* Cross Tracks (Paths) matching exact design */
-        .path-v-top { grid-column: 7 / 10; grid-row: 1 / 7; background: #27ae60; border: 1px solid #1e8449; }
-        .path-v-bottom { grid-column: 7 / 10; grid-row: 10 / 16; background: #f1c40f; border: 1px solid #d4ac0d; }
-        .path-h-left { grid-column: 1 / 7; grid-row: 7 / 10; background: #e74c3c; border: 1px solid #b03a2e; }
-        .path-h-right { grid-column: 10 / 16; grid-row: 7 / 10; background: #3498db; border: 1px solid #2471a3; }
+        .path-v-top { grid-column: 7 / 10; grid-row: 1 / 7; background: #2e6b3e; border: 1px solid #1c4226; }
+        .path-v-bottom { grid-column: 7 / 10; grid-row: 10 / 16; background: #826e1e; border: 1px solid #4a3e0f; }
+        .path-h-left { grid-column: 1 / 7; grid-row: 7 / 10; background: #7d2a23; border: 1px solid #471714; }
+        .path-h-right { grid-column: 10 / 16; grid-row: 7 / 10; background: #1c4b70; border: 1px solid #0f2b42; }
 
-        /* Control Panel */
         .control-panel {
             width: 100%; max-width: 480px;
             background: #12151c;
@@ -128,7 +159,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (ARMY)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -151,25 +182,25 @@
             </div>
         </div>
 
-        <!-- 100% Exact Ludo Board Replica -->
+        <!-- Army Battle Ludo Board -->
         <div class="board">
             <!-- Red Base -->
             <div class="base-red">
                 <div class="bunker-box">
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle active" id="token-active">🚀</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet active-commando" id="active-commando">🚀</div>
                 </div>
             </div>
             
             <!-- Green Base -->
             <div class="base-green">
                 <div class="bunker-box">
-                    <div class="token-circle">🟩</div>
-                    <div class="token-circle">🟩</div>
-                    <div class="token-circle">🟩</div>
-                    <div class="token-circle">🟩</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
                 </div>
             </div>
 
@@ -183,20 +214,20 @@
             <!-- Blue Base -->
             <div class="base-blue">
                 <div class="bunker-box">
-                    <div class="token-circle">🟦</div>
-                    <div class="token-circle">🟦</div>
-                    <div class="token-circle">🟦</div>
-                    <div class="token-circle">🟦</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
                 </div>
             </div>
 
             <!-- Yellow Base -->
             <div class="base-yellow">
                 <div class="bunker-box">
-                    <div class="token-circle">⭐</div>
-                    <div class="token-circle">⭐</div>
-                    <div class="token-circle">⭐</div>
-                    <div class="token-circle">⭐</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
+                    <div class="token-helmet">🪖</div>
                 </div>
             </div>
         </div>
@@ -223,19 +254,19 @@
     <!-- Controls & Dice -->
     <div class="control-panel">
         <div class="dice-box" id="dice-value">🎲</div>
-        <div class="status-msg" id="game-status">Roll a 6 to open your commando token!</div>
+        <div class="status-msg" id="game-status">Roll a 6 to deploy your commando token!</div>
         <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
     </div>
 
     <script>
-        let isOpen = false;
-        let steps = 0;
+        let commandoOut = false;
+        let progressSteps = 0;
 
         function rollDice() {
             const diceEl = document.getElementById("dice-value");
             const statusEl = document.getElementById("game-status");
             const rollBtn = document.getElementById("roll-dice-btn");
-            const activeToken = document.getElementById("token-active");
+            const commandoToken = document.getElementById("active-commando");
 
             rollBtn.disabled = true;
             let rollAnim = setInterval(() => {
@@ -247,23 +278,23 @@
                 let roll = Math.floor(Math.random() * 6) + 1;
                 diceEl.innerText = roll;
 
-                if (!isOpen) {
+                if (!commandoOut) {
                     if (roll === 6) {
-                        isOpen = true;
-                        activeToken.innerText = "👑";
-                        statusEl.innerText = `Rolled 6! Token is now active on track!`;
+                        commandoOut = true;
+                        commandoToken.innerText = "👑";
+                        statusEl.innerText = `Rolled 6! Commando deployed into battle zone!`;
                     } else {
-                        statusEl.innerText = `Rolled ${roll}. Need 6 to open token!`;
+                        statusEl.innerText = `Rolled ${roll}. Need 6 to deploy commando!`;
                     }
                 } else {
-                    steps += roll;
-                    if (steps >= 5) {
-                        statusEl.innerText = `🎉 Victory! Reached Home! Won 500 Coins!`;
+                    progressSteps += roll;
+                    if (progressSteps >= 5) {
+                        statusEl.innerText = `🎉 Victory! Commando secured the Trophy! Won 500 Coins!`;
                         setTimeout(() => {
                             window.location.href = "/dashboard";
                         }, 1500);
                     } else {
-                        statusEl.innerText = `Rolled ${roll}. Advanced to step ${steps}/5!`;
+                        statusEl.innerText = `Rolled ${roll}. Advanced to checkpoint ${progressSteps}/5!`;
                     }
                 }
                 rollBtn.disabled = false;
