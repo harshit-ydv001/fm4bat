@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Real Vs Bot Match</title>
+    <title>Ludo Battle - Fixed Bot Turn</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -180,7 +180,6 @@
     </div>
 
     <script>
-        // Randomly assign a realistic opponent profile
         const bots = [
             { name: "Rahul_99", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" },
             { name: "Priya_King", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" },
@@ -313,7 +312,7 @@
                 oppCard.classList.add('active-turn');
                 statusEl.innerText = `${chosenBot.name}'s turn...`;
                 rollBtn.disabled = true;
-                setTimeout(botTurn, 1200);
+                setTimeout(botTurn, 1000);
             }
         }
 
@@ -369,10 +368,10 @@
 
             if (movableCount === 0) {
                 statusEl.innerText = `Rolled ${currentRoll}. No valid moves! Passing turn.`;
-                setTimeout(switchTurn, 1500);
+                setTimeout(switchTurn, 1200);
             } else if (movableCount === 1) {
                 statusEl.innerText = `Rolled ${currentRoll}. Moving commando...`;
-                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll, 'user'), 400);
+                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll, 'user'), 300);
             } else {
                 statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
                 isWaitingForMove = true;
@@ -387,11 +386,11 @@
                 let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
 
                 if (validTokens.length === 0) {
-                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No valid moves!`;
-                    setTimeout(switchTurn, 1500);
+                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves! Passing turn.`;
+                    setTimeout(switchTurn, 1200); // Automatically switch turn back to user!
                 } else {
                     let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
-                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 800);
+                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 600);
                 }
             });
         }
@@ -430,7 +429,7 @@
                     clearInterval(interval);
                     finishMove(t, player);
                 }
-            }, 250);
+            }, 200);
         }
 
         function finishMove(t, player) {
@@ -448,7 +447,7 @@
                 playSound('win');
                 let winMsg = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : `😞 ${chosenBot.name} WON THE BATTLE! 😞`;
                 statusEl.innerText = winMsg;
-                setTimeout(() => window.location.href = "/dashboard", 3500);
+                setTimeout(() => window.location.href = "/dashboard", 3000);
                 return;
             }
 
@@ -457,10 +456,10 @@
                 if (player === 'user') {
                     rollBtn.disabled = false;
                 } else {
-                    setTimeout(botTurn, 1500);
+                    setTimeout(botTurn, 1000); // Bot gets another turn on 6
                 }
             } else {
-                setTimeout(switchTurn, 1200);
+                setTimeout(switchTurn, 1000);
             }
         }
 
