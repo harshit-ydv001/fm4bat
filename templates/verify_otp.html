@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - fm4bat</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0e14; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .auth-card { width: 100%; max-width: 400px; background: #141822; border: 2px solid #2a2f40; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .brand-title { font-size: 20px; font-weight: 900; color: #34d399; text-align: center; margin-bottom: 15px; }
+        .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 11px; color: #94a3b8; font-weight: bold; }
+        .form-group input { background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 13px; outline: none; }
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #34d399 0%, #059669 100%); color: #fff; border: none; padding: 11px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .mock-box { background: #1c212e; border: 1px dashed #34d399; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-size: 13px; color: #34d399; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="brand-title">🔒 OTP Verification</div>
+        {% if mock_otp %}
+        <div class="mock-box">Your Verification OTP: <strong>{{ mock_otp }}</strong></div>
+        {% endif %}
+        <form action="/verify-otp-action" method="POST">
+            <input type="hidden" name="identifier" value="{{ identifier }}">
+            <div class="form-group">
+                <label>Enter 4-Digit OTP</label>
+                <input type="text" name="otp" required placeholder="Enter OTP">
+            </div>
+            <button type="submit" class="submit-btn">Verify & Register</button>
+        </form>
+    </div>
+</body>
+</html>

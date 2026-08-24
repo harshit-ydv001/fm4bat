@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 import sqlite3
 
 from fastapi import FastAPI, Form, Request, WebSocket
@@ -16,6 +17,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(crash_router)
 
 templates = Jinja2Templates(directory="templates")
+
+# Temporary store for OTP verification
+otp_store = {}
 
 # Initialize SQLite Database for Permanent User Storage
 def init_db():
@@ -43,7 +47,6 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def root_login(request: Request):
-    # Session cookie check hata diya hai taaki website band karke kholne par hamesha login page hi aaye
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -58,7 +61,6 @@ async def login_user(identifier: str = Form(...), password: str = Form(...)):
 
     if row and row[1] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
-        # Session cookie (max_age hata diya hai, ab browser band karte hi session expire ho jayega)
         response.set_cookie(key="session_user", value=row[0])
         return response
         
@@ -74,25 +76,51 @@ async def signup_user(
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
-    # Check if username already exists
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         conn.close()
         return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
-    # Check if email/identifier already exists (Ek Gmail se ek hi account restriction)
     cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
     if cursor.fetchone():
         conn.close()
         return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
 
-    cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", (identifier, username, password))
-    conn.commit()
+    # Generate OTP for verification
+    generated_otp = str(random.randint(1000, 9999))
+    otp_store[identifier] = {
+        "username": username,
+        "identifier": identifier,
+        "password": password,
+        "otp": generated_otp
+    }
     conn.close()
 
-    response = RedirectResponse(url="/dashboard", status_code=303)
-    response.set_cookie(key="session_user", value=username)
-    return response
+    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&mock_otp={generated_otp}", status_code=303)
+
+
+@app.get("/verify-otp", response_class=HTMLResponse)
+async def verify_otp_page(request: Request, identifier: str, mock_otp: str = ""):
+    return templates.TemplateResponse("verify_otp.html", {"request": request, "identifier": identifier, "mock_otp": mock_otp})
+
+
+@app.post("/verify-otp-action")
+async def verify_otp_action(identifier: str = Form(...), otp: str = Form(...)):
+    user_data = otp_store.get(identifier)
+    if user_data and user_data["otp"] == otp:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", 
+                       (user_data["identifier"], user_data["username"], user_data["password"]))
+        conn.commit()
+        conn.close()
+        
+        del otp_store[identifier]
+        response = RedirectResponse(url="/dashboard", status_code=303)
+        response.set_cookie(key="session_user", value=user_data["username"])
+        return response
+    
+    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&error=InvalidOTP", status_code=303)
 
 
 @app.post("/forgot-password")
