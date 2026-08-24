@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - 1 Token Fast Edition</title>
+    <title>Ludo Battle - Pro Fast Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -51,18 +51,23 @@
 
         .inner-box {
             width: 100%; height: 100%; background: #fff; border-radius: 8px; border: 2px solid rgba(0,0,0,0.1);
-            display: flex; align-items: center; justify-content: center;
+            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
+            padding: 6px; gap: 4px; align-items: center; justify-items: center;
         }
         
         .token {
-            width: 32px; height: 32px; background: #222; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 16px;
+            width: 20px; height: 20px; background: #222; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 10px;
             border: 2px solid #fff; cursor: not-allowed; z-index: 10;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4); opacity: 0.5;
+        }
+        
+        .token.active-playing-token {
+            width: 26px; height: 26px; font-size: 14px; opacity: 1; z-index: 20;
         }
         
         .token.red-token { background: #e74c3c; }
-        .token.green-token { background: #2ecc71; }
+        .token.yellow-token { background: #f1c40f; }
         
         .token.movable {
             cursor: pointer; box-shadow: 0 0 14px 4px #00ffcc; transform: scale(1.25); border-color: #00ffcc; animation: pulse 1s infinite;
@@ -93,7 +98,7 @@
         .cell.blue-home-col { background: #3498db; }
         
         .cell.red-start-cell { background: #e74c3c; color: #fff; }
-        .cell.green-start-cell { background: #2ecc71; color: #fff; }
+        .cell.yellow-start-cell { background: #f1c40f; color: #111; }
 
         .control-panel {
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
@@ -147,7 +152,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (1-TOKEN FAST)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (PRO OPPOSITE)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -156,7 +161,7 @@
             <div class="player-card" id="opp-card">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
                 <div class="player-info">
-                    <span class="player-name" id="opp-name">Rahul_99</span>
+                    <span class="player-name" id="opp-name">Rahul_99 (Yellow)</span>
                     <span class="player-coins">Online</span>
                 </div>
                 <div class="mini-dice" id="opp-mini-dice">🎲</div>
@@ -174,24 +179,30 @@
 
         <div class="board" id="ludo-board">
             <div class="base-green" id="green-base-area">
-                <div class="inner-box" id="green-inner-box">
-                    <div class="token green-token" id="green-token">♟️</div>
+                <div class="inner-box">
+                    <div class="token">♟️</div><div class="token">♟️</div><div class="token">♟️</div><div class="token">♟️</div>
                 </div>
             </div>
             <div class="base-yellow" id="yellow-base-area">
-                <div class="inner-box">
-                    <div class="token" style="background:#f1c40f;">♟️</div>
+                <div class="inner-box" id="yellow-inner-box">
+                    <div class="token yellow-token">♟️</div>
+                    <div class="token yellow-token">♟️</div>
+                    <div class="token yellow-token">♟️</div>
+                    <div class="token yellow-token active-playing-token" id="yellow-token">♟️</div>
                 </div>
             </div>
             <div class="center-home"><div class="trophy-icon">🏆</div></div>
             <div class="base-blue" id="blue-base-area">
                 <div class="inner-box">
-                    <div class="token" style="background:#3498db;">♟️</div>
+                    <div class="token">♟️</div><div class="token">♟️</div><div class="token">♟️</div><div class="token">♟️</div>
                 </div>
             </div>
             <div class="base-red" id="red-base-area">
                 <div class="inner-box" id="red-inner-box">
-                    <div class="token red-token" id="red-token">♟️</div>
+                    <div class="token red-token">♟️</div>
+                    <div class="token red-token">♟️</div>
+                    <div class="token red-token">♟️</div>
+                    <div class="token red-token active-playing-token" id="red-token">♟️</div>
                 </div>
             </div>
         </div>
@@ -246,7 +257,7 @@
 
         const botsList = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
         let chosenBotName = botsList[Math.floor(Math.random() * botsList.length)];
-        document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
+        document.getElementById("opp-name").innerText = chosenBotName + " (Yellow)";
 
         const ludoBoard = document.getElementById('ludo-board');
         const safeCoords = [[8,2], [2,8], [8,14], [14,8]];
@@ -260,7 +271,7 @@
                     
                     if(safeCoords.some(coord => coord[0] === r && coord[1] === c)) cell.classList.add('safe-star');
                     if(r === 14 && c === 7) cell.classList.add('red-start-cell');
-                    if(r === 7 && c === 2) cell.classList.add('green-start-cell');
+                    if(r === 2 && c === 9) cell.classList.add('yellow-start-cell');
                     
                     if(r >= 10 && c === 8 && r <= 14) cell.classList.add('red-home-col');
                     if(r === 8 && c >= 2 && c <= 6) cell.classList.add('green-home-col');
@@ -273,6 +284,7 @@
             }
         }
 
+        // Red Path (Starts at [14,7])
         const redPathCoords = [
             [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
             [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
@@ -281,17 +293,33 @@
             [14,8], [13,8], [12,8], [11,8], [10,8], [9,8]
         ];
 
-        const greenPathCoords = [
-            [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
-            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
+        // Yellow Path (Starts opposite at [2,9])
+        const yellowPathCoords = [
+            [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
             [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], [15,8],
-            [15,7], [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
-            [7,1], [8,1], [8,2], [8,3], [8,4], [8,5], [8,6]
+            [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1], [7,1],
+            [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8], [1,9],
+            [2,8], [3,8], [4,8], [5,8], [6,8], [7,8]
         ];
 
-        // Single Token Object for each player
-        let redToken = { id: 'red-token', pos: -1, done: false };
-        let greenToken = { id: 'green-token', pos: -1, done: false };
+        // Tokens already pre-opened at start position (pos = 0)
+        let redToken = { id: 'red-token', pos: 0, done: false };
+        let yellowToken = { id: 'yellow-token', pos: 0, done: false };
+
+        // Place initial tokens on board at start positions
+        document.addEventListener("DOMContentLoaded", () => {
+            let redEl = document.getElementById('red-token');
+            ludoBoard.appendChild(redEl);
+            redEl.style.gridRow = redPathCoords[0][0];
+            redEl.style.gridColumn = redPathCoords[0][1];
+            redEl.innerText = "🚀";
+
+            let yellowEl = document.getElementById('yellow-token');
+            ludoBoard.appendChild(yellowEl);
+            yellowEl.style.gridRow = yellowPathCoords[0][0];
+            yellowEl.style.gridColumn = yellowPathCoords[0][1];
+            yellowEl.innerText = "🛸";
+        });
 
         let playerTurn = 'user'; 
         let activeDiceVal = 0;
@@ -346,18 +374,18 @@
         }
 
         function evaluateGameTurn(player) {
-            let token = (player === 'user') ? redToken : greenToken;
-            let canMove = !token.done && ((token.pos === -1 && activeDiceVal === 6) || (token.pos >= 0 && token.pos + activeDiceVal <= 56));
+            let token = (player === 'user') ? redToken : yellowToken;
+            let canMove = !token.done && (token.pos + activeDiceVal <= 56);
 
             if (!canMove) {
-                document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. No moves!`;
+                document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. Exceeds home!`;
                 setTimeout(() => switchPlayerTurn(player, false), 1500);
             } else if (player === 'bot') {
                 moveTokenSteps(token.id, activeDiceVal, 'bot');
             } else {
                 document.getElementById("game-status").innerText = `Rolled ${activeDiceVal}. Click your token!`;
                 isWaitingForTokenClick = true;
-                document.getElementById(token.id).classList.add('movable');
+                document.getElementById('red-token').classList.add('movable');
             }
         }
 
@@ -371,21 +399,9 @@
         });
 
         function moveTokenSteps(tokenId, stepsLeft, player) {
-            let token = (player === 'user') ? redToken : greenToken;
-            let pathList = (player === 'user') ? redPathCoords : greenPathCoords;
+            let token = (player === 'user') ? redToken : yellowToken;
+            let pathList = (player === 'user') ? redPathCoords : yellowPathCoords;
             let el = document.getElementById(tokenId);
-
-            if (token.pos === -1) {
-                token.pos = 0;
-                ludoBoard.appendChild(el);
-                el.innerText = player === 'user' ? "🚀" : "🛸";
-                playStepSound();
-                el.style.gridRow = pathList[token.pos][0];
-                el.style.gridColumn = pathList[token.pos][1];
-                checkForCaptures(token, player);
-                checkTurnCompletion(token, player);
-                return;
-            }
 
             let stepTimer = setInterval(() => {
                 if (stepsLeft > 0 && token.pos < 56) {
@@ -403,28 +419,25 @@
         }
 
         function checkForCaptures(activeToken, player) {
-            if (activeToken.pos === -1 || activeToken.pos >= 50 || activeToken.done) return;
+            if (activeToken.pos >= 50 || activeToken.done) return;
             
-            let currentPath = (player === 'user') ? redPathCoords : greenPathCoords;
+            let currentPath = (player === 'user') ? redPathCoords : yellowPathCoords;
             let currentCoords = currentPath[activeToken.pos];
 
             let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
             if (isSafe) return;
 
-            let oppToken = (player === 'user') ? greenToken : redToken;
-            let oppPath = (player === 'user') ? greenPathCoords : redPathCoords;
+            let oppToken = (player === 'user') ? yellowToken : redToken;
+            let oppPath = (player === 'user') ? yellowPathCoords : redPathCoords;
 
-            if (oppToken.pos >= 0 && oppToken.pos < 50 && !oppToken.done) {
+            if (oppToken.pos < 50 && !oppToken.done) {
                 let oppCoords = oppPath[oppToken.pos];
                 if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
-                    oppToken.pos = -1;
+                    // Capture opponent! Send back to start position (pos 0)
+                    oppToken.pos = 0;
                     let oppEl = document.getElementById(oppToken.id);
-                    oppEl.innerText = "♟️";
-                    if (player === 'user') {
-                        document.getElementById("green-inner-box").appendChild(oppEl);
-                    } else {
-                        document.getElementById("red-inner-box").appendChild(oppEl);
-                    }
+                    oppEl.style.gridRow = oppPath[0][0];
+                    oppEl.style.gridColumn = oppPath[0][1];
                     document.getElementById("game-status").innerText = "Captured opponent! Extra turn!";
                 }
             }
