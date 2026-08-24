@@ -126,8 +126,8 @@
         }
 
         .bet-row.real-user-highlight-row {
-            background: rgba(52, 211, 153, 0.18) !important;
-            border-left: 3px solid #34d399 !important;
+            background: rgba(231, 76, 60, 0.22) !important;
+            border-left: 3px solid #e74c3c !important;
             font-weight: bold;
         }
 
@@ -741,29 +741,50 @@
             let keys = Object.keys(latestBetsData);
             countEl.innerText = keys.length;
 
-            let myBets = [];
+            let realUserBets = [];
             let botBets = [];
 
             keys.forEach(uid => {
                 let bet = latestBetsData[uid];
-                let isMe = bet.username.startsWith(currentUsername);
-                if (isMe) {
-                    myBets.push(bet);
+                
+                // Bot list check to distinguish real players from standard bots
+                const botNamesList = [
+                    "Aman_King", "Rahul_99", "Priya_Pro", "Rohit_x", "Neha_Star", "Vikash_07", "Kunal_9", 
+                    "Karan_76", "Manish_57", "Anjali_97", "Akash_80", "Deepak_88", "Sahil_37", "Priya_77", 
+                    "Manish_90", "Divya_39", "Simran_98", "Kunal_27", "Anjali_19", "Alok_87", "Manish_60", 
+                    "Deepak_83", "Amit_58", "Kunal_21", "Rohan_42", "Rahul_38", "Vikram_82", "Sahil_30", 
+                    "Rohit_62", "Vikas_91", "Rohit_34", "Vikas_84", "Kunal_70", "Pooja_72"
+                ];
+                
+                let cleanName = bet.username.replace(" [2]", "");
+                let isBot = botNamesList.includes(cleanName);
+
+                if (!isBot) {
+                    realUserBets.push(bet); // All real players (like you, arpitking, etc.)
                 } else {
                     botBets.push(bet);
                 }
             });
 
-            // Real user / My bets first (Top), then bots below
-            let displayBets = currentTabFilter === 'my' ? myBets : [...myBets, ...botBets];
+            // Real users first (Top, Red highlighted), then bots below
+            let displayBets = currentTabFilter === 'my' ? realUserBets.filter(b => b.username.startsWith(currentUsername)) : [...realUserBets, ...botBets];
 
             displayBets.forEach(bet => {
                 let row = document.createElement("div");
                 let isMe = bet.username.startsWith(currentUsername);
                 
+                let cleanName = bet.username.replace(" [2]", "");
+                let isRealUser = !([
+                    "Aman_King", "Rahul_99", "Priya_Pro", "Rohit_x", "Neha_Star", "Vikash_07", "Kunal_9", 
+                    "Karan_76", "Manish_57", "Anjali_97", "Akash_80", "Deepak_88", "Sahil_37", "Priya_77", 
+                    "Manish_90", "Divya_39", "Simran_98", "Kunal_27", "Anjali_19", "Alok_87", "Manish_60", 
+                    "Deepak_83", "Amit_58", "Kunal_21", "Rohan_42", "Rahul_38", "Vikram_82", "Sahil_30", 
+                    "Rohit_62", "Vikas_91", "Rohit_34", "Vikas_84", "Kunal_70", "Pooja_72"
+                ].includes(cleanName));
+                
                 let rowClass = "bet-row";
-                if (isMe) {
-                    rowClass += " real-user-highlight-row"; // Special green top highlight for real user
+                if (isRealUser) {
+                    rowClass += " real-user-highlight-row"; // Red highlight for all real players at top
                 }
                 if (bet.cashed_out) rowClass += " cashed-row";
                 row.className = rowClass;
@@ -774,7 +795,7 @@
                     : `-`;
 
                 row.innerHTML = `
-                    <span class="col-user"><div class="user-avatar" style="${isMe ? 'background: #2ecc71; color: #111;' : ''}">${avatarLetter}</div> <b style="${isMe ? 'color: #34d399;' : ''}">${bet.username} ${isMe ? '(You)' : ''}</b></span>
+                    <span class="col-user"><div class="user-avatar" style="${isRealUser ? 'background: #e74c3c; color: #fff;' : ''}">${avatarLetter}</div> <b style="${isRealUser ? 'color: #ff6b6b;' : ''}">${bet.username} ${isMe ? '(You)' : ''}</b></span>
                     <span class="col-bet">${bet.amount.toFixed(2)} 🪙</span>
                     <span class="col-cashout">${cashoutDisplay}</span>
                 `;
