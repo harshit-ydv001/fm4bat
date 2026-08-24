@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Pro Fast Edition</title>
+    <title>Ludo Battle - Pro Tough Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
             background-color: #0b0e14; color: #fff;
             display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; padding-bottom: 20px;
+            min-height: 100vh; padding-bottom: 20px; overflow-x: hidden;
         }
         .navbar {
             width: 100%; max-width: 480px; background: #12151c; display: flex;
@@ -19,7 +19,7 @@
         
         .ludo-container {
             width: 100%; max-width: 480px; background: #141822;
-            border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px;
+            border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px; position: relative;
         }
 
         .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
@@ -147,16 +147,35 @@
             box-shadow: 0 4px 10px rgba(217, 119, 6, 0.4);
         }
         .roll-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Overlay popup for Win/Loss */
+        #result-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 100; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .result-title { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .result-sub { font-size: 14px; color: #94a3b8; }
+        
+        canvas#confetti-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 90;
+        }
     </style>
 </head>
 <body>
 
+    <canvas id="confetti-canvas"></canvas>
+
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (PRO OPPOSITE)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (TOUGH PRO)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
+        <div id="result-overlay">
+            <div class="result-title" id="res-title">🎉 YOU WON!</div>
+            <div class="result-sub" id="res-desc">Redirecting to Lobby...</div>
+        </div>
+
         <div class="players-row">
             <div class="player-card" id="opp-card">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
@@ -255,6 +274,40 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.06);
         }
 
+        function playWinFanfare() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+                }, idx * 150);
+            });
+        }
+
+        function playLoseSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const notes = [300, 260, 220, 180];
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.35);
+                }, idx * 200);
+            });
+        }
+
         const botsList = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
         let chosenBotName = botsList[Math.floor(Math.random() * botsList.length)];
         document.getElementById("opp-name").innerText = chosenBotName + " (Yellow)";
@@ -284,7 +337,6 @@
             }
         }
 
-        // Red Path (Starts at [14,7])
         const redPathCoords = [
             [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
             [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
@@ -293,7 +345,6 @@
             [14,8], [13,8], [12,8], [11,8], [10,8], [9,8]
         ];
 
-        // Yellow Path (Starts opposite at [2,9])
         const yellowPathCoords = [
             [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
             [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], [15,8],
@@ -302,11 +353,9 @@
             [2,8], [3,8], [4,8], [5,8], [6,8], [7,8]
         ];
 
-        // Tokens already pre-opened at start position (pos = 0)
         let redToken = { id: 'red-token', pos: 0, done: false };
         let yellowToken = { id: 'yellow-token', pos: 0, done: false };
 
-        // Place initial tokens on board at start positions
         document.addEventListener("DOMContentLoaded", () => {
             let redEl = document.getElementById('red-token');
             ludoBoard.appendChild(redEl);
@@ -433,7 +482,6 @@
             if (oppToken.pos < 50 && !oppToken.done) {
                 let oppCoords = oppPath[oppToken.pos];
                 if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
-                    // Capture opponent! Send back to start position (pos 0)
                     oppToken.pos = 0;
                     let oppEl = document.getElementById(oppToken.id);
                     oppEl.style.gridRow = oppPath[0][0];
@@ -443,14 +491,38 @@
             }
         }
 
+        function triggerWinEffect() {
+            playWinFanfare();
+            let overlay = document.getElementById("result-overlay");
+            document.getElementById("res-title").innerText = "🎉 YOU WON!";
+            document.getElementById("res-title").style.color = "#34d399";
+            document.getElementById("res-desc").innerText = "Fantastic play! Returning to lobby...";
+            overlay.style.display = "flex";
+            startConfetti();
+            setTimeout(() => window.location.href = "/dashboard", 3500);
+        }
+
+        function triggerLoseEffect() {
+            playLoseSound();
+            let overlay = document.getElementById("result-overlay");
+            document.getElementById("res-title").innerText = "💥 DEFEAT!";
+            document.getElementById("res-title").style.color = "#ef4444";
+            document.getElementById("res-desc").innerText = `${chosenBotName} won the match! Returning to lobby...`;
+            overlay.style.display = "flex";
+            setTimeout(() => window.location.href = "/dashboard", 3500);
+        }
+
         function checkTurnCompletion(token, player) {
             let el = document.getElementById(token.id);
 
             if (token.pos === 56) {
                 token.done = true;
                 el.innerText = "👑";
-                document.getElementById("game-status").innerText = player === 'user' ? "🎉 YOU WON!" : `😞 ${chosenBotName} WON!`;
-                setTimeout(() => window.location.href = "/dashboard", 3000);
+                if (player === 'user') {
+                    triggerWinEffect();
+                } else {
+                    triggerLoseEffect();
+                }
                 return;
             }
 
@@ -485,6 +557,33 @@
                 document.getElementById("user-mini-dice").innerText = "🎲";
                 setTimeout(runBotTurn, delayed ? 1000 : 200);
             }
+        }
+
+        // Simple Fireworks/Confetti Generator
+        function startConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            for(let i=0; i<150; i++) {
+                particles.push({
+                    x: canvas.width/2, y: canvas.height/2,
+                    vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12 - 4,
+                    color: ['#34d399', '#f1c40f', '#e74c3c', '#3498db'][Math.floor(Math.random()*4)],
+                    size: Math.random() * 6 + 4, alpha: 1
+                });
+            }
+            function loop() {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.alpha -= 0.01;
+                    ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(p.alpha, 0);
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+                requestAnimationFrame(loop);
+            }
+            loop();
         }
     </script>
 </body>
