@@ -18,7 +18,7 @@ app.include_router(crash_router)
 
 templates = Jinja2Templates(directory="templates")
 
-# Temporary store for OTP verification
+# Temporary store for OTP verification (Signup & Forgot Password)
 otp_store = {}
 
 # Initialize SQLite Database for Permanent User Storage
@@ -86,9 +86,9 @@ async def signup_user(
         conn.close()
         return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
 
-    # Generate OTP for verification
     generated_otp = str(random.randint(1000, 9999))
     otp_store[identifier] = {
+        "action": "signup",
         "username": username,
         "identifier": identifier,
         "password": password,
@@ -96,49 +96,68 @@ async def signup_user(
     }
     conn.close()
 
-    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&mock_otp={generated_otp}", status_code=303)
+    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&mock_otp={generated_otp}&type=signup", status_code=303)
 
 
-@app.get("/verify-otp", response_class=HTMLResponse)
-async def verify_otp_page(request: Request, identifier: str, mock_otp: str = ""):
-    return templates.TemplateResponse("verify_otp.html", {"request": request, "identifier": identifier, "mock_otp": mock_otp})
-
-
-@app.post("/verify-otp-action")
-async def verify_otp_action(identifier: str = Form(...), otp: str = Form(...)):
-    user_data = otp_store.get(identifier)
-    if user_data and user_data["otp"] == otp:
-        conn = sqlite3.connect("users.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", 
-                       (user_data["identifier"], user_data["username"], user_data["password"]))
-        conn.commit()
-        conn.close()
-        
-        del otp_store[identifier]
-        response = RedirectResponse(url="/dashboard", status_code=303)
-        response.set_cookie(key="session_user", value=user_data["username"])
-        return response
-    
-    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&error=InvalidOTP", status_code=303)
-
-
-@app.post("/forgot-password")
-async def forgot_password(identifier: str = Form(...), password: str = Form(...)):
+@app.post("/forgot-password-request")
+async def forgot_password_request(identifier: str = Form(...), password: str = Form(...)):
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
     cursor.execute("SELECT identifier FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
     row = cursor.fetchone()
-
-    if row:
-        cursor.execute("UPDATE users SET password = ? WHERE identifier = ?", (password, row[0]))
-        conn.commit()
-        conn.close()
-        return RedirectResponse(url="/?success=PasswordReset", status_code=303)
-
     conn.close()
-    return RedirectResponse(url="/?error=UserNotFound", status_code=303)
+
+    if not row:
+        return RedirectResponse(url="/?error=UserNotFound", status_code=303)
+
+    # Use the actual registered identifier
+    real_identifier = row[0]
+    generated_otp = str(random.randint(1000, 9999))
+    
+    otp_store[real_identifier] = {
+        "action": "forgot",
+        "identifier": real_identifier,
+        "password": password,
+        "otp": generated_otp
+    }
+
+    return RedirectResponse(url=f"/verify-otp?identifier={real_identifier}&mock_otp={generated_otp}&type=forgot", status_code=303)
+
+
+@app.get("/verify-otp", response_class=HTMLResponse)
+async def verify_otp_page(request: Request, identifier: str, mock_otp: str = "", type: str = "signup"):
+    return templates.TemplateResponse("verify_otp.html", {"request": request, "identifier": identifier, "mock_otp": mock_otp, "type": type})
+
+
+@app.post("/verify-otp-action")
+async def verify_otp_action(identifier: str = Form(...), otp: str = Form(...), type: str = Form(...)):
+    user_data = otp_store.get(identifier)
+    
+    if user_data and user_data["otp"] == otp:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        
+        if type == "signup":
+            cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", 
+                           (user_data["identifier"], user_data["username"], user_data["password"]))
+            conn.commit()
+            conn.close()
+            del otp_store[identifier]
+            
+            response = RedirectResponse(url="/dashboard", status_code=303)
+            response.set_cookie(key="session_user", value=user_data["username"])
+            return response
+            
+        elif type == "forgot":
+            cursor.execute("UPDATE users SET password = ? WHERE identifier = ?", (user_data["password"], user_data["identifier"]))
+            conn.commit()
+            conn.close()
+            del otp_store[identifier]
+            
+            return RedirectResponse(url="/?success=PasswordReset", status_code=303)
+    
+    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&error=InvalidOTP&type={type}", status_code=303)
 
 
 @app.get("/dashboard", response_class=HTMLResponse)

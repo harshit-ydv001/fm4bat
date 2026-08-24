@@ -20,15 +20,16 @@
     <div class="auth-card">
         <div class="brand-title">🔒 OTP Verification</div>
         {% if mock_otp %}
-        <div class="mock-box">Your Verification OTP: <strong>{{ mock_otp }}</strong></div>
+        <div class="mock-box">Your OTP: <strong>{{ mock_otp }}</strong></div>
         {% endif %}
         <form action="/verify-otp-action" method="POST">
             <input type="hidden" name="identifier" value="{{ identifier }}">
+            <input type="hidden" name="type" value="{{ type }}">
             <div class="form-group">
                 <label>Enter 4-Digit OTP</label>
                 <input type="text" name="otp" required placeholder="Enter OTP">
             </div>
-            <button type="submit" class="submit-btn">Verify & Register</button>
+            <button type="submit" class="submit-btn">Verify & Proceed</button>
         </form>
     </div>
 </body>
