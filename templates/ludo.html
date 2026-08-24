@@ -32,29 +32,17 @@
         }
 
         .players-row {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px;
         }
         .player-card {
-            background: #1c212e;
-            border: 1px solid #374151;
-            border-radius: 8px;
-            padding: 5px 8px;
-            width: 48%;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
         }
-        .player-avatar {
-            width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f;
-        }
+        .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
         .player-info { display: flex; flex-direction: column; font-size: 10px; }
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
-        /* Full 15x15 Classic Ludo Board Grid Layout */
+        /* Classic 15x15 Ludo Board Grid */
         .board {
             width: 360px; height: 360px;
             background: #ffffff;
@@ -68,54 +56,59 @@
         }
 
         /* 4 Corner Bases */
-        .base-green { grid-column: 1 / 7; grid-row: 1 / 7; background: #2ecc71; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
-        .base-yellow { grid-column: 10 / 16; grid-row: 1 / 7; background: #f1c40f; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
-        .base-red { grid-column: 1 / 7; grid-row: 10 / 16; background: #e74c3c; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
-        .base-blue { grid-column: 10 / 16; grid-row: 10 / 16; background: #3498db; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; }
+        .base-green { grid-column: 1 / 7; grid-row: 1 / 7; background: #2ecc71; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-yellow { grid-column: 10 / 16; grid-row: 1 / 7; background: #f1c40f; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-red { grid-column: 1 / 7; grid-row: 10 / 16; background: #e74c3c; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-blue { grid-column: 10 / 16; grid-row: 10 / 16; background: #3498db; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
 
         .inner-box {
             width: 100%; height: 100%; background: #fff; border-radius: 6px;
             display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
             padding: 8px; gap: 8px; align-items: center; justify-items: center;
         }
-        .token-circle {
-            width: 26px; height: 26px; background: #e0e0e0; border-radius: 50%;
+        
+        /* Token Styling */
+        .token {
+            width: 24px; height: 24px; background: #222; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; font-size: 14px;
-            border: 2px solid #999; cursor: pointer;
+            border: 2px solid #999; cursor: not-allowed;
+            place-self: center; z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        /* Playable Red Tokens Glow Effect */
+        .token.red-token { border-color: #fff; background: #b93d30; }
+        .token.movable {
+            cursor: pointer;
+            box-shadow: 0 0 12px 4px #00ffcc;
+            transform: scale(1.15);
+            border-color: #00ffcc;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.15); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1.15); }
         }
 
-        /* Center Home */
+        /* Center Trophy Home */
         .center-home {
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
-            display: flex; justify-content: center; align-items: center; font-size: 24px;
-            border: 2px solid #111;
+            display: flex; justify-content: center; align-items: center; font-size: 26px;
+            border: 2px solid #111; z-index: 1;
         }
 
-        /* Track Grid Cells */
+        /* Track Grid Cells (Generated via JS to ensure 100% perfection) */
         .cell {
-            background: #fff;
-            border: 1px solid #dcdcdc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 8px;
-            font-weight: bold;
+            background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold;
         }
-        .cell-green { background: #2ecc71; color: #fff; }
-        .cell-yellow { background: #f1c40f; color: #000; }
-        .cell-red { background: #e74c3c; color: #fff; }
-        .cell-blue { background: #3498db; color: #fff; }
+        .green-cell { background: #2ecc71; color: #fff; }
+        .yellow-cell { background: #f1c40f; color: #000; }
+        .red-cell { background: #e74c3c; color: #fff; }
+        .blue-cell { background: #3498db; color: #fff; }
 
         .control-panel {
-            width: 100%; max-width: 480px;
-            background: #12151c;
-            padding: 12px 15px;
-            margin-top: 8px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #1e222d;
+            width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         .dice-box {
             width: 50px; height: 50px; background: #fff; color: #111; font-size: 24px; font-weight: bold; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(255,255,255,0.15);
@@ -124,257 +117,269 @@
         
         .roll-btn {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
         }
         .roll-btn:active { transform: scale(0.95); }
+        .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (ARMY)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (PLAYABLE)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
-        <!-- Players Header -->
+        <!-- Top Players (Bots/Opponents) -->
         <div class="players-row">
             <div class="player-card">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Bhoomi">
-                <div class="player-info">
-                    <span class="player-name">Bhoomi</span>
-                    <span class="player-coins">🪙 9,010</span>
-                </div>
+                <div class="player-info"><span class="player-name">Bhoomi (Green)</span><span class="player-coins">🪙 9,010</span></div>
             </div>
             <div class="player-card">
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="player-avatar" alt="Irafan">
-                <div class="player-info">
-                    <span class="player-name">Irafan</span>
-                    <span class="player-coins">🪙 1,010</span>
-                </div>
+                <div class="player-info"><span class="player-name">Irafan (Yellow)</span><span class="player-coins">🪙 1,010</span></div>
             </div>
         </div>
 
-        <!-- 100% Complete Classic Ludo Board Grid -->
-        <div class="board">
-            <!-- Bases -->
+        <!-- Classic Ludo Board -->
+        <div class="board" id="ludo-board">
+            <!-- 4 Corner Bases -->
             <div class="base-green">
                 <div class="inner-box">
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
+                    <div class="token" style="background: #2ecc71;">🪖</div><div class="token" style="background: #2ecc71;">🪖</div>
+                    <div class="token" style="background: #2ecc71;">🪖</div><div class="token" style="background: #2ecc71;">🪖</div>
                 </div>
             </div>
-
             <div class="base-yellow">
                 <div class="inner-box">
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
+                    <div class="token" style="background: #f1c40f;">🪖</div><div class="token" style="background: #f1c40f;">🪖</div>
+                    <div class="token" style="background: #f1c40f;">🪖</div><div class="token" style="background: #f1c40f;">🪖</div>
                 </div>
             </div>
-
             <div class="center-home">🏆</div>
-
-            <div class="base-red">
-                <div class="inner-box">
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle" id="active-token">🚀</div>
-                </div>
-            </div>
-
             <div class="base-blue">
                 <div class="inner-box">
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
-                    <div class="token-circle">🪖</div>
+                    <div class="token" style="background: #3498db;">🪖</div><div class="token" style="background: #3498db;">🪖</div>
+                    <div class="token" style="background: #3498db;">🪖</div><div class="token" style="background: #3498db;">🪖</div>
                 </div>
             </div>
-
-            <!-- COMPLETE TRACK CELLS (ALL ARMS & HOME LANES) -->
-            <!-- Top Arm (Cols 7-9, Rows 1-6) -->
-            <div class="cell" style="grid-column: 7; grid-row: 1;"></div>
-            <div class="cell cell-green" style="grid-column: 8; grid-row: 1;" id="track-1">START</div>
-            <div class="cell" style="grid-column: 9; grid-row: 1;"></div>
-
-            <div class="cell cell-yellow" style="grid-column: 7; grid-row: 2;" id="track-2">⭐</div>
-            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 2;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 2;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 3;" id="track-3"></div>
-            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 3;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 3;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 4;" id="track-4"></div>
-            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 4;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 4;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 5;" id="track-5"></div>
-            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 5;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 5;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 6;"></div>
-            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 6;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 6;"></div>
-
-            <!-- Right Arm (Cols 10-15, Rows 7-9) -->
-            <div class="cell" style="grid-column: 10; grid-row: 7;"></div>
-            <div class="cell" style="grid-column: 11; grid-row: 7;"></div>
-            <div class="cell" style="grid-column: 12; grid-row: 7;"></div>
-            <div class="cell" style="grid-column: 13; grid-row: 7;"></div>
-            <div class="cell" style="grid-column: 14; grid-row: 7;" id="track-17">⭐</div>
-            <div class="cell" style="grid-column: 15; grid-row: 7;"></div>
-
-            <div class="cell cell-blue" style="grid-column: 10; grid-row: 8;"></div>
-            <div class="cell cell-blue" style="grid-column: 11; grid-row: 8;"></div>
-            <div class="cell cell-blue" style="grid-column: 12; grid-row: 8;"></div>
-            <div class="cell cell-blue" style="grid-column: 13; grid-row: 8;"></div>
-            <div class="cell cell-blue" style="grid-column: 14; grid-row: 8;"></div>
-            <div class="cell cell-blue" style="grid-column: 15; grid-row: 8;"></div>
-
-            <div class="cell" style="grid-column: 10; grid-row: 9;" id="track-18"></div>
-            <div class="cell" style="grid-column: 11; grid-row: 9;" id="track-19"></div>
-            <div class="cell" style="grid-column: 12; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 13; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 14; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 15; grid-row: 9;"></div>
-
-            <!-- Left Arm (Cols 1-6, Rows 7-9) -->
-            <div class="cell" style="grid-column: 1; grid-row: 7;"></div>
-            <div class="cell" style="grid-column: 2; grid-row: 7;" id="track-6">⭐</div>
-            <div class="cell" style="grid-column: 3; grid-row: 7;" id="track-7"></div>
-            <div class="cell" style="grid-column: 4; grid-row: 7;" id="track-8"></div>
-            <div class="cell" style="grid-column: 5; grid-row: 7;" id="track-9"></div>
-            <div class="cell" style="grid-column: 6; grid-row: 7;" id="track-10"></div>
-
-            <div class="cell cell-green" style="grid-column: 1; grid-row: 8;" id="track-15"></div>
-            <div class="cell cell-green" style="grid-column: 2; grid-row: 8;"></div>
-            <div class="cell cell-green" style="grid-column: 3; grid-row: 8;"></div>
-            <div class="cell cell-green" style="grid-column: 4; grid-row: 8;"></div>
-            <div class="cell cell-green" style="grid-column: 5; grid-row: 8;"></div>
-            <div class="cell cell-green" style="grid-column: 6; grid-row: 8;"></div>
-
-            <div class="cell" style="grid-column: 1; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 2; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 3; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 4; grid-row: 9;"></div>
-            <div class="cell" style="grid-column: 5; grid-row: 9;" id="track-11">⭐</div>
-            <div class="cell" style="grid-column: 6; grid-row: 9;" id="track-12"></div>
-
-            <!-- Bottom Arm (Cols 7-9, Rows 10-15) -->
-            <div class="cell" style="grid-column: 7; grid-row: 10;" id="track-13"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 10;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 10;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 11;" id="track-14"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 11;"></div>
-            <div class="cell cell-red" style="grid-column: 9; grid-row: 11;" id="track-16">⭐</div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 12;"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 12;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 12;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 13;"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 13;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 13;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 14;"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 14;"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 14;"></div>
-
-            <div class="cell" style="grid-column: 7; grid-row: 15;"></div>
-            <div class="cell cell-red" style="grid-column: 8; grid-row: 15;" id="track-max"></div>
-            <div class="cell" style="grid-column: 9; grid-row: 15;"></div>
+            
+            <!-- Red Base (Your Playable Tokens) -->
+            <div class="base-red" id="red-base-area">
+                <div class="inner-box" id="red-inner-box">
+                    <div class="token red-token" id="red-0">🪖</div>
+                    <div class="token red-token" id="red-1">🪖</div>
+                    <div class="token red-token" id="red-2">🪖</div>
+                    <div class="token red-token" id="red-3">🪖</div>
+                </div>
+            </div>
+            
+            <!-- Track boxes will be injected via JS to ensure 100% accuracy -->
         </div>
 
-        <!-- Bottom Players -->
+        <!-- Bottom Players (You & Bot) -->
         <div class="players-row" style="margin-top: 8px; margin-bottom: 0;">
             <div class="player-card" style="border-color: #34d399;">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="Guest_3">
-                <div class="player-info">
-                    <span class="player-name">Guest_3 (You)</span>
-                    <span class="player-coins">🪙 9,010</span>
-                </div>
+                <div class="player-info"><span class="player-name">Guest_3 (You - Red)</span><span class="player-coins">🪙 9,010</span></div>
             </div>
             <div class="player-card">
                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="player-avatar" alt="Rose">
-                <div class="player-info">
-                    <span class="player-name">Rose</span>
-                    <span class="player-coins">🪙 17,010</span>
-                </div>
+                <div class="player-info"><span class="player-name">Rose (Blue)</span><span class="player-coins">🪙 17,010</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Controls & Dice -->
+    <!-- Controls -->
     <div class="control-panel">
         <div class="dice-box" id="dice-value">🎲</div>
-        <div class="status-msg" id="game-status">Roll a 6 to start your track journey!</div>
+        <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
         <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
     </div>
 
     <script>
-        let currentStep = 0;
-        const maxSteps = 18;
+        // 1. Generate 100% accurate Track Board Grid
+        const board = document.getElementById('ludo-board');
+        for(let r = 1; r <= 15; r++) {
+            for(let c = 1; c <= 15; c++) {
+                // Check if cell belongs to the cross tracks
+                let isTrack = false;
+                if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
+                    (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
+                    isTrack = true;
+                }
+                
+                if (isTrack) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.gridRow = r; cell.style.gridColumn = c;
+                    
+                    // Add standard colors & stars
+                    if (r===7 && c===2) { cell.classList.add('green-cell'); cell.innerHTML = '⭐'; }
+                    else if (r===3 && c===7) { cell.innerHTML = '⭐'; } // Green safe
+                    else if (r===2 && c===9) { cell.classList.add('yellow-cell'); cell.innerHTML = '⭐'; }
+                    else if (r===7 && c===13) { cell.innerHTML = '⭐'; } // Yellow safe
+                    else if (r===9 && c===14) { cell.classList.add('blue-cell'); cell.innerHTML = '⭐'; }
+                    else if (r===13 && c===9) { cell.innerHTML = '⭐'; } // Blue safe
+                    else if (r===14 && c===7) { cell.classList.add('red-cell'); cell.innerHTML = '⭐'; }
+                    else if (r===9 && c===3) { cell.innerHTML = '⭐'; } // Red safe
+                    
+                    // Home Lanes
+                    else if (r===8 && c>=2 && c<=6) cell.classList.add('green-cell');
+                    else if (c===8 && r>=2 && r<=6) cell.classList.add('yellow-cell');
+                    else if (r===8 && c>=10 && c<=14) cell.classList.add('blue-cell');
+                    else if (c===8 && r>=10 && r<=14) cell.classList.add('red-cell');
+
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        // 2. Playable Logic for RED Tokens (Complete 57 Step Path mapped to grid [row, col])
+        const redPath = [
+            [14,7], [13,7], [12,7], [11,7], [10,7], // Up bottom arm
+            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], // Left on left arm
+            [8,1], // Up 1 step
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], // Right on left arm
+            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], // Up top arm
+            [1,8], // Right 1 step
+            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9], // Down top arm
+            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], // Right on right arm
+            [8,15], // Down 1 step
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], // Left on right arm
+            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], // Down bottom arm
+            [15,8], // Left 1 step
+            [14,8], [13,8], [12,8], [11,8], [10,8], // Up RED Home Lane
+            [9,8] // Center Home (Win)
+        ];
+
+        // Tokens state: -1 means in base. 0 to 56 is path position.
+        let tokens = [
+            { id: 'red-0', pos: -1, done: false },
+            { id: 'red-1', pos: -1, done: false },
+            { id: 'red-2', pos: -1, done: false },
+            { id: 'red-3', pos: -1, done: false }
+        ];
+
+        let currentRoll = 0;
+        let isWaitingForMove = false;
+
+        const diceEl = document.getElementById("dice-value");
+        const statusEl = document.getElementById("game-status");
+        const rollBtn = document.getElementById("roll-dice-btn");
+        const innerBox = document.getElementById("red-inner-box");
 
         function rollDice() {
-            const diceEl = document.getElementById("dice-value");
-            const statusEl = document.getElementById("game-status");
-            const rollBtn = document.getElementById("roll-dice-btn");
-            const token = document.getElementById("active-token");
-
+            if(isWaitingForMove) return;
             rollBtn.disabled = true;
-            let anim = setInterval(() => {
-                diceEl.innerText = Math.floor(Math.random() * 6) + 1;
-            }, 80);
+            statusEl.innerText = "Rolling...";
+
+            let anim = setInterval(() => { diceEl.innerText = Math.floor(Math.random() * 6) + 1; }, 80);
 
             setTimeout(() => {
                 clearInterval(anim);
-                let roll = Math.floor(Math.random() * 6) + 1;
-                diceEl.innerText = roll;
-
-                if (currentStep === 0) {
-                    if (roll === 6) {
-                        currentStep = 1;
-                        token.innerText = "";
-                        document.getElementById("track-1").innerHTML = "🚀";
-                        statusEl.innerText = `Rolled 6! Token entered the complete track!`;
-                    } else {
-                        statusEl.innerText = `Rolled ${roll}. Need a 6 to exit base!`;
-                    }
-                } else {
-                    let oldEl = currentStep === maxSteps ? document.getElementById("track-max") : document.getElementById(`track-${currentStep}`);
-                    if(oldEl) {
-                        oldEl.innerHTML = (currentStep === 1 ? "START" : "");
-                    }
-
-                    currentStep += roll;
-                    if (currentStep >= maxSteps) {
-                        currentStep = maxSteps;
-                        document.getElementById("track-max").innerHTML = "👑";
-                        statusEl.innerText = `🎉 Victory! Reached Home! Won 500 Coins!`;
-                        setTimeout(() => {
-                            window.location.href = "/dashboard";
-                        }, 1500);
-                    } else {
-                        let newEl = document.getElementById(`track-${currentStep}`);
-                        if(newEl) {
-                            newEl.innerHTML = "🚀";
-                        } else {
-                            document.getElementById("track-max").innerHTML = "🚀";
-                        }
-                        statusEl.innerText = `Rolled ${roll}. Moving along the full track boxes!`;
-                    }
-                }
-                rollBtn.disabled = false;
+                currentRoll = Math.floor(Math.random() * 6) + 1;
+                diceEl.innerText = currentRoll;
+                
+                checkMovableTokens();
             }, 600);
         }
+
+        function checkMovableTokens() {
+            let movableCount = 0;
+            let autoMoveTokenId = null;
+
+            tokens.forEach(t => {
+                const el = document.getElementById(t.id);
+                el.classList.remove('movable');
+
+                if (t.done) return;
+                
+                // Can move out of base?
+                if (t.pos === -1 && currentRoll === 6) {
+                    el.classList.add('movable');
+                    movableCount++;
+                    autoMoveTokenId = t.id;
+                }
+                // Can move forward on track?
+                else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
+                    el.classList.add('movable');
+                    movableCount++;
+                    autoMoveTokenId = t.id;
+                }
+            });
+
+            if (movableCount === 0) {
+                statusEl.innerText = `Rolled ${currentRoll}. No valid moves! Next turn.`;
+                rollBtn.disabled = false;
+            } else if (movableCount === 1) {
+                statusEl.innerText = `Rolled ${currentRoll}. Moving commando!`;
+                setTimeout(() => moveToken(autoMoveTokenId), 500); // Auto move if only 1 option
+            } else {
+                statusEl.innerText = `Rolled ${currentRoll}. Click a glowing commando to move!`;
+                isWaitingForMove = true;
+            }
+        }
+
+        function moveToken(tokenId) {
+            let t = tokens.find(tok => tok.id === tokenId);
+            let el = document.getElementById(tokenId);
+            
+            if (!el.classList.contains('movable') && isWaitingForMove) return;
+
+            // Remove all glowing effects
+            tokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
+            isWaitingForMove = false;
+
+            // Logic to move
+            if (t.pos === -1 && currentRoll === 6) {
+                t.pos = 0; // Move to start cell
+                board.appendChild(el); // Move out of base div onto the grid
+                el.innerText = "🚀"; // Change icon to rocket
+            } else {
+                t.pos += currentRoll;
+            }
+
+            // Apply new grid position
+            if (t.pos <= 56) {
+                el.style.gridRow = redPath[t.pos][0];
+                el.style.gridColumn = redPath[t.pos][1];
+            }
+
+            // Reached Home check
+            if (t.pos === 56) {
+                t.done = true;
+                el.innerText = "👑";
+                statusEl.innerText = `🎉 Commando reached Home!`;
+            }
+
+            // Check if all finished
+            if (tokens.every(tok => tok.done)) {
+                statusEl.innerText = "🎉 YOU WON THE BATTLE! 🎉";
+                setTimeout(() => window.location.href = "/dashboard", 2000);
+                return;
+            }
+
+            // Next Turn (If rolled 6, roll again)
+            if (currentRoll === 6 && !t.done) {
+                statusEl.innerText = `Rolled 6! You get another turn. Roll again!`;
+                rollBtn.disabled = false;
+            } else {
+                statusEl.innerText = `Move finished. Roll again!`;
+                rollBtn.disabled = false;
+            }
+        }
+
+        // Add Click listeners for tokens
+        tokens.forEach(t => {
+            document.getElementById(t.id).addEventListener('click', () => {
+                if (isWaitingForMove && document.getElementById(t.id).classList.contains('movable')) {
+                    moveToken(t.id);
+                }
+            });
+        });
     </script>
 </body>
 </html>
