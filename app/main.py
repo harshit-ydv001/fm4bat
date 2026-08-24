@@ -147,6 +147,14 @@ async def crash_game_page(request: Request):
     return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
+@app.get("/games/ludo", response_class=HTMLResponse)
+async def ludo_game_page(request: Request):
+    username = request.cookies.get("session_user")
+    if not username:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse("ludo.html", {"request": request, "username": username})
+
+
 @app.websocket("/ws/crash")
 async def crash_websocket(websocket: WebSocket):
     mode = websocket.query_params.get("mode", "token")
