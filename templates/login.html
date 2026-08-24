@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - fm4bat</title>
+    <title>Login & Signup - fm4bat</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -16,18 +16,27 @@
             border: 2px solid #2a2f40; border-radius: 12px; padding: 24px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .brand-title { font-size: 24px; font-weight: 900; color: #34d399; text-align: center; margin-bottom: 20px; }
-        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 12px; color: #94a3b8; font-weight: bold; }
+        .brand-title { font-size: 22px; font-weight: 900; color: #34d399; text-align: center; margin-bottom: 15px; }
+        
+        .tab-buttons { display: flex; margin-bottom: 20px; background: #1c212e; border-radius: 8px; padding: 4px; border: 1px solid #374151; }
+        .tab-btn { flex: 1; background: none; border: none; color: #94a3b8; padding: 8px; font-weight: bold; font-size: 13px; cursor: pointer; border-radius: 6px; transition: 0.3s; }
+        .tab-btn.active { background: #34d399; color: #0b0e14; }
+
+        .form-box { display: none; }
+        .form-box.active { display: block; }
+
+        .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 11px; color: #94a3b8; font-weight: bold; }
         .form-group input {
             background: #1c212e; border: 1px solid #374151; border-radius: 8px;
-            padding: 10px 14px; color: #fff; font-size: 14px; outline: none;
+            padding: 10px 14px; color: #fff; font-size: 13px; outline: none;
         }
         .form-group input:focus { border-color: #34d399; }
+        
         .submit-btn {
             width: 100%; background: linear-gradient(135deg, #34d399 0%, #059669 100%);
-            color: #fff; border: none; padding: 12px; border-radius: 8px;
-            font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 10px;
+            color: #fff; border: none; padding: 11px; border-radius: 8px;
+            font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 10px;
             text-transform: uppercase;
         }
         .submit-btn:hover { opacity: 0.9; }
@@ -36,22 +45,58 @@
 <body>
 
     <div class="auth-card">
-        <div class="brand-title">⚡ fm4bat Login</div>
+        <div class="brand-title">⚡ fm4bat Gaming</div>
         
-        <form action="/login" method="POST">
+        <div class="tab-buttons">
+            <button class="tab-btn active" id="login-tab" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" id="signup-tab" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <form id="login-form" class="form-box active" action="/login" method="POST">
             <div class="form-group">
                 <label>Username or Email</label>
                 <input type="text" name="identifier" required placeholder="Enter username or email">
             </div>
-            
             <div class="form-group">
                 <label>Password</label>
                 <input type="password" name="password" required placeholder="Enter password">
             </div>
-
             <button type="submit" class="submit-btn">Login</button>
         </form>
+
+        <form id="signup-form" class="form-box" action="/signup" method="POST">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" required placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label>Email or Mobile</label>
+                <input type="text" name="identifier" required placeholder="Enter email or mobile">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Create a password">
+            </div>
+            <button type="submit" class="submit-btn">Register & Start</button>
+        </form>
     </div>
+
+    <script>
+        function switchTab(tab) {
+            document.getElementById('login-tab').classList.remove('active');
+            document.getElementById('signup-tab').classList.remove('active');
+            document.getElementById('login-form').classList.remove('active');
+            document.getElementById('signup-form').classList.remove('active');
+
+            if (tab === 'login') {
+                document.getElementById('login-tab').classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.getElementById('signup-tab').classList.add('active');
+                document.getElementById('signup-form').classList.add('active');
+            }
+        }
+    </script>
 
 </body>
 </html>
