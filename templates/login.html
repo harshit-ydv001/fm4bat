@@ -3,346 +3,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Signup - fm4bat</title>
+    <title>Ludo Battle - Real Bot Turn Play</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { 
-            background: radial-gradient(circle at center, #0f172a 0%, #030712 100%); 
-            color: #ffffff; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow: hidden;
+        body {
+            background-color: #0b0e14; color: #fff;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding-bottom: 20px;
         }
-        .auth-card { 
-            background: rgba(17, 24, 39, 0.85); 
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(52, 211, 153, 0.2); 
-            padding: 35px 28px; 
-            border-radius: 20px; 
-            width: 380px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(52, 211, 153, 0.1); 
-            position: relative;
+        .navbar {
+            width: 100%; max-width: 480px; background: #12151c; display: flex;
+            justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #1e222d;
         }
-        .brand-logo { text-align: center; font-size: 26px; font-weight: 900; color: #34d399; margin-bottom: 4px; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(52, 211, 153, 0.4); }
-        h2 { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 20px; font-weight: 500; }
+        .brand-logo { font-size: 16px; font-weight: 900; color: #f1c40f; font-style: italic; text-decoration: none; }
         
-        .error-alert { 
-            display: none; 
-            background: rgba(239, 68, 68, 0.15); 
-            border: 1px solid rgba(239, 68, 68, 0.4); 
-            color: #f87171; 
-            padding: 10px; 
-            border-radius: 8px; 
-            font-size: 12px; 
-            text-align: center; 
-            margin-bottom: 15px; 
-            font-weight: 600; 
+        .ludo-container {
+            width: 100%; max-width: 480px; background: #141822;
+            border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px;
         }
 
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        input { 
-            width: 100%; 
-            background: rgba(3, 7, 18, 0.7); 
-            border: 1px solid #374151; 
-            padding: 12px 14px; 
-            border-radius: 10px; 
-            color: white; 
-            font-size: 14px; 
-            outline: none; 
-            transition: all 0.3s ease; 
+        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .player-card {
+            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
+            transition: all 0.3s ease;
         }
-        input:focus { 
-            border-color: #34d399; 
-            box-shadow: 0 0 10px rgba(52, 211, 153, 0.3); 
-        }
-        
-        .password-container { position: relative; }
-        .eye-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; opacity: 0.7; }
-        .eye-icon:hover { opacity: 1; }
+        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
+        .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
+        .player-info { display: flex; flex-direction: column; font-size: 10px; }
+        .player-name { font-weight: bold; color: #fff; }
+        .player-coins { color: #f1c40f; font-weight: bold; }
 
-        .forgot-link {
-            text-align: right;
-            font-size: 12px;
-            color: #34d399;
-            cursor: pointer;
-            margin-top: -8px;
-            margin-bottom: 16px;
-            display: block;
-            font-weight: 600;
+        .board {
+            width: 360px; height: 360px; background: #ffffff; border: 4px solid #111;
+            position: relative; display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(15, 1fr);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.85); border-radius: 4px;
         }
-        .forgot-link:hover { text-decoration: underline; }
 
-        .btn-submit { 
-            width: 100%; 
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%); 
-            color: white; 
-            border: none; 
-            padding: 13px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 14px; 
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
-            transition: all 0.3s ease; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .btn-submit:hover { 
-            background: linear-gradient(135deg, #047857 0%, #059669 100%); 
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.6);
-            transform: translateY(-1px);
+        .base-green { grid-column: 1 / 7; grid-row: 1 / 7; background: #2ecc71; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-yellow { grid-column: 10 / 16; grid-row: 1 / 7; background: #f1c40f; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-red { grid-column: 1 / 7; grid-row: 10 / 16; background: #e74c3c; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .base-blue { grid-column: 10 / 16; grid-row: 10 / 16; background: #3498db; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
+
+        .inner-box {
+            width: 100%; height: 100%; background: #fff; border-radius: 6px;
+            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
+            padding: 8px; gap: 8px; align-items: center; justify-items: center;
         }
         
-        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 20px; }
-        .toggle-text span { color: #34d399; font-weight: bold; cursor: pointer; }
-        .toggle-text span:hover { text-decoration: underline; }
-        
-        .otp-hint { font-size: 11px; color: #34d399; margin-top: 6px; display: block; background: rgba(52, 211, 153, 0.1); padding: 6px; border-radius: 6px; border-left: 3px solid #34d399; }
-        
-        .back-to-login {
-            text-align: center; font-size: 12px; color: #9ca3af; margin-top: 15px; cursor: pointer; display: none;
+        .token {
+            width: 24px; height: 24px; background: #222; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 14px;
+            border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10; transition: all 0.2s ease-in-out;
         }
-        .back-to-login span { color: #34d399; font-weight: bold; }
+        
+        .token.red-token { border-color: #fff; background: #b93d30; }
+        .token.green-token { border-color: #fff; background: #27ae60; }
+        
+        .token.movable {
+            cursor: pointer; box-shadow: 0 0 12px 4px #00ffcc; transform: scale(1.15); border-color: #00ffcc; animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1.15); } 50% { transform: scale(1.25); } 100% { transform: scale(1.15); } }
+
+        .center-home {
+            grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
+            display: flex; justify-content: center; align-items: center; font-size: 26px; border: 2px solid #111; z-index: 1;
+        }
+
+        .cell { background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; }
+        
+        .control-panel {
+            width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
+        }
+        
+        .dice-container { perspective: 400px; width: 52px; height: 52px; }
+        .dice-3d {
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+        }
+        .dice-face {
+            position: absolute; width: 52px; height: 52px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: 2.5px solid #d97706; border-radius: 10px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.4); display: grid; padding: 6px;
+        }
+
+        .dot { width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center; }
+        .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-2 .dot:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; }
+        .face-3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-3 .dot:nth-child(2) { grid-column: 2; grid-row: 2; }
+        .face-3 .dot:nth-child(3) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+        .face-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
+        .face-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-5 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-5 .dot:nth-child(2) { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
+        .face-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
+        .face-5 .dot:nth-child(4) { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+        .face-5 .dot:nth-child(5) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+        .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
+
+        .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
+        .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
+        .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
+        .dice-face.left   { transform: rotateY(-90deg) translateZ(26px); }
+        .dice-face.top    { transform: rotateX(90deg) translateZ(26px); }
+        .dice-face.bottom { transform: rotateX(-90deg) translateZ(26px); }
+
+        .status-msg { font-size: 11px; color: #34d399; font-weight: bold; text-align: center; flex: 1; padding: 0 8px; }
+        .roll-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        .roll-btn:active { transform: scale(0.95); }
+        .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
-        <div class="brand-logo">⚡ fm4bat</div>
-        <h2 id="form-title">Login to your account</h2>
-        
-        <!-- Error Alert Banner -->
-        <div id="error-alert" class="error-alert"></div>
+    <div class="navbar">
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (VS BOT)</a>
+        <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
+    </div>
 
-        <form action="/login" method="POST" id="auth-form" onsubmit="return handleFormSubmit(event)">
-            
-            <!-- Signup Username Field -->
-            <div class="form-group" id="username-field" style="display: none;">
-                <label>Choose Username</label>
-                <input type="text" name="username" id="input-username" placeholder="e.g. fm4bat_user">
+    <div class="ludo-container">
+        <div class="players-row">
+            <div class="player-card" id="opp-card">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
+                <div class="player-info"><span class="player-name" id="opp-name">Opponent (Green)</span><span class="player-coins">🪙 Bot Active</span></div>
             </div>
-
-            <div class="form-group" id="identifier-field">
-                <label id="identifier-label">Username / Email / Phone</label>
-                <input type="text" name="identifier" id="input-identifier" required placeholder="Enter username, email or phone">
+            <div class="player-card active-turn" id="user-card">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="You">
+                <div class="player-info"><span class="player-name">You (Red)</span><span class="player-coins">🪙 Active</span></div>
             </div>
+        </div>
 
-            <div class="form-group" id="password-group">
-                <label id="password-label">Password</label>
-                <div class="password-container">
-                    <input type="password" name="password" id="password-input" required placeholder="Enter password">
-                    <span class="eye-icon" id="eye-toggle" onclick="togglePassword()">👁️‍🗨️</span>
+        <div class="board" id="ludo-board">
+            <!-- Green Base (Bot Tokens) -->
+            <div class="base-green" id="green-base-area">
+                <div class="inner-box" id="green-inner-box">
+                    <div class="token green-token" id="green-0">🪖</div>
+                    <div class="token green-token" id="green-1">🪖</div>
+                    <div class="token green-token" id="green-2">🪖</div>
+                    <div class="token green-token" id="green-3">🪖</div>
                 </div>
             </div>
-
-            <!-- Forgot Password link -->
-            <span class="forgot-link" id="forgot-password-btn" onclick="showForgotPassword()">Forgot Password?</span>
-
-            <!-- OTP Verification Field -->
-            <div class="form-group" id="otp-field" style="display: none;">
-                <label>Enter 4-Digit OTP</label>
-                <input type="text" name="entered_otp" id="input-otp" maxlength="4" placeholder="Enter code received">
-                <span class="otp-hint" id="otp-display-hint"></span>
+            <div class="base-yellow"><div class="inner-box"><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div></div></div>
+            <div class="center-home">🏆</div>
+            <div class="base-blue"><div class="inner-box"><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div></div></div>
+            
+            <!-- Red Base (Your Playable Tokens) -->
+            <div class="base-red" id="red-base-area">
+                <div class="inner-box" id="red-inner-box">
+                    <div class="token red-token" id="red-0">🪖</div>
+                    <div class="token red-token" id="red-1">🪖</div>
+                    <div class="token red-token" id="red-2">🪖</div>
+                    <div class="token red-token" id="red-3">🪖</div>
+                </div>
             </div>
-
-            <button type="submit" class="btn-submit" id="submit-btn">Login</button>
-        </form>
-
-        <div class="toggle-text" id="toggle-container">
-            Don't have an account? <span onclick="toggleAuthMode()">Sign Up</span>
-        </div>
-        
-        <div class="back-to-login" id="back-login" onclick="resetToLogin()">
-            Remember password? <span>Login here</span>
         </div>
     </div>
 
+    <div class="control-panel">
+        <div class="dice-container">
+            <div class="dice-3d" id="dice-cube">
+                <div class="dice-face front face-1"><div class="dot"></div></div>
+                <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            </div>
+        </div>
+        <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
+        <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
+    </div>
+
     <script>
-        let mode = 'login'; 
-        let otpStep = false; 
-        let generatedOtp = "";
-
-        // Check URL parameters for errors and display warning on load
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const error = urlParams.get("error");
-            const alertBox = document.getElementById("error-alert");
-
-            if (error === "UsernameTaken") {
-                alertBox.innerText = "❌ This username is already taken! Please choose another one.";
-                alertBox.style.display = "block";
-            } else if (error === "EmailAlreadyRegistered") {
-                alertBox.innerText = "❌ This email or phone is already registered!";
-                alertBox.style.display = "block";
-            } else if (error === "InvalidCredentials") {
-                alertBox.innerText = "❌ Invalid username/email or password!";
-                alertBox.style.display = "block";
-            } else if (error === "UserNotFound") {
-                alertBox.innerText = "❌ User not found with this username/email!";
-                alertBox.style.display = "block";
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (type === 'dice') {
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(150 + Math.random() * 250, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                        osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+                    }, i * 60);
+                }
+            } else if (type === 'step') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.06);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.06);
+            } else if (type === 'win') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
             }
-        };
+        }
 
-        function togglePassword() {
-            const pwdInput = document.getElementById("password-input");
-            const eye = document.getElementById("eye-toggle");
-            if (pwdInput.type === "password") {
-                pwdInput.type = "text";
-                eye.innerText = "👁️";
+        const board = document.getElementById('ludo-board');
+        for(let r = 1; r <= 15; r++) {
+            for(let c = 1; c <= 15; c++) {
+                if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
+                    (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.gridRow = r; cell.style.gridColumn = c;
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        // Red Player Path (Starts from bottom arm [14,7])
+        const redPath = [
+            [14,7], [13,7], [12,7], [11,7], [10,7],
+            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1],
+            [8,1],
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6],
+            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7],
+            [1,8],
+            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9],
+            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15],
+            [8,15],
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10],
+            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9],
+            [15,8],
+            [14,8], [13,8], [12,8], [11,8], [10,8],
+            [9,8]
+        ];
+
+        // Green Bot Path (Starts from top arm [2,9] and loops around)
+        const greenPath = [
+            [2,9], [3,9], [4,9], [5,9], [6,9],
+            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15],
+            [8,15],
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10],
+            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9],
+            [15,8],
+            [15,7], [14,7], [13,7], [12,7], [11,7], [10,7],
+            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1],
+            [8,1],
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6],
+            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7],
+            [1,8],
+            [2,8], [3,8], [4,8], [5,8], [6,8],
+            [7,8]
+        ];
+
+        let redTokens = [
+            { id: 'red-0', pos: -1, done: false },
+            { id: 'red-1', pos: -1, done: false },
+            { id: 'red-2', pos: -1, done: false },
+            { id: 'red-3', pos: -1, done: false }
+        ];
+
+        let greenTokens = [
+            { id: 'green-0', pos: -1, done: false },
+            { id: 'green-1', pos: -1, done: false },
+            { id: 'green-2', pos: -1, done: false },
+            { id: 'green-3', pos: -1, done: false }
+        ];
+
+        let currentTurn = 'user'; // 'user' (Red) or 'bot' (Green)
+        let currentRoll = 0;
+        let isWaitingForMove = false;
+
+        const diceCube = document.getElementById("dice-cube");
+        const statusEl = document.getElementById("game-status");
+        const rollBtn = document.getElementById("roll-dice-btn");
+        const userCard = document.getElementById("user-card");
+        const oppCard = document.getElementById("opp-card");
+
+        function updateTurnIndicator() {
+            if (currentTurn === 'user') {
+                userCard.classList.add('active-turn');
+                oppCard.classList.remove('active-turn');
+                statusEl.innerText = "Your Turn (Red). Roll the dice!";
+                rollBtn.disabled = false;
             } else {
-                pwdInput.type = "password";
-                eye.innerText = "👁️‍🗨️";
+                userCard.classList.remove('active-turn');
+                oppCard.classList.add('active-turn');
+                statusEl.innerText = "Opponent's Turn (Green)...";
+                rollBtn.disabled = true;
+                setTimeout(botTurn, 1000); // Bot rolls after 1 second
             }
         }
 
-        function toggleAuthMode() {
-            const title = document.getElementById("form-title");
-            const btn = document.getElementById("submit-btn");
-            const usernameField = document.getElementById("username-field");
-            const identifierLabel = document.getElementById("identifier-label");
-            const identifierInput = document.getElementById("input-identifier");
-            const passwordGroup = document.getElementById("password-group");
-            const otpField = document.getElementById("otp-field");
-            const toggleContainer = document.getElementById("toggle-container");
-            const forgotLink = document.getElementById("forgot-password-btn");
-            const backLogin = document.getElementById("back-login");
-            const alertBox = document.getElementById("error-alert");
+        function rollDice() {
+            if(isWaitingForMove || currentTurn !== 'user') return;
+            rollBtn.disabled = true;
+            statusEl.innerText = "Rolling dice...";
+            playSound('dice');
 
-            alertBox.style.display = "none";
-            otpField.style.display = "none";
-            passwordGroup.style.display = "block";
-            otpStep = false;
+            animateDiceRoll(() => {
+                checkMovableTokens();
+            });
+        }
 
-            if (mode === 'login') {
-                mode = 'signup';
-                title.innerText = "Create New Account";
-                btn.innerText = "Send OTP";
-                usernameField.style.display = "block";
-                document.getElementById("input-username").required = true;
+        function animateDiceRoll(callback) {
+            let rx = (Math.floor(Math.random() * 4) + 4) * 360;
+            let ry = (Math.floor(Math.random() * 4) + 4) * 360;
+            diceCube.style.transition = "transform 0.9s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
+            diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+
+            setTimeout(() => {
+                currentRoll = Math.floor(Math.random() * 6) + 1;
+                let targetTransform = "";
+                switch(currentRoll) {
+                    case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
+                    case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
+                    case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
+                    case 4: targetTransform = "rotateY(90deg) rotateX(0deg)"; break;
+                    case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
+                    case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
+                }
+                diceCube.style.transition = "transform 0.4s ease-out";
+                diceCube.style.transform = targetTransform;
+                if(callback) callback();
+            }, 900);
+        }
+
+        // --- USER TURN LOGIC ---
+        function checkMovableTokens() {
+            let movableCount = 0;
+            let autoMoveTokenId = null;
+
+            redTokens.forEach(t => {
+                const el = document.getElementById(t.id);
+                el.classList.remove('movable');
+                if (t.done) return;
                 
-                identifierLabel.innerText = "Gmail ID or Phone Number";
-                identifierInput.placeholder = "Enter email or phone number";
-                
-                forgotLink.style.display = "none";
-                backLogin.style.display = "none";
-                toggleContainer.innerHTML = 'Already have an account? <span onclick="toggleAuthMode()">Login</span>';
+                if (t.pos === -1 && currentRoll === 6) {
+                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
+                } else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
+                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
+                }
+            });
+
+            if (movableCount === 0) {
+                statusEl.innerText = `Rolled ${currentRoll}. No valid moves! Passing turn.`;
+                setTimeout(switchTurn, 1500);
+            } else if (movableCount === 1) {
+                statusEl.innerText = `Rolled ${currentRoll}. Moving commando...`;
+                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll, 'user'), 400);
             } else {
-                resetToLogin();
+                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
+                isWaitingForMove = true;
             }
         }
 
-        function resetToLogin() {
-            mode = 'login';
-            otpStep = false;
-            document.getElementById("form-title").innerText = "Login to your account";
-            document.getElementById("submit-btn").innerText = "Login";
-            document.getElementById("username-field").style.display = "none";
-            document.getElementById("input-username").required = false;
-            document.getElementById("identifier-label").innerText = "Username / Email / Phone";
-            document.getElementById("input-identifier").placeholder = "Enter username, email or phone";
-            document.getElementById("password-group").style.display = "block";
-            document.getElementById("password-input").required = true;
-            document.getElementById("password-label").innerText = "Password";
-            document.getElementById("otp-field").style.display = "none";
-            document.getElementById("forgot-password-btn").style.display = "block";
-            document.getElementById("back-login").style.display = "none";
-            document.getElementById("toggle-container").style.display = "block";
-            document.getElementById("toggle-container").innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
+        // --- BOT TURN LOGIC ---
+        function botTurn() {
+            playSound('dice');
+            animateDiceRoll(() => {
+                statusEl.innerText = `Opponent rolled ${currentRoll}!`;
+                
+                // Find movable bot tokens
+                let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
+
+                if (validTokens.length === 0) {
+                    statusEl.innerText = `Opponent rolled ${currentRoll}. No valid moves!`;
+                    setTimeout(switchTurn, 1500);
+                } else {
+                    // Pick one token randomly to move
+                    let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
+                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 800);
+                }
+            });
         }
 
-        function showForgotPassword() {
-            mode = 'forgot';
-            otpStep = false;
-            document.getElementById("error-alert").style.display = "none";
-            document.getElementById("form-title").innerText = "Reset Password";
-            document.getElementById("submit-btn").innerText = "Send OTP";
-            document.getElementById("username-field").style.display = "none";
-            document.getElementById("input-username").required = false;
-            document.getElementById("identifier-label").innerText = "Registered Username / Email";
-            document.getElementById("input-identifier").placeholder = "Enter your username or email";
-            document.getElementById("password-group").style.display = "none"; 
-            document.getElementById("password-input").required = false;
-            document.getElementById("otp-field").style.display = "none";
-            document.getElementById("forgot-password-btn").style.display = "none";
-            document.getElementById("toggle-container").style.display = "none";
-            document.getElementById("back-login").style.display = "block";
-        }
-
-        function handleFormSubmit(event) {
-            const form = document.getElementById("auth-form");
+        function stepByStepMove(tokenId, stepsLeft, player) {
+            let tokensList = (player === 'user') ? redTokens : greenTokens;
+            let pathList = (player === 'user') ? redPath : greenPath;
             
-            if (mode === 'login') {
-                form.action = "/login";
-                return true;
-            } 
-            else if (mode === 'signup') {
-                if (!otpStep) {
-                    event.preventDefault();
-                    const identifierVal = document.getElementById("input-identifier").value;
-                    const usernameVal = document.getElementById("input-username").value;
-                    const passwordVal = document.getElementById("password-input").value;
+            let t = tokensList.find(tok => tok.id === tokenId);
+            let el = document.getElementById(tokenId);
+            
+            if (player === 'user') {
+                redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
+                isWaitingForMove = false;
+            }
 
-                    if (!identifierVal || !usernameVal || !passwordVal) {
-                        alert("Please fill in all fields first!");
-                        return false;
-                    }
+            if (t.pos === -1) {
+                t.pos = 0;
+                board.appendChild(el);
+                el.innerText = player === 'user' ? "🚀" : "🛸";
+                el.style.gridRow = pathList[t.pos][0];
+                el.style.gridColumn = pathList[t.pos][1];
+                playSound('step');
+                finishMove(t, player);
+                return;
+            }
 
-                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-                    document.getElementById("otp-field").style.display = "block";
-                    document.getElementById("otp-display-hint").innerText = `Mock OTP sent: [ ${generatedOtp} ]`;
-                    document.getElementById("submit-btn").innerText = "Verify & Register";
-                    otpStep = true;
-                    return false;
+            let interval = setInterval(() => {
+                if (stepsLeft > 0 && t.pos < 56) {
+                    t.pos++;
+                    el.style.gridRow = pathList[t.pos][0];
+                    el.style.gridColumn = pathList[t.pos][1];
+                    playSound('step');
+                    stepsLeft--;
                 } else {
-                    const enteredOtp = document.getElementById("input-otp").value;
-                    if (enteredOtp === generatedOtp) {
-                        form.action = "/signup";
-                        return true;
-                    } else {
-                        event.preventDefault();
-                        alert("Invalid OTP! Please check the code shown above.");
-                        return false;
-                    }
+                    clearInterval(interval);
+                    finishMove(t, player);
                 }
-            } 
-            else if (mode === 'forgot') {
-                if (!otpStep) {
-                    event.preventDefault();
-                    const identifierVal = document.getElementById("input-identifier").value;
-                    if (!identifierVal) {
-                        alert("Please enter your username or email first!");
-                        return false;
-                    }
+            }, 250);
+        }
 
-                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-                    document.getElementById("otp-field").style.display = "block";
-                    document.getElementById("otp-display-hint").innerText = `Reset OTP sent: [ ${generatedOtp} ]`;
-                    
-                    document.getElementById("password-group").style.display = "block";
-                    document.getElementById("password-label").innerText = "New Password";
-                    document.getElementById("password-input").required = true;
-                    document.getElementById("password-input").placeholder = "Enter new password";
+        function finishMove(t, player) {
+            let tokensList = (player === 'user') ? redTokens : greenTokens;
+            let el = document.getElementById(t.id);
 
-                    document.getElementById("submit-btn").innerText = "Verify & Reset Password";
-                    otpStep = true;
-                    return false;
+            if (t.pos === 56) {
+                t.done = true;
+                el.innerText = "👑";
+                playSound('win');
+                statusEl.innerText = player === 'user' ? `🎉 Your Commando reached Home!` : `⚠️ Opponent Commando reached Home!`;
+            }
+
+            if (tokensList.every(tok => tok.done)) {
+                playSound('win');
+                let winMsg = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : "😞 OPPONENT WON THE BATTLE! 😞";
+                statusEl.innerText = winMsg;
+                setTimeout(() => window.location.href = "/dashboard", 3000);
+                return;
+            }
+
+            // If 6 is rolled, same player gets another turn
+            if (currentRoll === 6 && !t.done) {
+                statusEl.innerText = `Rolled 6! Roll again!`;
+                if (player === 'user') {
+                    rollBtn.disabled = false;
                 } else {
-                    const enteredOtp = document.getElementById("input-otp").value;
-                    if (enteredOtp === generatedOtp) {
-                        form.action = "/forgot-password";
-                        return true;
-                    } else {
-                        event.preventDefault();
-                        alert("Invalid OTP! Please check the code shown above.");
-                        return false;
-                    }
+                    setTimeout(botTurn, 1500); // Bot rolls again
                 }
+            } else {
+                setTimeout(switchTurn, 1200);
             }
         }
+
+        function switchTurn() {
+            currentTurn = (currentTurn === 'user') ? 'bot' : 'user';
+            updateTurnIndicator();
+        }
+
+        redTokens.forEach(t => {
+            document.getElementById(t.id).addEventListener('click', () => {
+                if (currentTurn === 'user' && isWaitingForMove && document.getElementById(t.id).classList.contains('movable')) {
+                    statusEl.innerText = `Moving step by step...`;
+                    stepByStepMove(t.id, currentRoll, 'user');
+                }
+            });
+        });
     </script>
 </body>
 </html>
