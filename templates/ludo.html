@@ -73,10 +73,9 @@
             display: flex; justify-content: center; align-items: center; font-size: 14px;
             border: 2px solid #999; cursor: not-allowed;
             place-self: center; z-index: 10;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease-in-out;
         }
         
-        /* Playable Red Tokens Glow Effect */
         .token.red-token { border-color: #fff; background: #b93d30; }
         .token.movable {
             cursor: pointer;
@@ -91,14 +90,12 @@
             100% { transform: scale(1.15); }
         }
 
-        /* Center Trophy Home */
         .center-home {
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
             display: flex; justify-content: center; align-items: center; font-size: 26px;
             border: 2px solid #111; z-index: 1;
         }
 
-        /* Track Grid Cells (Generated via JS to ensure 100% perfection) */
         .cell {
             background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold;
         }
@@ -126,12 +123,11 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (PLAYABLE)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (SMOOTH STEP)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
-        <!-- Top Players (Bots/Opponents) -->
         <div class="players-row">
             <div class="player-card">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Bhoomi">
@@ -143,9 +139,7 @@
             </div>
         </div>
 
-        <!-- Classic Ludo Board -->
         <div class="board" id="ludo-board">
-            <!-- 4 Corner Bases -->
             <div class="base-green">
                 <div class="inner-box">
                     <div class="token" style="background: #2ecc71;">🪖</div><div class="token" style="background: #2ecc71;">🪖</div>
@@ -166,7 +160,6 @@
                 </div>
             </div>
             
-            <!-- Red Base (Your Playable Tokens) -->
             <div class="base-red" id="red-base-area">
                 <div class="inner-box" id="red-inner-box">
                     <div class="token red-token" id="red-0">🪖</div>
@@ -175,11 +168,8 @@
                     <div class="token red-token" id="red-3">🪖</div>
                 </div>
             </div>
-            
-            <!-- Track boxes will be injected via JS to ensure 100% accuracy -->
         </div>
 
-        <!-- Bottom Players (You & Bot) -->
         <div class="players-row" style="margin-top: 8px; margin-bottom: 0;">
             <div class="player-card" style="border-color: #34d399;">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="Guest_3">
@@ -192,7 +182,6 @@
         </div>
     </div>
 
-    <!-- Controls -->
     <div class="control-panel">
         <div class="dice-box" id="dice-value">🎲</div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
@@ -200,11 +189,9 @@
     </div>
 
     <script>
-        // 1. Generate 100% accurate Track Board Grid
         const board = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
-                // Check if cell belongs to the cross tracks
                 let isTrack = false;
                 if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
                     (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
@@ -216,17 +203,15 @@
                     cell.className = 'cell';
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     
-                    // Add standard colors & stars
                     if (r===7 && c===2) { cell.classList.add('green-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===3 && c===7) { cell.innerHTML = '⭐'; } // Green safe
+                    else if (r===3 && c===7) { cell.innerHTML = '⭐'; }
                     else if (r===2 && c===9) { cell.classList.add('yellow-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===7 && c===13) { cell.innerHTML = '⭐'; } // Yellow safe
+                    else if (r===7 && c===13) { cell.innerHTML = '⭐'; }
                     else if (r===9 && c===14) { cell.classList.add('blue-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===13 && c===9) { cell.innerHTML = '⭐'; } // Blue safe
+                    else if (r===13 && c===9) { cell.innerHTML = '⭐'; }
                     else if (r===14 && c===7) { cell.classList.add('red-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===9 && c===3) { cell.innerHTML = '⭐'; } // Red safe
+                    else if (r===9 && c===3) { cell.innerHTML = '⭐'; }
                     
-                    // Home Lanes
                     else if (r===8 && c>=2 && c<=6) cell.classList.add('green-cell');
                     else if (c===8 && r>=2 && r<=6) cell.classList.add('yellow-cell');
                     else if (r===8 && c>=10 && c<=14) cell.classList.add('blue-cell');
@@ -237,25 +222,23 @@
             }
         }
 
-        // 2. Playable Logic for RED Tokens (Complete 57 Step Path mapped to grid [row, col])
         const redPath = [
-            [14,7], [13,7], [12,7], [11,7], [10,7], // Up bottom arm
-            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], // Left on left arm
-            [8,1], // Up 1 step
-            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], // Right on left arm
-            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], // Up top arm
-            [1,8], // Right 1 step
-            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9], // Down top arm
-            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], // Right on right arm
-            [8,15], // Down 1 step
-            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], // Left on right arm
-            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], // Down bottom arm
-            [15,8], // Left 1 step
-            [14,8], [13,8], [12,8], [11,8], [10,8], // Up RED Home Lane
-            [9,8] // Center Home (Win)
+            [14,7], [13,7], [12,7], [11,7], [10,7],
+            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1],
+            [8,1],
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6],
+            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7],
+            [1,8],
+            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9],
+            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15],
+            [8,15],
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10],
+            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9],
+            [15,8],
+            [14,8], [13,8], [12,8], [11,8], [10,8],
+            [9,8]
         ];
 
-        // Tokens state: -1 means in base. 0 to 56 is path position.
         let tokens = [
             { id: 'red-0', pos: -1, done: false },
             { id: 'red-1', pos: -1, done: false },
@@ -269,7 +252,6 @@
         const diceEl = document.getElementById("dice-value");
         const statusEl = document.getElementById("game-status");
         const rollBtn = document.getElementById("roll-dice-btn");
-        const innerBox = document.getElementById("red-inner-box");
 
         function rollDice() {
             if(isWaitingForMove) return;
@@ -297,13 +279,11 @@
 
                 if (t.done) return;
                 
-                // Can move out of base?
                 if (t.pos === -1 && currentRoll === 6) {
                     el.classList.add('movable');
                     movableCount++;
                     autoMoveTokenId = t.id;
                 }
-                // Can move forward on track?
                 else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
                     el.classList.add('movable');
                     movableCount++;
@@ -312,59 +292,65 @@
             });
 
             if (movableCount === 0) {
-                statusEl.innerText = `Rolled ${currentRoll}. No valid moves! Next turn.`;
+                statusEl.innerText = `Rolled ${currentRoll}. No valid moves!`;
                 rollBtn.disabled = false;
             } else if (movableCount === 1) {
-                statusEl.innerText = `Rolled ${currentRoll}. Moving commando!`;
-                setTimeout(() => moveToken(autoMoveTokenId), 500); // Auto move if only 1 option
+                statusEl.innerText = `Rolled ${currentRoll}. Moving step by step...`;
+                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll), 400);
             } else {
-                statusEl.innerText = `Rolled ${currentRoll}. Click a glowing commando to move!`;
+                statusEl.innerText = `Rolled ${currentRoll}. Click a glowing commando!`;
                 isWaitingForMove = true;
             }
         }
 
-        function moveToken(tokenId) {
+        // Smooth step-by-step sliding movement function
+        function stepByStepMove(tokenId, stepsLeft) {
             let t = tokens.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
-            
-            if (!el.classList.contains('movable') && isWaitingForMove) return;
 
-            // Remove all glowing effects
             tokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
             isWaitingForMove = false;
 
-            // Logic to move
-            if (t.pos === -1 && currentRoll === 6) {
-                t.pos = 0; // Move to start cell
-                board.appendChild(el); // Move out of base div onto the grid
-                el.innerText = "🚀"; // Change icon to rocket
-            } else {
-                t.pos += currentRoll;
-            }
-
-            // Apply new grid position
-            if (t.pos <= 56) {
+            if (t.pos === -1) {
+                t.pos = 0;
+                board.appendChild(el);
+                el.innerText = "🚀";
                 el.style.gridRow = redPath[t.pos][0];
                 el.style.gridColumn = redPath[t.pos][1];
+                finishMove(t);
+                return;
             }
 
-            // Reached Home check
+            // Slide 1 step at a time with delay for real tap-tap feeling
+            let interval = setInterval(() => {
+                if (stepsLeft > 0 && t.pos < 56) {
+                    t.pos++;
+                    el.style.gridRow = redPath[t.pos][0];
+                    el.style.gridColumn = redPath[t.pos][1];
+                    stepsLeft--;
+                } else {
+                    clearInterval(interval);
+                    finishMove(t);
+                }
+            }, 250); // 250ms per step
+        }
+
+        function finishMove(t) {
+            let el = document.getElementById(t.id);
             if (t.pos === 56) {
                 t.done = true;
                 el.innerText = "👑";
                 statusEl.innerText = `🎉 Commando reached Home!`;
             }
 
-            // Check if all finished
             if (tokens.every(tok => tok.done)) {
                 statusEl.innerText = "🎉 YOU WON THE BATTLE! 🎉";
                 setTimeout(() => window.location.href = "/dashboard", 2000);
                 return;
             }
 
-            // Next Turn (If rolled 6, roll again)
             if (currentRoll === 6 && !t.done) {
-                statusEl.innerText = `Rolled 6! You get another turn. Roll again!`;
+                statusEl.innerText = `Rolled 6! Roll again!`;
                 rollBtn.disabled = false;
             } else {
                 statusEl.innerText = `Move finished. Roll again!`;
@@ -372,11 +358,11 @@
             }
         }
 
-        // Add Click listeners for tokens
         tokens.forEach(t => {
             document.getElementById(t.id).addEventListener('click', () => {
                 if (isWaitingForMove && document.getElementById(t.id).classList.contains('movable')) {
-                    moveToken(t.id);
+                    statusEl.innerText = `Moving step by step...`;
+                    stepByStepMove(t.id, currentRoll);
                 }
             });
         });
