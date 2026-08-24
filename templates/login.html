@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Auto Turn Bot</title>
+    <title>Ludo Battle - Strict Turn Bot</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -130,7 +130,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (AUTO BOT)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (STRICT TURN)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -191,7 +191,7 @@
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
-        <button class="roll-btn" id="roll-dice-btn" onclick="userRollDice()">Roll Dice</button>
+        <button class="roll-btn" id="roll-dice-btn" onclick="handleUserRoll()">Roll Dice</button>
     </div>
 
     <script>
@@ -266,9 +266,11 @@
             { id: 'green-3', pos: -1, done: false }
         ];
 
-        let currentTurn = 'user'; // 'user' or 'bot'
-        let currentRoll = 0;
-        let isWaitingForUserClick = false;
+        let gameState = {
+            turn: 'user', // 'user' or 'bot'
+            roll: 0,
+            locked: false
+        };
 
         const diceCube = document.getElementById("dice-cube");
         const statusEl = document.getElementById("game-status");
@@ -278,9 +280,8 @@
         const userMiniDice = document.getElementById("user-mini-dice");
         const oppMiniDice = document.getElementById("opp-mini-dice");
 
-        function setTurn(turn) {
-            currentTurn = turn;
-            if (currentTurn === 'user') {
+        function updateUI() {
+            if (gameState.turn === 'user') {
                 userCard.classList.add('active-turn');
                 oppCard.classList.remove('active-turn');
                 statusEl.innerText = "Your Turn (Red). Roll the dice!";
@@ -292,96 +293,87 @@
                 statusEl.innerText = `${chosenBot.name}'s turn...`;
                 rollBtn.disabled = true;
                 userMiniDice.innerText = "🎲";
-                setTimeout(startBotTurn, 1000);
+                setTimeout(runBotTurn, 1000);
             }
         }
 
-        function animateDice(rolledValue, callback) {
+        function animateDice(value, callback) {
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
-            diceCube.style.transition = "transform 0.8s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
+            diceCube.style.transition = "transform 0.7s ease-out";
             diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 
             setTimeout(() => {
-                let targetTransform = "";
-                switch(rolledValue) {
-                    case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
-                    case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
-                    case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
-                    case 4: targetTransform = "rotateY(90deg) rotateX(0deg)"; break;
-                    case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
-                    case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
+                let transform = "";
+                switch(value) {
+                    case 1: transform = "rotateX(0deg) rotateY(0deg)"; break;
+                    case 2: transform = "rotateX(-90deg) rotateY(0deg)"; break;
+                    case 3: transform = "rotateY(-90deg) rotateX(0deg)"; break;
+                    case 4: transform = "rotateY(90deg) rotateX(0deg)"; break;
+                    case 5: transform = "rotateX(90deg) rotateY(0deg)"; break;
+                    case 6: transform = "rotateX(180deg) rotateY(0deg)"; break;
                 }
-                diceCube.style.transition = "transform 0.3s ease-out";
-                diceCube.style.transform = targetTransform;
+                diceCube.style.transform = transform;
                 if(callback) callback();
-            }, 800);
+            }, 700);
         }
 
-        // --- USER TURN ---
-        function userRollDice() {
-            if (currentTurn !== 'user' || isWaitingForUserClick) return;
+        // --- USER ACTION ---
+        function handleUserRoll() {
+            if (gameState.locked || gameState.turn !== 'user') return;
+            gameState.locked = true;
             rollBtn.disabled = true;
-            currentRoll = Math.floor(Math.random() * 6) + 1;
+            gameState.roll = Math.floor(Math.random() * 6) + 1;
             statusEl.innerText = "Rolling...";
 
-            animateDice(currentRoll, () => {
-                userMiniDice.innerText = currentRoll;
-                evaluateUserMove();
+            animateDice(gameState.roll, () => {
+                userMiniDice.innerText = gameState.roll;
+                processMove('user');
             });
         }
 
-        function evaluateUserMove() {
-            let movable = redTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
+        // --- BOT ACTION ---
+        function runBotTurn() {
+            if (gameState.locked) return;
+            gameState.locked = true;
+            oppMiniDice.innerText = "⏳";
+            statusEl.innerText = `${chosenBot.name} is rolling...`;
+            gameState.roll = Math.floor(Math.random() * 6) + 1;
+
+            animateDice(gameState.roll, () => {
+                oppMiniDice.innerText = gameState.roll;
+                statusEl.innerText = `${chosenBot.name} rolled ${gameState.roll}!`;
+                setTimeout(() => processMove('bot'), 800);
+            });
+        }
+
+        function processMove(player) {
+            let tokens = (player === 'user') ? redTokens : greenTokens;
+            let movable = tokens.filter(t => !t.done && ((t.pos === -1 && gameState.roll === 6) || (t.pos >= 0 && t.pos + gameState.roll <= 56)));
 
             if (movable.length === 0) {
-                statusEl.innerText = `Rolled ${currentRoll}. No moves available!`;
-                setTimeout(() => setTurn('bot'), 1500);
-            } else if (movable.length === 1) {
-                statusEl.innerText = `Rolled ${currentRoll}. Moving token...`;
-                setTimeout(() => moveToken(movable[0].id, currentRoll, 'user'), 400);
+                statusEl.innerText = `${player === 'user' ? 'You' : chosenBot.name} rolled ${gameState.roll}. No moves!`;
+                setTimeout(() => nextTurn(player, false), 1500);
+            } else if (player === 'bot' || movable.length === 1) {
+                let chosen = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
+                executeStepMove(chosen.id, gameState.roll, player);
             } else {
-                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing token!`;
-                isWaitingForUserClick = true;
+                statusEl.innerText = `Rolled ${gameState.roll}. Click your glowing token!`;
                 movable.forEach(t => document.getElementById(t.id).classList.add('movable'));
             }
         }
 
         redTokens.forEach(t => {
             document.getElementById(t.id).addEventListener('click', () => {
-                if (currentTurn === 'user' && isWaitingForUserClick && document.getElementById(t.id).classList.contains('movable')) {
+                if (gameState.turn === 'user' && gameState.locked && document.getElementById(t.id).classList.contains('movable')) {
                     redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
-                    isWaitingForUserClick = false;
                     statusEl.innerText = "Moving token...";
-                    moveToken(t.id, currentRoll, 'user');
+                    executeStepMove(t.id, gameState.roll, 'user');
                 }
             });
         });
 
-        // --- BOT TURN ---
-        function startBotTurn() {
-            currentRoll = Math.floor(Math.random() * 6) + 1;
-            oppMiniDice.innerText = "⏳";
-            statusEl.innerText = `${chosenBot.name} is rolling...`;
-
-            animateDice(currentRoll, () => {
-                oppMiniDice.innerText = currentRoll;
-                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
-
-                let movable = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
-
-                if (movable.length === 0) {
-                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves!`;
-                    setTimeout(() => setTurn('user'), 1500);
-                } else {
-                    let chosen = movable[Math.floor(Math.random() * movable.length)];
-                    setTimeout(() => moveToken(chosen.id, currentRoll, 'bot'), 800);
-                }
-            });
-        }
-
-        // --- MOVEMENT ENGINE ---
-        function moveToken(tokenId, stepsLeft, player) {
+        function executeStepMove(tokenId, stepsLeft, player) {
             let tokensList = (player === 'user') ? redTokens : greenTokens;
             let pathList = (player === 'user') ? redPath : greenPath;
             let t = tokensList.find(tok => tok.id === tokenId);
@@ -393,7 +385,7 @@
                 el.innerText = player === 'user' ? "🚀" : "🛸";
                 el.style.gridRow = pathList[t.pos][0];
                 el.style.gridColumn = pathList[t.pos][1];
-                finalizeMove(t, player);
+                concludeMove(t, player);
                 return;
             }
 
@@ -405,12 +397,12 @@
                     stepsLeft--;
                 } else {
                     clearInterval(interval);
-                    finalizeMove(t, player);
+                    concludeMove(t, player);
                 }
-            }, 200);
+            }, 180);
         }
 
-        function finalizeMove(t, player) {
+        function concludeMove(t, player) {
             let tokensList = (player === 'user') ? redTokens : greenTokens;
             let el = document.getElementById(t.id);
 
@@ -425,19 +417,24 @@
                 return;
             }
 
-            // If 6 is rolled, same player plays again, else switch turn
-            if (currentRoll === 6 && !t.done) {
+            let gotSix = (gameState.roll === 6 && !t.done);
+            if (gotSix) {
                 statusEl.innerText = `Rolled 6! Extra turn!`;
+                gameState.locked = false;
                 if (player === 'user') {
                     rollBtn.disabled = false;
                 } else {
-                    setTimeout(startBotTurn, 1200);
+                    setTimeout(runBotTurn, 1000);
                 }
             } else {
-                setTimeout(() => {
-                    setTurn(player === 'user' ? 'bot' : 'user');
-                }, 1200);
+                nextTurn(player, true);
             }
+        }
+
+        function nextTurn(currentPlayer, delayed) {
+            gameState.turn = (currentPlayer === 'user') ? 'bot' : 'user';
+            gameState.locked = false;
+            setTimeout(updateUI, delayed ? 1200 : 200);
         }
     </script>
 </body>
