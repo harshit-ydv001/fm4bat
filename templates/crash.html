@@ -126,7 +126,7 @@
         }
 
         .bet-row.real-user-highlight-row {
-            background: rgba(231, 76, 60, 0.22) !important;
+            background: rgba(231, 76, 60, 0.25) !important;
             border-left: 3px solid #e74c3c !important;
             font-weight: bold;
         }
@@ -747,44 +747,31 @@
             keys.forEach(uid => {
                 let bet = latestBetsData[uid];
                 
-                // Bot list check to distinguish real players from standard bots
-                const botNamesList = [
-                    "Aman_King", "Rahul_99", "Priya_Pro", "Rohit_x", "Neha_Star", "Vikash_07", "Kunal_9", 
-                    "Karan_76", "Manish_57", "Anjali_97", "Akash_80", "Deepak_88", "Sahil_37", "Priya_77", 
-                    "Manish_90", "Divya_39", "Simran_98", "Kunal_27", "Anjali_19", "Alok_87", "Manish_60", 
-                    "Deepak_83", "Amit_58", "Kunal_21", "Rohan_42", "Rahul_38", "Vikram_82", "Sahil_30", 
-                    "Rohit_62", "Vikas_91", "Rohit_34", "Vikas_84", "Kunal_70", "Pooja_72"
-                ];
-                
+                // Real user tab or check: Only username matching current logged in user (or extra real sessions starting with real names) should be separated. 
+                // Since server generates automated bot bets using standard names, we identify actual logged-in users by checking if they match currentUsername or if their name was placed via real token connection.
+                // To keep it precise: Any user whose username matches currentUsername (or contains the logged-in session identifier) is a real user.
                 let cleanName = bet.username.replace(" [2]", "");
-                let isBot = botNamesList.includes(cleanName);
+                let isRealUser = (cleanName === currentUsername || cleanName === "arpitking" || bet.is_real);
 
-                if (!isBot) {
-                    realUserBets.push(bet); // All real players (like you, arpitking, etc.)
+                if (isRealUser) {
+                    realUserBets.push(bet);
                 } else {
                     botBets.push(bet);
                 }
             });
 
-            // Real users first (Top, Red highlighted), then bots below
+            // Real users first (Top, Red highlighted), then bots below normally
             let displayBets = currentTabFilter === 'my' ? realUserBets.filter(b => b.username.startsWith(currentUsername)) : [...realUserBets, ...botBets];
 
             displayBets.forEach(bet => {
                 let row = document.createElement("div");
-                let isMe = bet.username.startsWith(currentUsername);
-                
                 let cleanName = bet.username.replace(" [2]", "");
-                let isRealUser = !([
-                    "Aman_King", "Rahul_99", "Priya_Pro", "Rohit_x", "Neha_Star", "Vikash_07", "Kunal_9", 
-                    "Karan_76", "Manish_57", "Anjali_97", "Akash_80", "Deepak_88", "Sahil_37", "Priya_77", 
-                    "Manish_90", "Divya_39", "Simran_98", "Kunal_27", "Anjali_19", "Alok_87", "Manish_60", 
-                    "Deepak_83", "Amit_58", "Kunal_21", "Rohan_42", "Rahul_38", "Vikram_82", "Sahil_30", 
-                    "Rohit_62", "Vikas_91", "Rohit_34", "Vikas_84", "Kunal_70", "Pooja_72"
-                ].includes(cleanName));
+                let isRealUser = (cleanName === currentUsername || cleanName === "arpitking" || bet.is_real);
+                let isMe = bet.username.startsWith(currentUsername);
                 
                 let rowClass = "bet-row";
                 if (isRealUser) {
-                    rowClass += " real-user-highlight-row"; // Red highlight for all real players at top
+                    rowClass += " real-user-highlight-row"; // Red highlight only for real players at top
                 }
                 if (bet.cashed_out) rowClass += " cashed-row";
                 row.className = rowClass;
