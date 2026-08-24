@@ -106,31 +106,34 @@
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
-        /* 3D Rotating Dice Container */
+        /* STYLISH 3D ROTATING DICE */
         .dice-container {
-            perspective: 300px;
-            width: 50px; height: 50px;
+            perspective: 400px;
+            width: 52px; height: 52px;
         }
         .dice-3d {
             width: 100%; height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: rotateX(-20deg) rotateY(-20deg);
+            transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
         }
         .dice-face {
-            position: absolute; width: 50px; height: 50px;
-            background: #fff; color: #111; font-size: 22px; font-weight: bold;
+            position: absolute; width: 52px; height: 52px;
+            background: linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%);
+            color: #111; font-size: 20px; font-weight: 900;
             display: flex; justify-content: center; align-items: center;
-            border: 2px solid #ccc; border-radius: 8px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+            border: 2.5px solid #d97706; border-radius: 10px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.4);
         }
-        /* 3D Rotations for different numbers */
-        .dice-3d.show-1 { transform: rotateX(0deg) rotateY(0deg); }
-        .dice-3d.show-2 { transform: rotateX(-90deg) rotateY(0deg); }
-        .dice-3d.show-3 { transform: rotateY(-90deg) rotateX(0deg); }
-        .dice-3d.show-4 { transform: rotateY(90deg) rotateX(0deg); }
-        .dice-3d.show-5 { transform: rotateX(90deg) rotateY(0deg); }
-        .dice-3d.show-6 { transform: rotateX(180deg) rotateY(0deg); }
+        
+        /* Exact 3D Cube Face Positions */
+        .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
+        .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
+        .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
+        .dice-face.left   { transform: rotateY(-90deg) translateZ(26px); }
+        .dice-face.top    { transform: rotateX(90deg) translateZ(26px); }
+        .dice-face.bottom { transform: rotateX(-90deg) translateZ(26px); }
 
         .status-msg { font-size: 11px; color: #34d399; font-weight: bold; text-align: center; flex: 1; padding: 0 8px; }
         
@@ -145,7 +148,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (3D DICE)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (STYLISH 3D)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -204,16 +207,16 @@
         </div>
     </div>
 
-    <!-- 3D Dice Control Panel -->
+    <!-- Stylish 3D Dice Control Panel -->
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
-                <div class="dice-face" style="transform: rotateY(0deg) translateZ(25px);">🎲</div>
-                <div class="dice-face" style="transform: rotateX(90deg) translateZ(25px);">2</div>
-                <div class="dice-face" style="transform: rotateY(90deg) translateZ(25px);">3</div>
-                <div class="dice-face" style="transform: rotateY(-90deg) translateZ(25px);">4</div>
-                <div class="dice-face" style="transform: rotateX(-90deg) translateZ(25px);">5</div>
-                <div class="dice-face" style="transform: rotateX(180deg) translateZ(25px);">6</div>
+                <div class="dice-face front">1</div>
+                <div class="dice-face back">6</div>
+                <div class="dice-face right">3</div>
+                <div class="dice-face left">4</div>
+                <div class="dice-face top">2</div>
+                <div class="dice-face bottom">5</div>
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the 3D dice!</div>
@@ -290,21 +293,31 @@
             rollBtn.disabled = true;
             statusEl.innerText = "Rolling 3D dice...";
 
-            // Add random spinning animation before landing on final face
-            let randomX = (Math.floor(Math.random() * 4) + 3) * 360;
-            let randomY = (Math.floor(Math.random() * 4) + 3) * 360;
-            diceCube.style.transition = "transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-            diceCube.style.transform = `rotateX(${randomX}deg) rotateY(${randomY}deg)`;
+            // Heavy random 3D rotations for rolling effect
+            let rx = (Math.floor(Math.random() * 4) + 4) * 360;
+            let ry = (Math.floor(Math.random() * 4) + 4) * 360;
+            diceCube.style.transition = "transform 0.9s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
+            diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 
             setTimeout(() => {
                 currentRoll = Math.floor(Math.random() * 6) + 1;
                 
-                // Set exact 3D face class
-                diceCube.style.transition = "transform 0.4s ease";
-                diceCube.className = `dice-3d show-${currentRoll}`;
+                // Exact precise rotations so the rolled face lands directly flat in front
+                let targetTransform = "";
+                switch(currentRoll) {
+                    case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
+                    case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
+                    case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
+                    case 4: targetTransform = "rotateY(90deg) rotateX(0deg)"; break;
+                    case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
+                    case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
+                }
+
+                diceCube.style.transition = "transform 0.4s ease-out";
+                diceCube.style.transform = targetTransform;
 
                 checkMovableTokens();
-            }, 800);
+            }, 900);
         }
 
         function checkMovableTokens() {
