@@ -125,11 +125,10 @@
             margin-bottom: 2px;
         }
 
-        .bet-row.my-bet {
-            color: #00f0ff !important;
+        .bet-row.real-user-highlight-row {
+            background: rgba(52, 211, 153, 0.18) !important;
+            border-left: 3px solid #34d399 !important;
             font-weight: bold;
-            background: rgba(0, 240, 255, 0.12);
-            border-radius: 6px;
         }
 
         .col-user { width: 35%; text-align: left; display: flex; align-items: center; gap: 6px; }
@@ -303,7 +302,6 @@
         let currentTabFilter = 'all'; 
         let latestBetsData = {};
 
-        // Web Audio API Rocket / Jet Engine Simulator with Dynamic Speed/Volume Scaling
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let jetNoiseNode = null;
         let jetFilterNode = null;
@@ -311,9 +309,8 @@
 
         function startJetEngineSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            if (jetNoiseNode) return; // Already running
+            if (jetNoiseNode) return;
 
-            // Create white noise buffer for realistic jet roar
             const bufferSize = audioCtx.sampleRate * 2;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
@@ -325,7 +322,6 @@
             jetNoiseNode.buffer = noiseBuffer;
             jetNoiseNode.loop = true;
 
-            // Lowpass filter for heavy engine rumble
             jetFilterNode = audioCtx.createBiquadFilter();
             jetFilterNode.type = 'lowpass';
             jetFilterNode.frequency.setValueAtTime(150, audioCtx.currentTime);
@@ -344,7 +340,6 @@
         function updateJetEngineSound(multiplier) {
             if (!jetFilterNode || !jetGainNode) return;
             
-            // As multiplier increases, increase engine roar pitch (filter frequency) and volume
             let progress = Math.log(multiplier);
             let targetFreq = 150 + (progress * 300);
             let targetGain = 0.04 + (progress * 0.015);
@@ -497,7 +492,6 @@
                     status.style.color = "#00f0ff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
                     
-                    // Start jet rocket engine sound
                     startJetEngineSound();
                     
                     if (bet1Active && !bet1Cashed) {
@@ -525,7 +519,6 @@
                     status.innerText = "MULTIPLIER RISING";
                     status.style.color = "#00f0ff";
                     
-                    // Dynamically scale sound pitch and volume as multiplier increases
                     updateJetEngineSound(data.multiplier);
 
                     let progress = Math.log(data.multiplier) * 0.9;
@@ -576,7 +569,6 @@
                     status.style.color = "#e74c3c";
                     if(plane) plane.style.transform = `translate(370px, 20px) rotate(65deg)`;
 
-                    // Stop engine and play crash
                     playCrashSound();
 
                     bet1Active = false;
@@ -762,6 +754,7 @@
                 }
             });
 
+            // Real user / My bets first (Top), then bots below
             let displayBets = currentTabFilter === 'my' ? myBets : [...myBets, ...botBets];
 
             displayBets.forEach(bet => {
@@ -769,7 +762,9 @@
                 let isMe = bet.username.startsWith(currentUsername);
                 
                 let rowClass = "bet-row";
-                if (isMe) rowClass += " my-bet";
+                if (isMe) {
+                    rowClass += " real-user-highlight-row"; // Special green top highlight for real user
+                }
                 if (bet.cashed_out) rowClass += " cashed-row";
                 row.className = rowClass;
 
@@ -779,7 +774,7 @@
                     : `-`;
 
                 row.innerHTML = `
-                    <span class="col-user"><div class="user-avatar">${avatarLetter}</div> <b>${bet.username}</b></span>
+                    <span class="col-user"><div class="user-avatar" style="${isMe ? 'background: #2ecc71; color: #111;' : ''}">${avatarLetter}</div> <b style="${isMe ? 'color: #34d399;' : ''}">${bet.username} ${isMe ? '(You)' : ''}</b></span>
                     <span class="col-bet">${bet.amount.toFixed(2)} 🪙</span>
                     <span class="col-cashout">${cashoutDisplay}</span>
                 `;
