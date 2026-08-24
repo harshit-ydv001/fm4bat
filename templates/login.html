@@ -25,21 +25,46 @@
         .form-box { display: none; }
         .form-box.active { display: block; }
 
-        .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; position: relative; }
         .form-group label { font-size: 11px; color: #94a3b8; font-weight: bold; }
+        
+        .input-wrapper { position: relative; display: flex; align-items: center; }
         .form-group input {
+            width: 100%;
             background: #1c212e; border: 1px solid #374151; border-radius: 8px;
-            padding: 10px 14px; color: #fff; font-size: 13px; outline: none;
+            padding: 10px 40px 10px 14px; color: #fff; font-size: 13px; outline: none;
         }
         .form-group input:focus { border-color: #34d399; }
+
+        .toggle-password {
+            position: absolute; right: 12px; background: none; border: none;
+            color: #94a3b8; cursor: pointer; font-size: 15px;
+        }
+
+        .forgot-link {
+            text-align: right; font-size: 11px; color: #34d399; text-decoration: none; margin-top: -6px; margin-bottom: 10px; display: block; cursor: pointer;
+        }
+        .forgot-link:hover { text-decoration: underline; }
         
         .submit-btn {
             width: 100%; background: linear-gradient(135deg, #34d399 0%, #059669 100%);
             color: #fff; border: none; padding: 11px; border-radius: 8px;
-            font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 10px;
+            font-weight: bold; font-size: 13px; cursor: pointer; margin-top: 5px;
             text-transform: uppercase;
         }
         .submit-btn:hover { opacity: 0.9; }
+
+        /* Modal styling for Forgot Password */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-content {
+            background: #141822; border: 2px solid #2a2f40; padding: 20px; border-radius: 12px;
+            width: 90%; max-width: 350px;
+        }
+        .modal-title { font-size: 16px; font-weight: bold; color: #34d399; margin-bottom: 12px; }
+        .close-modal { float: right; background: none; border: none; color: #fff; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,6 +77,7 @@
             <button class="tab-btn" id="signup-tab" onclick="switchTab('signup')">Sign Up</button>
         </div>
 
+        <!-- Login Form -->
         <form id="login-form" class="form-box active" action="/login" method="POST">
             <div class="form-group">
                 <label>Username or Email</label>
@@ -59,11 +85,16 @@
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" required placeholder="Enter password">
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="login-pass" required placeholder="Enter password">
+                    <button type="button" class="toggle-password" onclick="togglePassword('login-pass', this)">👁️</button>
+                </div>
             </div>
+            <a class="forgot-link" onclick="openForgotModal()">Forgot Password?</a>
             <button type="submit" class="submit-btn">Login</button>
         </form>
 
+        <!-- Signup Form -->
         <form id="signup-form" class="form-box" action="/signup" method="POST">
             <div class="form-group">
                 <label>Username</label>
@@ -75,10 +106,35 @@
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" required placeholder="Create a password">
+                <div class="input-wrapper">
+                    <input type="password" name="password" id="signup-pass" required placeholder="Create a password">
+                    <button type="button" class="toggle-password" onclick="togglePassword('signup-pass', this)">👁️</button>
+                </div>
             </div>
             <button type="submit" class="submit-btn">Register & Start</button>
         </form>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeForgotModal()">✕</button>
+            <div class="modal-title">Reset Password</div>
+            <form action="/forgot-password" method="POST">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <input type="text" name="identifier" required placeholder="Enter registered username/email">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" id="forgot-pass" required placeholder="Enter new password">
+                        <button type="button" class="toggle-password" onclick="togglePassword('forgot-pass', this)">👁️</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Update Password</button>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -95,6 +151,24 @@
                 document.getElementById('signup-tab').classList.add('active');
                 document.getElementById('signup-form').classList.add('active');
             }
+        }
+
+        function togglePassword(fieldId, btn) {
+            const field = document.getElementById(fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+                btn.innerText = "🙈";
+            } else {
+                field.type = "password";
+                btn.innerText = "👁️";
+            }
+        }
+
+        function openForgotModal() {
+            document.getElementById('forgot-modal').style.display = 'flex';
+        }
+        function closeForgotModal() {
+            document.getElementById('forgot-modal').style.display = 'none';
         }
     </script>
 
