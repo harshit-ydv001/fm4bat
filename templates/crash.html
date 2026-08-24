@@ -208,9 +208,7 @@
         </div>
     </div>
 
-    <!-- Dual Betting Panels -->
     <div class="betting-section">
-        <!-- Panel 1 -->
         <div class="bet-panel">
             <div class="bet-mode-tabs">
                 <button class="bet-mode-tab active">Bet</button>
@@ -232,7 +230,6 @@
             </div>
         </div>
 
-        <!-- Panel 2 -->
         <div class="bet-panel">
             <div class="bet-mode-tabs">
                 <button class="bet-mode-tab active">Bet</button>
@@ -255,7 +252,6 @@
         </div>
     </div>
 
-    <!-- Bottom Section: All Bets & My Bets Only -->
     <div class="stats-section">
         <div class="stats-tabs">
             <button class="stats-tab active" id="tab-all" onclick="switchTab('all')">All Bets (<span id="player-count">0</span>)</button>
@@ -269,7 +265,6 @@
         <div class="bets-list" id="live-bets-list"></div>
     </div>
 
-    <!-- Full Screen History Modal -->
     <div class="history-modal" id="historyModal">
         <div class="history-modal-content">
             <div class="history-modal-header">
@@ -303,59 +298,71 @@
         let currentTabFilter = 'all'; 
         let latestBetsData = {};
 
-        // Web Audio API Sound Effects
+        // Ultra-Smooth Professional Web Audio API Sound Effects
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playTakeoffSound() {
+        function playSmoothTakeoff() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Soft warm ambient rise (Sine wave with gradual smooth filter)
             let osc = audioCtx.createOscillator();
             let gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 3);
             
-            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 3);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(320, audioCtx.currentTime + 2.5);
+            
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.5);
+            gain.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 2.5);
             
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 3);
+            osc.stop(audioCtx.currentTime + 2.5);
         }
 
-        function playCashoutSound() {
+        function playSmoothCashout() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Pleasant harp-like double chime (C5 & G5)
+            let now = audioCtx.currentTime;
+            [523.25, 783.99].forEach((freq, index) => {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + (index * 0.08));
+                
+                gain.gain.setValueAtTime(0.001, now + (index * 0.08));
+                gain.gain.linearRampToValueAtTime(0.12, now + (index * 0.08) + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + (index * 0.08) + 0.6);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + (index * 0.08));
+                osc.stop(now + (index * 0.08) + 0.6);
+            });
+        }
+
+        function playSmoothCrash() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            // Soft downward gliding tone (Non-harsh fade out)
             let osc = audioCtx.createOscillator();
             let gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); 
-            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); 
             
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.5);
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 0.5);
             
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
             osc.stop(audioCtx.currentTime + 0.5);
-        }
-
-        function playCrashSound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.4);
-            
-            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 0.4);
-            
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
         }
 
         function connectWebSocket() {
@@ -414,8 +421,8 @@
                     status.style.color = "#00f0ff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
                     
-                    // Play takeoff sound on flight start
-                    playTakeoffSound();
+                    // Play smooth ambient takeoff sound
+                    playSmoothTakeoff();
                     
                     if (bet1Active && !bet1Cashed) {
                         btn1.innerText = "CASH OUT";
@@ -490,8 +497,8 @@
                     status.style.color = "#e74c3c";
                     if(plane) plane.style.transform = `translate(370px, 20px) rotate(65deg)`;
 
-                    // Play crash sound
-                    playCrashSound();
+                    // Play smooth crash tone
+                    playSmoothCrash();
 
                     bet1Active = false;
                     bet1Cashed = false;
@@ -580,8 +587,8 @@
                     balance += winAmount;
                     updateBalanceDisplay();
 
-                    // Play cashout success win chime
-                    playCashoutSound();
+                    // Play smooth satisfying harp win chime
+                    playSmoothCashout();
 
                     actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
                     actionBtn.style.background = "#2ecc71";
@@ -593,8 +600,8 @@
                     balance += winAmount;
                     updateBalanceDisplay();
 
-                    // Play cashout success win chime
-                    playCashoutSound();
+                    // Play smooth satisfying harp win chime
+                    playSmoothCashout();
 
                     actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
                     actionBtn.style.background = "#2ecc71";
