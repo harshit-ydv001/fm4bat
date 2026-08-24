@@ -29,7 +29,7 @@
         <div class="brand-logo">⚡ fm4bat</div>
         <h2 id="form-title">Login to your account</h2>
         
-        <form action="/login" method="POST" id="auth-form">
+        <form action="/login" method="POST" id="auth-form" onsubmit="return handleFormSubmit(event)">
             
             <!-- Signup Fields -->
             <div class="form-group" id="username-field" style="display: none;">
@@ -57,7 +57,7 @@
                 <span class="otp-hint" id="otp-display-hint"></span>
             </div>
 
-            <button type="button" class="btn-submit" id="submit-btn" onclick="handleAuthAction()">Login</button>
+            <button type="submit" class="btn-submit" id="submit-btn">Login</button>
         </form>
 
         <div class="toggle-text" id="toggle-container">
@@ -67,7 +67,7 @@
 
     <script>
         let isLogin = true;
-        let otpStep = false; // Track if we are waiting for OTP verification during signup
+        let otpStep = false; 
         let generatedOtp = "";
 
         function togglePassword() {
@@ -120,39 +120,42 @@
             }
         }
 
-        function handleAuthAction() {
+        function handleFormSubmit(event) {
             const form = document.getElementById("auth-form");
             
             if (isLogin) {
                 form.action = "/login";
-                form.submit();
+                return true; // Allow normal submit
             } else {
                 if (!otpStep) {
-                    // Step 1 of Signup: Generate dummy OTP and show input field
+                    event.preventDefault(); // Stop form submission for Step 1 of Signup
+                    
                     const identifierVal = document.getElementById("input-identifier").value;
                     const usernameVal = document.getElementById("input-username").value;
                     const passwordVal = document.getElementById("password-input").value;
 
                     if (!identifierVal || !usernameVal || !passwordVal) {
                         alert("Please fill in all fields first!");
-                        return;
+                        return false;
                     }
 
                     generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
                     
-                    // Show OTP input and change button text
                     document.getElementById("otp-field").style.display = "block";
                     document.getElementById("otp-display-hint").innerText = `Mock OTP sent to ${identifierVal}: [ ${generatedOtp} ]`;
                     document.getElementById("submit-btn").innerText = "Verify & Register";
                     otpStep = true;
+                    return false;
                 } else {
                     // Step 2 of Signup: Verify OTP
                     const enteredOtp = document.getElementById("input-otp").value;
                     if (enteredOtp === generatedOtp) {
                         form.action = "/signup";
-                        form.submit();
+                        return true;
                     } else {
+                        event.preventDefault();
                         alert("Invalid OTP! Please check the code shown above.");
+                        return false;
                     }
                 }
             }
