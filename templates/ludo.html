@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - fm4bat (With Sound)</title>
+    <title>Ludo Battle - fm4bat (Real Dice Sound)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -170,7 +170,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (WITH SOUND)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (REAL DICE SOUND)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -246,47 +246,64 @@
     </div>
 
     <script>
-        // Web Audio API Sound Synthesizer (No external files needed, works instantly!)
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
 
             if (type === 'dice') {
-                // Dice rolling rattle effect
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
+                // Real wooden dice cup shaking rattle sound using rapid multi-clicks
+                let rattles = 8;
+                for (let i = 0; i < rattles; i++) {
+                    setTimeout(() => {
+                        if (audioCtx.state === 'closed') return;
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.type = 'square';
+                        // Random frequencies for wooden cup clatter feel
+                        osc.frequency.setValueAtTime(120 + Math.random() * 300, audioCtx.currentTime);
+                        
+                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                        
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.05);
+                    }, i * 70); // spaced out rattling
+                }
             } else if (type === 'step') {
-                // Token move tap-tap sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.06);
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.08);
+                osc.stop(audioCtx.currentTime + 0.06);
             } else if (type === 'win') {
-                // Victory chime sound
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12); // E5
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24); // G5
+                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.36); // C6
+                
                 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.6);
+                osc.stop(audioCtx.currentTime + 0.7);
             }
         }
 
@@ -357,8 +374,8 @@
         function rollDice() {
             if(isWaitingForMove) return;
             rollBtn.disabled = true;
-            statusEl.innerText = "Rolling dice...";
-            playSound('dice');
+            statusEl.innerText = "Shaking dice cup...";
+            playSound('dice'); // Play realistic rattling cup sound
 
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
@@ -380,7 +397,6 @@
 
                 diceCube.style.transition = "transform 0.4s ease-out";
                 diceCube.style.transform = targetTransform;
-                playSound('dice');
 
                 checkMovableTokens();
             }, 900);
