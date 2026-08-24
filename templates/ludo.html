@@ -227,7 +227,7 @@
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playRealisticDiceStudy() {
+        function playRealisticDiceSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             for(let i=0; i<12; i++) {
                 let delay = i * 45 + Math.random() * 25;
@@ -262,16 +262,7 @@
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
         const ludoBoard = document.getElementById('ludo-board');
-        
-        // Exact Star positions precisely matching user's marked lines on columns:
-        // Yellow arm left column (row 2, col 8) -> wait, looking at user's mark:
-        // Yellow top column, Green left column, Red bottom column, Blue right column
-        const safeCoords = [
-            [2, 8],   // Yellow start star (top column)
-            [14, 8],  // Red start star (bottom column)
-            [8, 2],   // Green start star (left column)
-            [8, 14]   // Blue start star (right column)
-        ];
+        const safeCoords = [[8,2], [2,8], [8,14], [14,8]];
 
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
@@ -287,6 +278,7 @@
                     if(r >= 10 && c === 8 && r <= 14) cell.classList.add('red-home-col');
                     if(r === 8 && c >= 2 && c <= 6) cell.classList.add('green-home-col');
                     if(r >= 2 && c === 8 && r <= 6) cell.classList.add('yellow-home-col');
+                    if(r === 8 && c >= 10 && c <= 14) cell.classList.add('blue-home-col'); // Right arm colored Blue as requested
 
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     ludoBoard.appendChild(cell);
@@ -318,7 +310,7 @@
         let isWaitingForTokenClick = false;
 
         function runDiceAnimation(val, player, onFinish) {
-            playRealisticDiceStudy();
+            playRealisticDiceSound();
             let cube = document.getElementById("dice-cube");
             let rx = (Math.floor(Math.random() * 3) + 4) * 360;
             let ry = (Math.floor(Math.random() * 3) + 4) * 360;
