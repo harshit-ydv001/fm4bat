@@ -262,10 +262,17 @@
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
         const ludoBoard = document.getElementById('ludo-board');
-        // Exact Ludo star safe points including start positions and regular star spots
+        
+        // Exact Star positions as marked by user on the screenshot reference
         const safeCoords = [
-            [8,2], [2,8], [8,14], [14,8], 
-            [7,2], [14,7], [9,2], [13,8]
+            [8,2],  // Green start star (left)
+            [14,7], // Red start star (bottom)
+            [2,8],  // Yellow start star (top)
+            [8,14], // Blue start star (right)
+            [7,2],  // Green track star
+            [13,8], // Red track star
+            [9,14], // Blue track star
+            [3,8]   // Yellow track star
         ];
 
         for(let r = 1; r <= 15; r++) {
@@ -428,7 +435,7 @@
             let currentCoords = currentPath[activeToken.pos];
 
             let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
-            if (isSafe) return;
+            if (isSafe) return; // Safe point par goti cut nahi hogi
 
             let opponentTokens = (player === 'user') ? greenTokensArr : redTokensArr;
             let opponentPath = (player === 'user') ? greenPathCoords : redPathCoords;
