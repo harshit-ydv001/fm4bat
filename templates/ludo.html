@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - fm4bat</title>
+    <title>Ludo Battle - fm4bat (With Sound)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -106,7 +106,7 @@
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
-        /* REAL LUDO 3D DOTS DICE */
+        /* 3D Dots Dice Styles */
         .dice-container {
             perspective: 400px;
             width: 52px; height: 52px;
@@ -126,12 +126,10 @@
             display: grid; padding: 6px;
         }
 
-        /* Dice Dot Styling */
         .dot {
             width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center;
         }
 
-        /* Face layouts using CSS grid */
         .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
         .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
         .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
@@ -152,7 +150,6 @@
 
         .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
 
-        /* 3D Transformations */
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
@@ -173,7 +170,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (REAL DICE)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (WITH SOUND)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -232,21 +229,15 @@
         </div>
     </div>
 
-    <!-- Real Ludo 3D Dots Dice Control Panel -->
+    <!-- Control Panel -->
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
-                <!-- Face 1 -->
                 <div class="dice-face front face-1"><div class="dot"></div></div>
-                <!-- Face 6 -->
                 <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <!-- Face 3 -->
                 <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <!-- Face 4 -->
                 <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <!-- Face 2 -->
                 <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
-                <!-- Face 5 -->
                 <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
             </div>
         </div>
@@ -255,6 +246,50 @@
     </div>
 
     <script>
+        // Web Audio API Sound Synthesizer (No external files needed, works instantly!)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'dice') {
+                // Dice rolling rattle effect
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } else if (type === 'step') {
+                // Token move tap-tap sound
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } else if (type === 'win') {
+                // Victory chime sound
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            }
+        }
+
         const board = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
@@ -323,6 +358,7 @@
             if(isWaitingForMove) return;
             rollBtn.disabled = true;
             statusEl.innerText = "Rolling dice...";
+            playSound('dice');
 
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
@@ -344,6 +380,7 @@
 
                 diceCube.style.transition = "transform 0.4s ease-out";
                 diceCube.style.transform = targetTransform;
+                playSound('dice');
 
                 checkMovableTokens();
             }, 900);
@@ -396,6 +433,7 @@
                 el.innerText = "🚀";
                 el.style.gridRow = redPath[t.pos][0];
                 el.style.gridColumn = redPath[t.pos][1];
+                playSound('step');
                 finishMove(t);
                 return;
             }
@@ -405,6 +443,7 @@
                     t.pos++;
                     el.style.gridRow = redPath[t.pos][0];
                     el.style.gridColumn = redPath[t.pos][1];
+                    playSound('step');
                     stepsLeft--;
                 } else {
                     clearInterval(interval);
@@ -418,12 +457,14 @@
             if (t.pos === 56) {
                 t.done = true;
                 el.innerText = "👑";
+                playSound('win');
                 statusEl.innerText = `🎉 Commando reached Home!`;
             }
 
             if (tokens.every(tok => tok.done)) {
+                playSound('win');
                 statusEl.innerText = "🎉 YOU WON THE BATTLE! 🎉";
-                setTimeout(() => window.location.href = "/dashboard", 2000);
+                setTimeout(() => window.location.href = "/dashboard", 2500);
                 return;
             }
 
