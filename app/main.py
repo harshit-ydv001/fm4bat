@@ -145,7 +145,7 @@ async def crash_game_page(request: Request):
     return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
-# Ludo Lobby Route (Dashboard se ludo click karne par ye open hoga)
+# Ludo Lobby Route (Strict Authentication Check)
 @app.get("/games/ludo", response_class=HTMLResponse)
 async def ludo_lobby_page(request: Request):
     username = request.cookies.get("session_user")
@@ -154,7 +154,7 @@ async def ludo_lobby_page(request: Request):
     return templates.TemplateResponse("ludo_lobby.html", {"request": request, "username": username})
 
 
-# Ludo Playable Game Route (Matchmaking ke baad ye game start karega)
+# Ludo Playable Game Route (Strict Authentication Check)
 @app.get("/games/ludo/play", response_class=HTMLResponse)
 async def ludo_game_play_page(request: Request):
     username = request.cookies.get("session_user")
