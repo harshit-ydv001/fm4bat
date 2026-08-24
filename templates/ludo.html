@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Clean Working Bot</title>
+    <title>Ludo Battle - Perfect Turn Loop</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -277,6 +277,7 @@
 
             if (movable.length === 0) {
                 document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. No moves!`;
+                // FIX: No moves hone par bhi turant turn switch hogi!
                 setTimeout(() => switchPlayerTurn(player, false), 1500);
             } else if (player === 'bot' || movable.length === 1) {
                 let chosen = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
