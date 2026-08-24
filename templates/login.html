@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Fixed Bot Turn</title>
+    <title>Ludo Battle - Dual Real Dice</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -22,16 +22,23 @@
             border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px;
         }
 
-        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
         .player-card {
-            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
-            transition: all 0.3s ease;
+            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 6px 10px; width: 48%; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease; position: relative;
         }
-        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.6); background: rgba(241, 196, 15, 0.05); }
+        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.7); background: rgba(241, 196, 15, 0.08); }
         .player-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
-        .player-info { display: flex; flex-direction: column; font-size: 10px; }
+        .player-info { display: flex; flex-direction: column; font-size: 10px; flex: 1; }
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
+
+        /* Mini Dice for Card Header */
+        .mini-dice {
+            width: 28px; height: 28px; background: #fff; border: 2px solid #d97706; border-radius: 6px;
+            display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #111;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
 
         .board {
             width: 360px; height: 360px; background: #ffffff; border: 4px solid #111;
@@ -75,6 +82,7 @@
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
+        /* 3D Dots Dice Styles */
         .dice-container { perspective: 400px; width: 52px; height: 52px; }
         .dice-3d {
             width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
@@ -124,19 +132,29 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (REAL VS BOT)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (DUAL DICE)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
+        <!-- Opponent Player Card with Mini Dice -->
         <div class="players-row">
             <div class="player-card" id="opp-card">
                 <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" id="opp-avatar" alt="Opponent">
-                <div class="player-info"><span class="player-name" id="opp-name">Rahul_99</span><span class="player-coins" id="opp-status">Online</span></div>
+                <div class="player-info">
+                    <span class="player-name" id="opp-name">Rahul_99</span>
+                    <span class="player-coins" id="opp-status">Waiting...</span>
+                </div>
+                <div class="mini-dice" id="opp-mini-dice">🎲</div>
             </div>
+
             <div class="player-card active-turn" id="user-card">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="You">
-                <div class="player-info"><span class="player-name">You (Red)</span><span class="player-coins">🪙 Active</span></div>
+                <div class="player-info">
+                    <span class="player-name">You (Red)</span>
+                    <span class="player-coins">🪙 Active</span>
+                </div>
+                <div class="mini-dice" id="user-mini-dice">🎲</div>
             </div>
         </div>
 
@@ -164,6 +182,7 @@
         </div>
     </div>
 
+    <!-- Main Control Panel with User's 3D Dice -->
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
@@ -300,6 +319,8 @@
         const rollBtn = document.getElementById("roll-dice-btn");
         const userCard = document.getElementById("user-card");
         const oppCard = document.getElementById("opp-card");
+        const userMiniDice = document.getElementById("user-mini-dice");
+        const oppMiniDice = document.getElementById("opp-mini-dice");
 
         function updateTurnIndicator() {
             if (currentTurn === 'user') {
@@ -307,12 +328,14 @@
                 oppCard.classList.remove('active-turn');
                 statusEl.innerText = "Your Turn (Red). Roll the dice!";
                 rollBtn.disabled = false;
+                oppMiniDice.innerText = "🎲";
             } else {
                 userCard.classList.remove('active-turn');
                 oppCard.classList.add('active-turn');
-                statusEl.innerText = `${chosenBot.name}'s turn...`;
+                statusEl.innerText = `${chosenBot.name} is rolling dice...`;
                 rollBtn.disabled = true;
-                setTimeout(botTurn, 1000);
+                userMiniDice.innerText = "🎲";
+                setTimeout(botTurn, 1200);
             }
         }
 
@@ -322,8 +345,32 @@
             statusEl.innerText = "Rolling dice...";
             playSound('dice');
 
-            animateDiceRoll(() => {
+            animateDiceRoll((roll) => {
+                currentRoll = roll;
+                userMiniDice.innerText = currentRoll;
                 checkMovableTokens();
+            });
+        }
+
+        function botTurn() {
+            playSound('dice');
+            oppMiniDice.innerText = "⏳";
+            statusEl.innerText = `${chosenBot.name} is rolling...`;
+
+            animateDiceRoll((roll) => {
+                currentRoll = roll;
+                oppMiniDice.innerText = currentRoll;
+                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
+                
+                let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
+
+                if (validTokens.length === 0) {
+                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves! Passing turn.`;
+                    setTimeout(switchTurn, 1400);
+                } else {
+                    let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
+                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 800);
+                }
             });
         }
 
@@ -334,9 +381,9 @@
             diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 
             setTimeout(() => {
-                currentRoll = Math.floor(Math.random() * 6) + 1;
+                let rolled = Math.floor(Math.random() * 6) + 1;
                 let targetTransform = "";
-                switch(currentRoll) {
+                switch(rolled) {
                     case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
                     case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
                     case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
@@ -346,7 +393,7 @@
                 }
                 diceCube.style.transition = "transform 0.4s ease-out";
                 diceCube.style.transform = targetTransform;
-                if(callback) callback();
+                if(callback) callback(rolled);
             }, 900);
         }
 
@@ -368,7 +415,7 @@
 
             if (movableCount === 0) {
                 statusEl.innerText = `Rolled ${currentRoll}. No valid moves! Passing turn.`;
-                setTimeout(switchTurn, 1200);
+                setTimeout(switchTurn, 1400);
             } else if (movableCount === 1) {
                 statusEl.innerText = `Rolled ${currentRoll}. Moving commando...`;
                 setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll, 'user'), 300);
@@ -376,23 +423,6 @@
                 statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
                 isWaitingForMove = true;
             }
-        }
-
-        function botTurn() {
-            playSound('dice');
-            animateDiceRoll(() => {
-                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
-                
-                let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
-
-                if (validTokens.length === 0) {
-                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves! Passing turn.`;
-                    setTimeout(switchTurn, 1200); // Automatically switch turn back to user!
-                } else {
-                    let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
-                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 600);
-                }
-            });
         }
 
         function stepByStepMove(tokenId, stepsLeft, player) {
@@ -456,10 +486,10 @@
                 if (player === 'user') {
                     rollBtn.disabled = false;
                 } else {
-                    setTimeout(botTurn, 1000); // Bot gets another turn on 6
+                    setTimeout(botTurn, 1200); // Bot rolls again on 6
                 }
             } else {
-                setTimeout(switchTurn, 1000);
+                setTimeout(switchTurn, 1200);
             }
         }
 
