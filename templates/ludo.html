@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Exact Ludo King Edition</title>
+    <title>Ludo Battle - 1 Token Fast Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -51,14 +51,13 @@
 
         .inner-box {
             width: 100%; height: 100%; background: #fff; border-radius: 8px; border: 2px solid rgba(0,0,0,0.1);
-            display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr);
-            padding: 8px; gap: 8px; align-items: center; justify-items: center;
+            display: flex; align-items: center; justify-content: center;
         }
         
         .token {
-            width: 24px; height: 24px; background: #222; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 13px;
-            border: 2px solid #fff; cursor: not-allowed; place-self: center; z-index: 10;
+            width: 32px; height: 32px; background: #222; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 16px;
+            border: 2px solid #fff; cursor: not-allowed; z-index: 10;
             box-shadow: 0 3px 6px rgba(0,0,0,0.4);
         }
         
@@ -148,7 +147,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (KING)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (1-TOKEN FAST)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -176,17 +175,11 @@
         <div class="board" id="ludo-board">
             <div class="base-green" id="green-base-area">
                 <div class="inner-box" id="green-inner-box">
-                    <div class="token green-token" id="green-0">♟️</div>
-                    <div class="token green-token" id="green-1">♟️</div>
-                    <div class="token green-token" id="green-2">♟️</div>
-                    <div class="token green-token" id="green-3">♟️</div>
+                    <div class="token green-token" id="green-token">♟️</div>
                 </div>
             </div>
             <div class="base-yellow" id="yellow-base-area">
                 <div class="inner-box">
-                    <div class="token" style="background:#f1c40f;">♟️</div>
-                    <div class="token" style="background:#f1c40f;">♟️</div>
-                    <div class="token" style="background:#f1c40f;">♟️</div>
                     <div class="token" style="background:#f1c40f;">♟️</div>
                 </div>
             </div>
@@ -194,17 +187,11 @@
             <div class="base-blue" id="blue-base-area">
                 <div class="inner-box">
                     <div class="token" style="background:#3498db;">♟️</div>
-                    <div class="token" style="background:#3498db;">♟️</div>
-                    <div class="token" style="background:#3498db;">♟️</div>
-                    <div class="token" style="background:#3498db;">♟️</div>
                 </div>
             </div>
             <div class="base-red" id="red-base-area">
                 <div class="inner-box" id="red-inner-box">
-                    <div class="token red-token" id="red-0">♟️</div>
-                    <div class="token red-token" id="red-1">♟️</div>
-                    <div class="token red-token" id="red-2">♟️</div>
-                    <div class="token red-token" id="red-3">♟️</div>
+                    <div class="token red-token" id="red-token">♟️</div>
                 </div>
             </div>
         </div>
@@ -278,7 +265,7 @@
                     if(r >= 10 && c === 8 && r <= 14) cell.classList.add('red-home-col');
                     if(r === 8 && c >= 2 && c <= 6) cell.classList.add('green-home-col');
                     if(r >= 2 && c === 8 && r <= 6) cell.classList.add('yellow-home-col');
-                    if(r === 8 && c >= 10 && c <= 14) cell.classList.add('blue-home-col'); // Right arm colored Blue as requested
+                    if(r === 8 && c >= 10 && c <= 14) cell.classList.add('blue-home-col');
 
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     ludoBoard.appendChild(cell);
@@ -302,8 +289,9 @@
             [7,1], [8,1], [8,2], [8,3], [8,4], [8,5], [8,6]
         ];
 
-        let redTokensArr = [{id:'red-0', pos:-1, done:false}, {id:'red-1', pos:-1, done:false}, {id:'red-2', pos:-1, done:false}, {id:'red-3', pos:-1, done:false}];
-        let greenTokensArr = [{id:'green-0', pos:-1, done:false}, {id:'green-1', pos:-1, done:false}, {id:'green-2', pos:-1, done:false}, {id:'green-3', pos:-1, done:false}];
+        // Single Token Object for each player
+        let redToken = { id: 'red-token', pos: -1, done: false };
+        let greenToken = { id: 'green-token', pos: -1, done: false };
 
         let playerTurn = 'user'; 
         let activeDiceVal = 0;
@@ -358,62 +346,58 @@
         }
 
         function evaluateGameTurn(player) {
-            let tokens = (player === 'user') ? redTokensArr : greenTokensArr;
-            let movable = tokens.filter(t => !t.done && ((t.pos === -1 && activeDiceVal === 6) || (t.pos >= 0 && t.pos + activeDiceVal <= 56)));
+            let token = (player === 'user') ? redToken : greenToken;
+            let canMove = !token.done && ((token.pos === -1 && activeDiceVal === 6) || (token.pos >= 0 && token.pos + activeDiceVal <= 56));
 
-            if (movable.length === 0) {
+            if (!canMove) {
                 document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. No moves!`;
                 setTimeout(() => switchPlayerTurn(player, false), 1500);
-            } else if (player === 'bot' || movable.length === 1) {
-                let chosen = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
-                moveTokenSteps(chosen.id, activeDiceVal, player);
+            } else if (player === 'bot') {
+                moveTokenSteps(token.id, activeDiceVal, 'bot');
             } else {
-                document.getElementById("game-status").innerText = `Rolled ${activeDiceVal}. Click your glowing token!`;
+                document.getElementById("game-status").innerText = `Rolled ${activeDiceVal}. Click your token!`;
                 isWaitingForTokenClick = true;
-                movable.forEach(t => document.getElementById(t.id).classList.add('movable'));
+                document.getElementById(token.id).classList.add('movable');
             }
         }
 
-        redTokensArr.forEach(t => {
-            document.getElementById(t.id).addEventListener('click', () => {
-                if (playerTurn === 'user' && isWaitingForTokenClick && document.getElementById(t.id).classList.contains('movable')) {
-                    redTokensArr.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
-                    isWaitingForTokenClick = false;
-                    document.getElementById("game-status").innerText = "Moving token...";
-                    moveTokenSteps(t.id, activeDiceVal, 'user');
-                }
-            });
+        document.getElementById('red-token').addEventListener('click', () => {
+            if (playerTurn === 'user' && isWaitingForTokenClick && document.getElementById('red-token').classList.contains('movable')) {
+                document.getElementById('red-token').classList.remove('movable');
+                isWaitingForTokenClick = false;
+                document.getElementById("game-status").innerText = "Moving token...";
+                moveTokenSteps('red-token', activeDiceVal, 'user');
+            }
         });
 
         function moveTokenSteps(tokenId, stepsLeft, player) {
-            let tokensList = (player === 'user') ? redTokensArr : greenTokensArr;
+            let token = (player === 'user') ? redToken : greenToken;
             let pathList = (player === 'user') ? redPathCoords : greenPathCoords;
-            let t = tokensList.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
 
-            if (t.pos === -1) {
-                t.pos = 0;
+            if (token.pos === -1) {
+                token.pos = 0;
                 ludoBoard.appendChild(el);
                 el.innerText = player === 'user' ? "🚀" : "🛸";
                 playStepSound();
-                el.style.gridRow = pathList[t.pos][0];
-                el.style.gridColumn = pathList[t.pos][1];
-                checkForCaptures(t, player);
-                checkTurnCompletion(t, player);
+                el.style.gridRow = pathList[token.pos][0];
+                el.style.gridColumn = pathList[token.pos][1];
+                checkForCaptures(token, player);
+                checkTurnCompletion(token, player);
                 return;
             }
 
             let stepTimer = setInterval(() => {
-                if (stepsLeft > 0 && t.pos < 56) {
-                    t.pos++;
+                if (stepsLeft > 0 && token.pos < 56) {
+                    token.pos++;
                     playStepSound();
-                    el.style.gridRow = pathList[t.pos][0];
-                    el.style.gridColumn = pathList[t.pos][1];
+                    el.style.gridRow = pathList[token.pos][0];
+                    el.style.gridColumn = pathList[token.pos][1];
                     stepsLeft--;
                 } else {
                     clearInterval(stepTimer);
-                    checkForCaptures(t, player);
-                    checkTurnCompletion(t, player);
+                    checkForCaptures(token, player);
+                    checkTurnCompletion(token, player);
                 }
             }, 180);
         }
@@ -427,43 +411,37 @@
             let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
             if (isSafe) return;
 
-            let opponentTokens = (player === 'user') ? greenTokensArr : redTokensArr;
-            let opponentPath = (player === 'user') ? greenPathCoords : redPathCoords;
+            let oppToken = (player === 'user') ? greenToken : redToken;
+            let oppPath = (player === 'user') ? greenPathCoords : redPathCoords;
 
-            opponentTokens.forEach(opp => {
-                if (opp.pos >= 0 && opp.pos < 50 && !opp.done) {
-                    let oppCoords = opponentPath[opp.pos];
-                    if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
-                        opp.pos = -1;
-                        let oppEl = document.getElementById(opp.id);
-                        oppEl.innerText = "♟️";
-                        if (player === 'user') {
-                            document.getElementById("green-inner-box").appendChild(oppEl);
-                        } else {
-                            document.getElementById("red-inner-box").appendChild(oppEl);
-                        }
-                        document.getElementById("game-status").innerText = "Captured opponent token! Extra turn!";
+            if (oppToken.pos >= 0 && oppToken.pos < 50 && !oppToken.done) {
+                let oppCoords = oppPath[oppToken.pos];
+                if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
+                    oppToken.pos = -1;
+                    let oppEl = document.getElementById(oppToken.id);
+                    oppEl.innerText = "♟️";
+                    if (player === 'user') {
+                        document.getElementById("green-inner-box").appendChild(oppEl);
+                    } else {
+                        document.getElementById("red-inner-box").appendChild(oppEl);
                     }
+                    document.getElementById("game-status").innerText = "Captured opponent! Extra turn!";
                 }
-            });
+            }
         }
 
-        function checkTurnCompletion(t, player) {
-            let tokensList = (player === 'user') ? redTokensArr : greenTokensArr;
-            let el = document.getElementById(t.id);
+        function checkTurnCompletion(token, player) {
+            let el = document.getElementById(token.id);
 
-            if (t.pos === 56) {
-                t.done = true;
+            if (token.pos === 56) {
+                token.done = true;
                 el.innerText = "👑";
-            }
-
-            if (tokensList.every(tok => tok.done)) {
                 document.getElementById("game-status").innerText = player === 'user' ? "🎉 YOU WON!" : `😞 ${chosenBotName} WON!`;
                 setTimeout(() => window.location.href = "/dashboard", 3000);
                 return;
             }
 
-            let gotSix = (activeDiceVal === 6 && !t.done);
+            let gotSix = (activeDiceVal === 6);
             if (gotSix) {
                 document.getElementById("game-status").innerText = "Rolled 6! Extra turn!";
                 if (player === 'user') {
