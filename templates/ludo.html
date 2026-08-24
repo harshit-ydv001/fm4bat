@@ -54,7 +54,7 @@
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
-        /* Full 15x15 Classic Ludo Board Grid */
+        /* Full 15x15 Classic Ludo Board Grid Layout */
         .board {
             width: 360px; height: 360px;
             background: #ffffff;
@@ -89,7 +89,6 @@
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
             display: flex; justify-content: center; align-items: center; font-size: 24px;
             border: 2px solid #111;
-            position: relative;
         }
 
         /* Track Grid Cells */
@@ -102,10 +101,10 @@
             font-size: 8px;
             font-weight: bold;
         }
-        .green-cell { background: #2ecc71; color: #fff; }
-        .red-cell { background: #e74c3c; color: #fff; }
-        .yellow-cell { background: #f1c40f; }
-        .blue-cell { background: #3498db; color: #fff; }
+        .cell-green { background: #2ecc71; color: #fff; }
+        .cell-yellow { background: #f1c40f; color: #000; }
+        .cell-red { background: #e74c3c; color: #fff; }
+        .cell-blue { background: #3498db; color: #fff; }
 
         .control-panel {
             width: 100%; max-width: 480px;
@@ -198,33 +197,33 @@
                 </div>
             </div>
 
-            <!-- COMPLETE TRACK CELLS FOR ALL 4 ARMS -->
-            <!-- TOP ARM (Rows 1-6, Cols 7-9) -->
+            <!-- COMPLETE TRACK CELLS (ALL ARMS & HOME LANES) -->
+            <!-- Top Arm (Cols 7-9, Rows 1-6) -->
             <div class="cell" style="grid-column: 7; grid-row: 1;"></div>
-            <div class="cell green-cell" style="grid-column: 8; grid-row: 1;" id="track-1">START</div>
+            <div class="cell cell-green" style="grid-column: 8; grid-row: 1;" id="track-1">START</div>
             <div class="cell" style="grid-column: 9; grid-row: 1;"></div>
 
-            <div class="cell yellow-cell" style="grid-column: 7; grid-row: 2;" id="track-2">⭐</div>
-            <div class="cell yellow-cell" style="grid-column: 8; grid-row: 2;"></div>
+            <div class="cell cell-yellow" style="grid-column: 7; grid-row: 2;" id="track-2">⭐</div>
+            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 2;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 2;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 3;" id="track-3"></div>
-            <div class="cell yellow-cell" style="grid-column: 8; grid-row: 3;"></div>
+            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 3;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 3;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 4;" id="track-4"></div>
-            <div class="cell yellow-cell" style="grid-column: 8; grid-row: 4;"></div>
+            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 4;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 4;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 5;" id="track-5"></div>
-            <div class="cell yellow-cell" style="grid-column: 8; grid-row: 5;"></div>
+            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 5;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 5;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 6;"></div>
-            <div class="cell yellow-cell" style="grid-column: 8; grid-row: 6;"></div>
+            <div class="cell cell-yellow" style="grid-column: 8; grid-row: 6;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 6;"></div>
 
-            <!-- RIGHT ARM (Rows 7-9, Cols 10-15) -->
+            <!-- Right Arm (Cols 10-15, Rows 7-9) -->
             <div class="cell" style="grid-column: 10; grid-row: 7;"></div>
             <div class="cell" style="grid-column: 11; grid-row: 7;"></div>
             <div class="cell" style="grid-column: 12; grid-row: 7;"></div>
@@ -232,12 +231,12 @@
             <div class="cell" style="grid-column: 14; grid-row: 7;" id="track-17">⭐</div>
             <div class="cell" style="grid-column: 15; grid-row: 7;"></div>
 
-            <div class="cell blue-cell" style="grid-column: 10; grid-row: 8;"></div>
-            <div class="cell blue-cell" style="grid-column: 11; grid-row: 8;"></div>
-            <div class="cell blue-cell" style="grid-column: 12; grid-row: 8;"></div>
-            <div class="cell blue-cell" style="grid-column: 13; grid-row: 8;"></div>
-            <div class="cell blue-cell" style="grid-column: 14; grid-row: 8;"></div>
-            <div class="cell blue-cell" style="grid-column: 15; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 10; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 11; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 12; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 13; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 14; grid-row: 8;"></div>
+            <div class="cell cell-blue" style="grid-column: 15; grid-row: 8;"></div>
 
             <div class="cell" style="grid-column: 10; grid-row: 9;" id="track-18"></div>
             <div class="cell" style="grid-column: 11; grid-row: 9;" id="track-19"></div>
@@ -246,7 +245,7 @@
             <div class="cell" style="grid-column: 14; grid-row: 9;"></div>
             <div class="cell" style="grid-column: 15; grid-row: 9;"></div>
 
-            <!-- LEFT ARM (Rows 7-9, Cols 1-6) -->
+            <!-- Left Arm (Cols 1-6, Rows 7-9) -->
             <div class="cell" style="grid-column: 1; grid-row: 7;"></div>
             <div class="cell" style="grid-column: 2; grid-row: 7;" id="track-6">⭐</div>
             <div class="cell" style="grid-column: 3; grid-row: 7;" id="track-7"></div>
@@ -254,12 +253,12 @@
             <div class="cell" style="grid-column: 5; grid-row: 7;" id="track-9"></div>
             <div class="cell" style="grid-column: 6; grid-row: 7;" id="track-10"></div>
 
-            <div class="cell green-cell" style="grid-column: 1; grid-row: 8;" id="track-15"></div>
-            <div class="cell green-cell" style="grid-column: 2; grid-row: 8;"></div>
-            <div class="cell green-cell" style="grid-column: 3; grid-row: 8;"></div>
-            <div class="cell green-cell" style="grid-column: 4; grid-row: 8;"></div>
-            <div class="cell green-cell" style="grid-column: 5; grid-row: 8;"></div>
-            <div class="cell green-cell" style="grid-column: 6; grid-row: 8;"></div>
+            <div class="cell cell-green" style="grid-column: 1; grid-row: 8;" id="track-15"></div>
+            <div class="cell cell-green" style="grid-column: 2; grid-row: 8;"></div>
+            <div class="cell cell-green" style="grid-column: 3; grid-row: 8;"></div>
+            <div class="cell cell-green" style="grid-column: 4; grid-row: 8;"></div>
+            <div class="cell cell-green" style="grid-column: 5; grid-row: 8;"></div>
+            <div class="cell cell-green" style="grid-column: 6; grid-row: 8;"></div>
 
             <div class="cell" style="grid-column: 1; grid-row: 9;"></div>
             <div class="cell" style="grid-column: 2; grid-row: 9;"></div>
@@ -268,29 +267,29 @@
             <div class="cell" style="grid-column: 5; grid-row: 9;" id="track-11">⭐</div>
             <div class="cell" style="grid-column: 6; grid-row: 9;" id="track-12"></div>
 
-            <!-- BOTTOM ARM (Rows 10-15, Cols 7-9) -->
+            <!-- Bottom Arm (Cols 7-9, Rows 10-15) -->
             <div class="cell" style="grid-column: 7; grid-row: 10;" id="track-13"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 10;"></div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 10;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 10;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 11;" id="track-14"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 11;"></div>
-            <div class="cell red-cell" style="grid-column: 9; grid-row: 11;" id="track-16">⭐</div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 11;"></div>
+            <div class="cell cell-red" style="grid-column: 9; grid-row: 11;" id="track-16">⭐</div>
 
             <div class="cell" style="grid-column: 7; grid-row: 12;"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 12;"></div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 12;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 12;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 13;"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 13;"></div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 13;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 13;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 14;"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 14;"></div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 14;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 14;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 15;"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 15;" id="track-max"></div>
+            <div class="cell cell-red" style="grid-column: 8; grid-row: 15;" id="track-max"></div>
             <div class="cell" style="grid-column: 9; grid-row: 15;"></div>
         </div>
 
