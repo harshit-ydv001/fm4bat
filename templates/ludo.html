@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Playable</title>
+    <title>Ludo Battle - Corrected Turn</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -22,14 +22,22 @@
             border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px;
         }
 
-        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
         .player-card {
-            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
+            background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 6px 10px; width: 48%; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease; position: relative;
         }
-        .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
-        .player-info { display: flex; flex-direction: column; font-size: 10px; }
+        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.7); background: rgba(241, 196, 15, 0.08); }
+        .player-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
+        .player-info { display: flex; flex-direction: column; font-size: 10px; flex: 1; }
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
+
+        .mini-dice {
+            width: 28px; height: 28px; background: #fff; border: 2px solid #d97706; border-radius: 6px;
+            display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #111;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
 
         .board {
             width: 360px; height: 360px; background: #ffffff; border: 4px solid #111;
@@ -50,15 +58,17 @@
         
         .token {
             width: 24px; height: 24px; background: #222; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 14px;
+            display: flex; justify-content: center; align-items: center; font-size: 13px;
             border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10; transition: all 0.2s ease-in-out;
         }
         
         .token.red-token { border-color: #fff; background: #b93d30; }
+        .token.green-token { border-color: #fff; background: #27ae60; }
+        
         .token.movable {
-            cursor: pointer; box-shadow: 0 0 12px 4px #00ffcc; transform: scale(1.15); border-color: #00ffcc; animation: pulse 1s infinite;
+            cursor: pointer; box-shadow: 0 0 14px 4px #00ffcc; transform: scale(1.2); border-color: #00ffcc; animation: pulse 1s infinite;
         }
-        @keyframes pulse { 0% { transform: scale(1.15); } 50% { transform: scale(1.25); } 100% { transform: scale(1.15); } }
+        @keyframes pulse { 0% { transform: scale(1.2); } 50% { transform: scale(1.3); } 100% { transform: scale(1.2); } }
 
         .center-home {
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
@@ -66,11 +76,7 @@
         }
 
         .cell { background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; }
-        .green-cell { background: #2ecc71; color: #fff; }
-        .yellow-cell { background: #f1c40f; color: #000; }
-        .red-cell { background: #e74c3c; color: #fff; }
-        .blue-cell { background: #3498db; color: #fff; }
-
+        
         .control-panel {
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
@@ -78,33 +84,15 @@
         .dice-container { perspective: 400px; width: 52px; height: 52px; }
         .dice-3d {
             width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 0.8s ease;
         }
         .dice-face {
             position: absolute; width: 52px; height: 52px;
             background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            border: 2.5px solid #d97706; border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.4); display: grid; padding: 6px;
+            border: 2.5px solid #d97706; border-radius: 10px; display: grid; padding: 6px;
         }
 
         .dot { width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center; }
-        .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-        .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-        .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
-        .face-2 .dot:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; }
-        .face-3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
-        .face-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
-        .face-3 .dot:nth-child(2) { grid-column: 2; grid-row: 2; }
-        .face-3 .dot:nth-child(3) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
-        .face-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
-        .face-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
-        .face-5 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
-        .face-5 .dot:nth-child(2) { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
-        .face-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
-        .face-5 .dot:nth-child(4) { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
-        .face-5 .dot:nth-child(5) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
-        .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
-
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
@@ -115,33 +103,48 @@
         .status-msg { font-size: 11px; color: #34d399; font-weight: bold; text-align: center; flex: 1; padding: 0 8px; }
         .roll-btn {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase;
         }
-        .roll-btn:active { transform: scale(0.95); }
-        .roll-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .roll-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (REAL VS BOT)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
         <div class="players-row">
-            <div class="player-card">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
-                <div class="player-info"><span class="player-name" id="opp-name">Opponent (Bot)</span><span class="player-coins">🪙 Active</span></div>
+            <div class="player-card" id="opp-card">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" id="opp-avatar" alt="Opponent">
+                <div class="player-info">
+                    <span class="player-name" id="opp-name">Rahul_99</span>
+                    <span class="player-coins">Online</span>
+                </div>
+                <div class="mini-dice" id="opp-mini-dice">🎲</div>
             </div>
-            <div class="player-card" style="border-color: #34d399;">
+
+            <div class="player-card active-turn" id="user-card">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="You">
-                <div class="player-info"><span class="player-name">You (Red)</span><span class="player-coins">🪙 Active</span></div>
+                <div class="player-info">
+                    <span class="player-name">You (Red)</span>
+                    <span class="player-coins">Active</span>
+                </div>
+                <div class="mini-dice" id="user-mini-dice">🎲</div>
             </div>
         </div>
 
         <div class="board" id="ludo-board">
-            <div class="base-green"><div class="inner-box"><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div></div></div>
+            <div class="base-green" id="green-base-area">
+                <div class="inner-box" id="green-inner-box">
+                    <div class="token green-token" id="green-0">🪖</div>
+                    <div class="token green-token" id="green-1">🪖</div>
+                    <div class="token green-token" id="green-2">🪖</div>
+                    <div class="token green-token" id="green-3">🪖</div>
+                </div>
+            </div>
             <div class="base-yellow"><div class="inner-box"><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div></div></div>
             <div class="center-home">🏆</div>
             <div class="base-blue"><div class="inner-box"><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div></div></div>
@@ -160,65 +163,29 @@
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
-                <div class="dice-face front face-1"><div class="dot"></div></div>
-                <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
-                <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face front">1</div>
+                <div class="dice-face back">6</div>
+                <div class="dice-face right">3</div>
+                <div class="dice-face left">4</div>
+                <div class="dice-face top">2</div>
+                <div class="dice-face bottom">5</div>
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
-        <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
+        <button class="roll-btn" id="roll-btn" onclick="userRoll()">Roll Dice</button>
     </div>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            if (type === 'dice') {
-                for (let i = 0; i < 6; i++) {
-                    setTimeout(() => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.connect(gain); gain.connect(audioCtx.destination);
-                        osc.type = 'square';
-                        osc.frequency.setValueAtTime(150 + Math.random() * 250, audioCtx.currentTime);
-                        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-                        osc.start(); osc.stop(audioCtx.currentTime + 0.04);
-                    }, i * 60);
-                }
-            } else if (type === 'step') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.06);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.06);
-            } else if (type === 'win') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12);
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-            }
-        }
+        const bots = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
+        let chosenBotName = bots[Math.floor(Math.random() * bots.length)];
+        document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
         const board = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
                 if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
                     (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
-                    const cell = document.createElement('div');
+                    let cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     board.appendChild(cell);
@@ -227,157 +194,172 @@
         }
 
         const redPath = [
-            [14,7], [13,7], [12,7], [11,7], [10,7],
-            [9,6], [9,5], [9,4], [9,3], [9,2], [9,1],
-            [8,1],
-            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6],
-            [6,7], [5,7], [4,7], [3,7], [2,7], [1,7],
-            [1,8],
-            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9],
-            [7,10], [7,11], [7,12], [7,13], [7,14], [7,15],
-            [8,15],
-            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10],
-            [10,9], [11,9], [12,9], [13,9], [14,9], [15,9],
-            [15,8],
-            [14,8], [13,8], [12,8], [11,8], [10,8],
-            [9,8]
+            [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
+            [1,9], [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], [15,8],
+            [14,8], [13,8], [12,8], [11,8], [10,8], [9,8]
         ];
 
-        let tokens = [
-            { id: 'red-0', pos: -1, done: false },
-            { id: 'red-1', pos: -1, done: false },
-            { id: 'red-2', pos: -1, done: false },
-            { id: 'red-3', pos: -1, done: false }
+        const greenPath = [
+            [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
+            [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], [15,8],
+            [15,7], [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
+            [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
+            [2,8], [3,8], [4,8], [5,8], [6,8], [7,8]
         ];
 
-        let currentRoll = 0;
-        let isWaitingForMove = false;
+        let redTokens = [{id:'red-0', pos:-1, done:false}, {id:'red-1', pos:-1, done:false}, {id:'red-2', pos:-1, done:false}, {id:'red-3', pos:-1, done:false}];
+        let greenTokens = [{id:'green-0', pos:-1, done:false}, {id:'green-1', pos:-1, done:false}, {id:'green-2', pos:-1, done:false}, {id:'green-3', pos:-1, done:false}];
 
-        const diceCube = document.getElementById("dice-cube");
-        const statusEl = document.getElementById("game-status");
-        const rollBtn = document.getElementById("roll-dice-btn");
+        let turn = 'user'; // 'user' or 'bot'
+        let rollVal = 0;
+        let isWaitingClick = false;
 
-        function rollDice() {
-            if(isWaitingForMove) return;
-            rollBtn.disabled = true;
-            statusEl.innerText = "Rolling dice...";
-            playSound('dice');
-
-            let rx = (Math.floor(Math.random() * 4) + 4) * 360;
-            let ry = (Math.floor(Math.random() * 4) + 4) * 360;
-            diceCube.style.transition = "transform 0.9s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
-            diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-
-            setTimeout(() => {
-                currentRoll = Math.floor(Math.random() * 6) + 1;
-                let targetTransform = "";
-                switch(currentRoll) {
-                    case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
-                    case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
-                    case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
-                    case 4: targetTransform = "rotateY(90deg) rotateX(0deg)"; break;
-                    case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
-                    case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
-                }
-                diceCube.style.transition = "transform 0.4s ease-out";
-                diceCube.style.transform = targetTransform;
-
-                checkMovableTokens();
-            }, 900);
-        }
-
-        function checkMovableTokens() {
-            let movableCount = 0;
-            let autoMoveTokenId = null;
-
-            tokens.forEach(t => {
-                const el = document.getElementById(t.id);
-                el.classList.remove('movable');
-                if (t.done) return;
-                
-                if (t.pos === -1 && currentRoll === 6) {
-                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
-                } else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
-                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
-                }
-            });
-
-            if (movableCount === 0) {
-                statusEl.innerText = `Rolled ${currentRoll}. No valid moves!`;
-                rollBtn.disabled = false;
-            } else if (movableCount === 1) {
-                statusEl.innerText = `Rolled ${currentRoll}. Moving step by step...`;
-                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll), 400);
+        function setTurn(nextPlayer) {
+            turn = nextPlayer;
+            isWaitingClick = false;
+            if (turn === 'user') {
+                document.getElementById("user-card").classList.add('active-turn');
+                document.getElementById("opp-card").classList.remove('active-turn');
+                document.getElementById("game-status").innerText = "Your Turn (Red). Roll the dice!";
+                document.getElementById("roll-btn").disabled = false;
+                document.getElementById("opp-mini-dice").innerText = "🎲";
             } else {
-                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
-                isWaitingForMove = true;
+                document.getElementById("user-card").classList.remove('active-turn');
+                document.getElementById("opp-card").classList.add('active-turn');
+                document.getElementById("game-status").innerText = `${chosenBotName}'s turn...`;
+                document.getElementById("roll-btn").disabled = true;
+                document.getElementById("user-mini-dice").innerText = "🎲";
+                setTimeout(botPlay, 1000);
             }
         }
 
-        function stepByStepMove(tokenId, stepsLeft) {
-            let t = tokens.find(tok => tok.id === tokenId);
+        function rotateDice(val, callback) {
+            let cube = document.getElementById("dice-cube");
+            let rot = "";
+            switch(val) {
+                case 1: rot = "rotateX(0deg) rotateY(0deg)"; break;
+                case 2: rot = "rotateX(-90deg) rotateY(0deg)"; break;
+                case 3: rot = "rotateY(-90deg) rotateX(0deg)"; break;
+                case 4: rot = "rotateY(90deg) rotateX(0deg)"; break;
+                case 5: rot = "rotateX(90deg) rotateY(0deg)"; break;
+                case 6: rot = "rotateX(180deg) rotateY(0deg)"; break;
+            }
+            cube.style.transform = rot;
+            setTimeout(callback, 700);
+        }
+
+        function userRoll() {
+            if (turn !== 'user' || isWaitingClick) return;
+            document.getElementById("roll-btn").disabled = true;
+            rollVal = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("game-status").innerText = `You rolled ${rollVal}`;
+            document.getElementById("user-mini-dice").innerText = rollVal;
+
+            rotateDice(rollVal, () => evaluateTurn('user'));
+        }
+
+        function botPlay() {
+            if (turn !== 'bot') return;
+            rollVal = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("game-status").innerText = `${chosenBotName} rolled ${rollVal}`;
+            document.getElementById("opp-mini-dice").innerText = rollVal;
+
+            rotateDice(rollVal, () => evaluateTurn('bot'));
+        }
+
+        function evaluateTurn(player) {
+            let tokens = (player === 'user') ? redTokens : greenTokens;
+            let movable = tokens.filter(t => !t.done && ((t.pos === -1 && rollVal === 6) || (t.pos >= 0 && t.pos + rollVal <= 56)));
+
+            if (movable.length === 0) {
+                document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} got ${rollVal}. No moves!`;
+                setTimeout(() => nextPlayerTurn(player, false), 1500);
+            } else if (player === 'bot' || movable.length === 1) {
+                let chosenToken = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
+                moveTokenSteps(chosenToken.id, rollVal, player);
+            } else {
+                document.getElementById("game-status").innerText = `Got ${rollVal}. Click your glowing token!`;
+                isWaitingClick = true;
+                movable.forEach(t => document.getElementById(t.id).classList.add('movable'));
+            }
+        }
+
+        redTokens.forEach(t => {
+            document.getElementById(t.id).addEventListener('click', () => {
+                if (turn === 'user' && isWaitingClick && document.getElementById(t.id).classList.contains('movable')) {
+                    redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
+                    isWaitingClick = false;
+                    document.getElementById("game-status").innerText = "Moving token...";
+                    moveTokenSteps(t.id, rollVal, 'user');
+                }
+            });
+        });
+
+        function moveTokenSteps(tokenId, stepsLeft, player) {
+            let tokensList = (player === 'user') ? redTokens : greenTokens;
+            let pathList = (player === 'user') ? redPath : greenPath;
+            let t = tokensList.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
-            tokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
-            isWaitingForMove = false;
 
             if (t.pos === -1) {
                 t.pos = 0;
                 board.appendChild(el);
-                el.innerText = "🚀";
-                el.style.gridRow = redPath[t.pos][0];
-                el.style.gridColumn = redPath[t.pos][1];
-                playSound('step');
-                finishMove(t);
+                el.innerText = player === 'user' ? "🚀" : "🛸";
+                el.style.gridRow = pathList[t.pos][0];
+                el.style.gridColumn = pathList[t.pos][1];
+                finishTurnAction(t, player);
                 return;
             }
 
-            let interval = setInterval(() => {
+            let timer = setInterval(() => {
                 if (stepsLeft > 0 && t.pos < 56) {
                     t.pos++;
-                    el.style.gridRow = redPath[t.pos][0];
-                    el.style.gridColumn = redPath[t.pos][1];
-                    playSound('step');
+                    el.style.gridRow = pathList[t.pos][0];
+                    el.style.gridColumn = pathList[t.pos][1];
                     stepsLeft--;
                 } else {
-                    clearInterval(interval);
-                    finishMove(t);
+                    clearInterval(timer);
+                    finishTurnAction(t, player);
                 }
-            }, 250);
+            }, 180);
         }
 
-        function finishMove(t) {
+        function finishTurnAction(t, player) {
+            let tokensList = (player === 'user') ? redTokens : greenTokens;
             let el = document.getElementById(t.id);
+
             if (t.pos === 56) {
                 t.done = true;
                 el.innerText = "👑";
-                playSound('win');
-                statusEl.innerText = `🎉 Commando reached Home!`;
             }
 
-            if (tokens.every(tok => tok.done)) {
-                playSound('win');
-                statusEl.innerText = "🎉 YOU WON THE BATTLE! 🎉";
-                setTimeout(() => window.location.href = "/dashboard", 2500);
+            if (tokensList.every(tok => tok.done)) {
+                document.getElementById("game-status").innerText = player === 'user' ? "🎉 YOU WON!" : `😞 ${chosenBotName} WON!`;
+                setTimeout(() => window.location.href = "/dashboard", 3000);
                 return;
             }
 
-            if (currentRoll === 6 && !t.done) {
-                statusEl.innerText = `Rolled 6! Roll again!`;
-                rollBtn.disabled = false;
+            let gotSix = (rollVal === 6 && !t.done);
+            if (gotSix) {
+                document.getElementById("game-status").innerText = "Rolled 6! Extra turn!";
+                if (player === 'user') {
+                    document.getElementById("roll-btn").disabled = false;
+                } else {
+                    setTimeout(botPlay, 1000);
+                }
             } else {
-                statusEl.innerText = `Move finished. Roll again!`;
-                rollBtn.disabled = false;
+                setTimeout(() => {
+                    setTurn(player === 'user' ? 'bot' : 'user');
+                }, 1200);
             }
         }
 
-        tokens.forEach(t => {
-            document.getElementById(t.id).addEventListener('click', () => {
-                if (isWaitingForMove && document.getElementById(t.id).classList.contains('movable')) {
-                    statusEl.innerText = `Moving step by step...`;
-                    stepByStepMove(t.id, currentRoll);
-                }
-            });
-        });
+        function nextPlayerTurn(currentPlayer, delayed) {
+            let next = (currentPlayer === 'user') ? 'bot' : 'user';
+            setTimeout(() => setTurn(next), delayed ? 1200 : 200);
+        }
     </script>
 </body>
 </html>
