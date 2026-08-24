@@ -54,7 +54,7 @@
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
-        /* Authentic Ludo Board with 15x15 Grid */
+        /* Perfect Clean 15x15 Ludo Board */
         .board {
             width: 360px; height: 360px;
             background: #2b3528;
@@ -92,21 +92,14 @@
             grid-column: 7 / 10; grid-row: 7 / 10; background: #141820; 
             display: flex; justify-content: center; align-items: center; font-size: 24px;
             border: 2px solid #2a3447;
+            z-index: 5;
         }
 
-        /* Full Track Path Grid Cells for Round Movement */
-        .track-cell {
-            background: #e2d3bc;
-            border: 1px solid #c8b79b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 11px;
-        }
-        .cell-red { background: #b93d30; }
-        .cell-green { background: #278c52; }
-        .cell-blue { background: #2376b8; }
-        .cell-yellow { background: #d4ac0d; }
+        /* Cross Paths (Clean 3-Lane Arms) */
+        .path-v-top { grid-column: 7 / 10; grid-row: 1 / 7; background: #278c52; border: 1px solid #1c663c; }
+        .path-v-bottom { grid-column: 7 / 10; grid-row: 10 / 16; background: #d4ac0d; border: 1px solid #9a7d0a; }
+        .path-h-left { grid-column: 1 / 7; grid-row: 7 / 10; background: #b93d30; border: 1px solid #8e2a20; }
+        .path-h-right { grid-column: 10 / 16; grid-row: 7 / 10; background: #2376b8; border: 1px solid #185382; }
 
         .control-panel {
             width: 100%; max-width: 480px;
@@ -157,15 +150,14 @@
             </div>
         </div>
 
-        <!-- Authentic 15x15 Ludo Board with Full Circuit Track Cells -->
+        <!-- Clean Board Layout -->
         <div class="board">
-            <!-- Bases -->
             <div class="base-red">
                 <div class="bunker-box">
                     <div class="token-helmet">🪖</div>
                     <div class="token-helmet">🪖</div>
                     <div class="token-helmet">🪖</div>
-                    <div class="token-helmet" id="token-active">🪖</div>
+                    <div class="token-helmet" id="active-token">🚀</div>
                 </div>
             </div>
             
@@ -178,7 +170,12 @@
                 </div>
             </div>
 
+            <!-- Cross Arms & Center Home -->
+            <div class="path-v-top"></div>
+            <div class="path-h-left"></div>
             <div class="center-home">🏆</div>
+            <div class="path-h-right"></div>
+            <div class="path-v-bottom"></div>
 
             <div class="base-blue">
                 <div class="bunker-box">
@@ -197,28 +194,6 @@
                     <div class="token-helmet">🪖</div>
                 </div>
             </div>
-
-            <!-- Circuit Track Path Cells (Full Round Circuit) -->
-            <!-- Top Arm -->
-            <div class="track-cell" style="grid-column: 7; grid-row: 2;" id="track-1"></div>
-            <div class="track-cell cell-green" style="grid-column: 8; grid-row: 1;" id="track-2"></div>
-            <div class="track-cell" style="grid-column: 9; grid-row: 1;" id="track-3"></div>
-            <div class="track-cell" style="grid-column: 9; grid-row: 2;" id="track-4"></div>
-            <div class="track-cell" style="grid-column: 9; grid-row: 3;" id="track-5"></div>
-            
-            <!-- Right Arm -->
-            <div class="track-cell" style="grid-column: 14; grid-row: 7;" id="track-6"></div>
-            <div class="track-cell cell-yellow" style="grid-column: 15; grid-row: 8;" id="track-7"></div>
-            <div class="track-cell" style="grid-column: 14; grid-row: 9;" id="track-8"></div>
-            
-            <!-- Bottom Arm -->
-            <div class="track-cell" style="grid-column: 9; grid-row: 14;" id="track-9"></div>
-            <div class="track-cell cell-blue" style="grid-column: 8; grid-row: 15;" id="track-10"></div>
-            <div class="track-cell" style="grid-column: 7; grid-row: 14;" id="track-11"></div>
-
-            <!-- Left Arm & Home Entry -->
-            <div class="track-cell cell-red" style="grid-column: 1; grid-row: 8;" id="track-12"></div>
-            <div class="track-cell" style="grid-column: 2; grid-row: 7;" id="track-13"></div>
         </div>
 
         <div class="players-row" style="margin-top: 8px; margin-bottom: 0;">
@@ -241,19 +216,18 @@
 
     <div class="control-panel">
         <div class="dice-box" id="dice-value">🎲</div>
-        <div class="status-msg" id="game-status">Roll a 6 to deploy commando onto the board circuit!</div>
+        <div class="status-msg" id="game-status">Roll a 6 to deploy commando into battle!</div>
         <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
     </div>
 
     <script>
-        let circuitPos = 0; // 0 = in base, 1 to 13 = circuit track steps
-        const totalCircuitSteps = 13;
+        let isDeployed = false;
 
         function rollDice() {
             const diceEl = document.getElementById("dice-value");
             const statusEl = document.getElementById("game-status");
             const rollBtn = document.getElementById("roll-dice-btn");
-            const activeToken = document.getElementById("token-active");
+            const activeToken = document.getElementById("active-token");
 
             rollBtn.disabled = true;
             let rollAnim = setInterval(() => {
@@ -265,33 +239,19 @@
                 let roll = Math.floor(Math.random() * 6) + 1;
                 diceEl.innerText = roll;
 
-                if (circuitPos === 0) {
+                if (!isDeployed) {
                     if (roll === 6) {
-                        circuitPos = 1;
-                        activeToken.innerHTML = "";
-                        document.getElementById("track-1").innerHTML = "🚀";
-                        statusEl.innerText = `Rolled 6! Commando deployed onto the board!`;
+                        isDeployed = true;
+                        activeToken.innerText = "👑";
+                        statusEl.innerText = `Rolled 6! Commando deployed successfully!`;
                     } else {
                         statusEl.innerText = `Rolled ${roll}. Need 6 to exit bunker base!`;
                     }
                 } else {
-                    // Clear previous track cell
-                    if(circuitPos <= totalCircuitSteps) {
-                        document.getElementById(`track-${circuitPos}`).innerHTML = "";
-                    }
-
-                    circuitPos += roll;
-                    if (circuitPos >= totalCircuitSteps) {
-                        circuitPos = totalCircuitSteps;
-                        document.getElementById(`track-${totalCircuitSteps}`).innerHTML = "👑";
-                        statusEl.innerText = `🎉 Victory! Commando completed the circuit and entered Home! Won 500 Coins!`;
-                        setTimeout(() => {
-                            window.location.href = "/dashboard";
-                        }, 1500);
-                    } else {
-                        document.getElementById(`track-${circuitPos}`).innerHTML = "🚀";
-                        statusEl.innerText = `Rolled ${roll}. Moving along the circuit track!`;
-                    }
+                    statusEl.innerText = `🎉 Rolled ${roll}. Commando marching towards the trophy!`;
+                    setTimeout(() => {
+                        window.location.href = "/dashboard";
+                    }, 1500);
                 }
                 rollBtn.disabled = false;
             }, 600);
