@@ -1,5 +1,6 @@
 import asyncio
 import json
+import sqlite3
 
 from fastapi import FastAPI, Form, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -16,8 +17,24 @@ app.include_router(crash_router)
 
 templates = Jinja2Templates(directory="templates")
 
-# Simulated User Database: { identifier (email/phone): {"username": str, "password": str} }
-USERS_DB = {"admin": {"username": "admin", "password": "admin123"}}
+# Initialize SQLite Database for Permanent User Storage
+def init_db():
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            identifier TEXT PRIMARY KEY,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    """)
+    # Insert default admin user if not exists
+    cursor.execute("INSERT OR IGNORE INTO users (identifier, username, password) VALUES (?, ?, ?)", 
+                   ("admin", "admin", "admin123"))
+    conn.commit()
+    conn.close()
+
+init_db()
 
 
 @app.on_event("startup")
@@ -35,19 +52,17 @@ async def root_login(request: Request):
 
 @app.post("/login")
 async def login_user(identifier: str = Form(...), password: str = Form(...)):
-    user_data = None
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
     
-    if identifier in USERS_DB:
-        user_data = USERS_DB[identifier]
-    else:
-        for details in USERS_DB.values():
-            if details["username"] == identifier:
-                user_data = details
-                break
+    # Check by identifier (email/phone) or username
+    cursor.execute("SELECT username, password FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
+    row = cursor.fetchone()
+    conn.close()
 
-    if user_data and user_data["password"] == password:
+    if row and row[1] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
-        response.set_cookie(key="session_user", value=user_data["username"])
+        response.set_cookie(key="session_user", value=row[0])
         return response
         
     return RedirectResponse(url="/?error=InvalidCredentials", status_code=303)
@@ -59,14 +74,20 @@ async def signup_user(
     identifier: str = Form(...),
     password: str = Form(...),
 ):
-    if identifier in USERS_DB:
-        return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
 
-    username_exists = any(u["username"] == username for u in USERS_DB.values())
-    if username_exists:
-        return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
+    # Check if identifier or username already exists
+    cursor.execute("SELECT * FROM users WHERE identifier = ? OR username = ?", (identifier, username))
+    existing = cursor.fetchone()
 
-    USERS_DB[identifier] = {"username": username, "password": password}
+    if existing:
+        conn.close()
+        return RedirectResponse(url="/?error=UserAlreadyExists", status_code=303)
+
+    cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", (identifier, username, password))
+    conn.commit()
+    conn.close()
 
     response = RedirectResponse(url="/dashboard", status_code=303)
     response.set_cookie(key="session_user", value=username)
@@ -75,20 +96,19 @@ async def signup_user(
 
 @app.post("/forgot-password")
 async def forgot_password(identifier: str = Form(...), password: str = Form(...)):
-    user_key = None
-    if identifier in USERS_DB:
-        user_key = identifier
-    else:
-        for key, details in USERS_DB.items():
-            if details["username"] == identifier:
-                user_key = key
-                break
+    conn = sqlite3.connect("users.db")
+    cursor = conn.cursor()
 
-    if user_key:
-        USERS_DB[user_key]["password"] = password
-        response = RedirectResponse(url="/?success=PasswordReset", status_code=303)
-        return response
+    cursor.execute("SELECT identifier FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
+    row = cursor.fetchone()
 
+    if row:
+        cursor.execute("UPDATE users SET password = ? WHERE identifier = ?", (password, row[0]))
+        conn.commit()
+        conn.close()
+        return RedirectResponse(url="/?success=PasswordReset", status_code=303)
+
+    conn.close()
     return RedirectResponse(url="/?error=UserNotFound", status_code=303)
 
 
