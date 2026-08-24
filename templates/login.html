@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Perfect Turn Bot</title>
+    <title>Ludo Battle - Auto Turn Bot</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -130,7 +130,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (VS BOT)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (AUTO BOT)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -191,7 +191,7 @@
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
-        <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
+        <button class="roll-btn" id="roll-dice-btn" onclick="userRollDice()">Roll Dice</button>
     </div>
 
     <script>
@@ -204,46 +204,6 @@
         let chosenBot = bots[Math.floor(Math.random() * bots.length)];
         document.getElementById("opp-name").innerText = chosenBot.name + " (Green)";
         document.getElementById("opp-avatar").src = chosenBot.avatar;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            if (type === 'dice') {
-                for (let i = 0; i < 6; i++) {
-                    setTimeout(() => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.connect(gain); gain.connect(audioCtx.destination);
-                        osc.type = 'square';
-                        osc.frequency.setValueAtTime(150 + Math.random() * 250, audioCtx.currentTime);
-                        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-                        osc.start(); osc.stop(audioCtx.currentTime + 0.04);
-                    }, i * 60);
-                }
-            } else if (type === 'step') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.06);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.06);
-            } else if (type === 'win') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12);
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24);
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
-            }
-        }
 
         const board = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
@@ -306,9 +266,9 @@
             { id: 'green-3', pos: -1, done: false }
         ];
 
-        let currentTurn = 'user';
+        let currentTurn = 'user'; // 'user' or 'bot'
         let currentRoll = 0;
-        let isWaitingForMove = false;
+        let isWaitingForUserClick = false;
 
         const diceCube = document.getElementById("dice-cube");
         const statusEl = document.getElementById("game-status");
@@ -318,9 +278,8 @@
         const userMiniDice = document.getElementById("user-mini-dice");
         const oppMiniDice = document.getElementById("opp-mini-dice");
 
-        function switchTurn() {
-            currentTurn = (currentTurn === 'user') ? 'bot' : 'user';
-            
+        function setTurn(turn) {
+            currentTurn = turn;
             if (currentTurn === 'user') {
                 userCard.classList.add('active-turn');
                 oppCard.classList.remove('active-turn');
@@ -333,55 +292,19 @@
                 statusEl.innerText = `${chosenBot.name}'s turn...`;
                 rollBtn.disabled = true;
                 userMiniDice.innerText = "🎲";
-                setTimeout(botTurn, 1000); // 1 second delay then bot rolls
+                setTimeout(startBotTurn, 1000);
             }
         }
 
-        function rollDice() {
-            if(isWaitingForMove || currentTurn !== 'user') return;
-            rollBtn.disabled = true;
-            statusEl.innerText = "Rolling dice...";
-            playSound('dice');
-
-            animateDiceRoll((roll) => {
-                currentRoll = roll;
-                userMiniDice.innerText = currentRoll;
-                checkMovableTokens();
-            });
-        }
-
-        function botTurn() {
-            playSound('dice');
-            oppMiniDice.innerText = "⏳";
-            statusEl.innerText = `${chosenBot.name} is rolling dice...`;
-
-            animateDiceRoll((roll) => {
-                currentRoll = roll;
-                oppMiniDice.innerText = currentRoll;
-                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
-                
-                let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
-
-                if (validTokens.length === 0) {
-                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves!`;
-                    setTimeout(switchTurn, 1500);
-                } else {
-                    let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
-                    setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 800);
-                }
-            });
-        }
-
-        function animateDiceRoll(callback) {
+        function animateDice(rolledValue, callback) {
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
-            diceCube.style.transition = "transform 0.9s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
+            diceCube.style.transition = "transform 0.8s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
             diceCube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 
             setTimeout(() => {
-                let rolled = Math.floor(Math.random() * 6) + 1;
                 let targetTransform = "";
-                switch(rolled) {
+                switch(rolledValue) {
                     case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
                     case 2: targetTransform = "rotateX(-90deg) rotateY(0deg)"; break;
                     case 3: targetTransform = "rotateY(-90deg) rotateX(0deg)"; break;
@@ -389,51 +312,80 @@
                     case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
                     case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
                 }
-                diceCube.style.transition = "transform 0.4s ease-out";
+                diceCube.style.transition = "transform 0.3s ease-out";
                 diceCube.style.transform = targetTransform;
-                if(callback) callback(rolled);
-            }, 900);
+                if(callback) callback();
+            }, 800);
         }
 
-        function checkMovableTokens() {
-            let movableCount = 0;
-            let autoMoveTokenId = null;
+        // --- USER TURN ---
+        function userRollDice() {
+            if (currentTurn !== 'user' || isWaitingForUserClick) return;
+            rollBtn.disabled = true;
+            currentRoll = Math.floor(Math.random() * 6) + 1;
+            statusEl.innerText = "Rolling...";
 
-            redTokens.forEach(t => {
-                const el = document.getElementById(t.id);
-                el.classList.remove('movable');
-                if (t.done) return;
-                
-                if (t.pos === -1 && currentRoll === 6) {
-                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
-                } else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
-                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
+            animateDice(currentRoll, () => {
+                userMiniDice.innerText = currentRoll;
+                evaluateUserMove();
+            });
+        }
+
+        function evaluateUserMove() {
+            let movable = redTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
+
+            if (movable.length === 0) {
+                statusEl.innerText = `Rolled ${currentRoll}. No moves available!`;
+                setTimeout(() => setTurn('bot'), 1500);
+            } else if (movable.length === 1) {
+                statusEl.innerText = `Rolled ${currentRoll}. Moving token...`;
+                setTimeout(() => moveToken(movable[0].id, currentRoll, 'user'), 400);
+            } else {
+                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing token!`;
+                isWaitingForUserClick = true;
+                movable.forEach(t => document.getElementById(t.id).classList.add('movable'));
+            }
+        }
+
+        redTokens.forEach(t => {
+            document.getElementById(t.id).addEventListener('click', () => {
+                if (currentTurn === 'user' && isWaitingForUserClick && document.getElementById(t.id).classList.contains('movable')) {
+                    redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
+                    isWaitingForUserClick = false;
+                    statusEl.innerText = "Moving token...";
+                    moveToken(t.id, currentRoll, 'user');
                 }
             });
+        });
 
-            if (movableCount === 0) {
-                statusEl.innerText = `Rolled ${currentRoll}. No valid moves!`;
-                setTimeout(switchTurn, 1500);
-            } else if (movableCount === 1) {
-                statusEl.innerText = `Rolled ${currentRoll}. Moving commando...`;
-                setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll, 'user'), 300);
-            } else {
-                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
-                isWaitingForMove = true;
-            }
+        // --- BOT TURN ---
+        function startBotTurn() {
+            currentRoll = Math.floor(Math.random() * 6) + 1;
+            oppMiniDice.innerText = "⏳";
+            statusEl.innerText = `${chosenBot.name} is rolling...`;
+
+            animateDice(currentRoll, () => {
+                oppMiniDice.innerText = currentRoll;
+                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
+
+                let movable = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
+
+                if (movable.length === 0) {
+                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No moves!`;
+                    setTimeout(() => setTurn('user'), 1500);
+                } else {
+                    let chosen = movable[Math.floor(Math.random() * movable.length)];
+                    setTimeout(() => moveToken(chosen.id, currentRoll, 'bot'), 800);
+                }
+            });
         }
 
-        function stepByStepMove(tokenId, stepsLeft, player) {
+        // --- MOVEMENT ENGINE ---
+        function moveToken(tokenId, stepsLeft, player) {
             let tokensList = (player === 'user') ? redTokens : greenTokens;
             let pathList = (player === 'user') ? redPath : greenPath;
-            
             let t = tokensList.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
-            
-            if (player === 'user') {
-                redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
-                isWaitingForMove = false;
-            }
 
             if (t.pos === -1) {
                 t.pos = 0;
@@ -441,8 +393,7 @@
                 el.innerText = player === 'user' ? "🚀" : "🛸";
                 el.style.gridRow = pathList[t.pos][0];
                 el.style.gridColumn = pathList[t.pos][1];
-                playSound('step');
-                finishMove(t, player);
+                finalizeMove(t, player);
                 return;
             }
 
@@ -451,54 +402,43 @@
                     t.pos++;
                     el.style.gridRow = pathList[t.pos][0];
                     el.style.gridColumn = pathList[t.pos][1];
-                    playSound('step');
                     stepsLeft--;
                 } else {
                     clearInterval(interval);
-                    finishMove(t, player);
+                    finalizeMove(t, player);
                 }
             }, 200);
         }
 
-        function finishMove(t, player) {
+        function finalizeMove(t, player) {
             let tokensList = (player === 'user') ? redTokens : greenTokens;
             let el = document.getElementById(t.id);
 
             if (t.pos === 56) {
                 t.done = true;
                 el.innerText = "👑";
-                playSound('win');
-                statusEl.innerText = player === 'user' ? `🎉 Your Commando reached Home!` : `⚠️ ${chosenBot.name}'s Commando reached Home!`;
             }
 
             if (tokensList.every(tok => tok.done)) {
-                playSound('win');
-                let winMsg = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : `😞 ${chosenBot.name} WON THE BATTLE! 😞`;
-                statusEl.innerText = winMsg;
+                statusEl.innerText = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : `😞 ${chosenBot.name} WON THE BATTLE! 😞`;
                 setTimeout(() => window.location.href = "/dashboard", 3000);
                 return;
             }
 
+            // If 6 is rolled, same player plays again, else switch turn
             if (currentRoll === 6 && !t.done) {
-                statusEl.innerText = `Rolled 6! Roll again!`;
+                statusEl.innerText = `Rolled 6! Extra turn!`;
                 if (player === 'user') {
                     rollBtn.disabled = false;
                 } else {
-                    setTimeout(botTurn, 1200); // Bot gets another turn on 6
+                    setTimeout(startBotTurn, 1200);
                 }
             } else {
-                setTimeout(switchTurn, 1500);
+                setTimeout(() => {
+                    setTurn(player === 'user' ? 'bot' : 'user');
+                }, 1200);
             }
         }
-
-        redTokens.forEach(t => {
-            document.getElementById(t.id).addEventListener('click', () => {
-                if (currentTurn === 'user' && isWaitingForMove && document.getElementById(t.id).classList.contains('movable')) {
-                    statusEl.innerText = `Moving step by step...`;
-                    stepByStepMove(t.id, currentRoll, 'user');
-                }
-            });
-        });
     </script>
 </body>
 </html>
