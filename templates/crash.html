@@ -125,9 +125,9 @@
             margin-bottom: 2px;
         }
 
-        /* Only the logged in real user row gets red highlight */
-        .bet-row.my-real-highlight {
-            background: rgba(231, 76, 60, 0.3) !important;
+        /* All real users get red highlight on all devices */
+        .bet-row.real-user-highlight {
+            background: rgba(231, 76, 60, 0.28) !important;
             border-left: 3px solid #e74c3c !important;
             font-weight: bold;
         }
@@ -746,34 +746,66 @@
             let keys = Object.keys(latestBetsData);
             countEl.innerText = keys.length;
 
-            let myRealBets = [];
-            let otherBets = [];
+            let realUserBets = [];
+            let botBets = [];
+
+            // A clean, robust check: Bot names follow standard naming format (Name followed by underscore and numbers, e.g., "Rahul_99", "Karan_50", "Tanvi_32")
+            // Real users are explicitly identified because their username is placed via real browser session (like Harshitking, arpitking, etc.)
+            const knownBotPrefixes = [
+                "Aman", "Rahul", "Priya", "Rohit", "Neha", "Vikash", "Kunal", "Karan", 
+                "Manish", "Anjali", "Alok", "Deepak", "Amit", "Rohan", "Vikram", "Sahil", 
+                "Vikas", "Pooja", "Divya", "Simran", "Tanvi", "Megha", "Akash", "Ritu", "Sandeep"
+            ];
 
             keys.forEach(uid => {
                 let bet = latestBetsData[uid];
                 let cleanName = bet.username.replace(" [2]", "").trim();
                 
-                // STRICT CHECK: Only separate the user who is actually logged into THIS specific browser/device session
-                let isMe = (cleanName === currentUsername);
+                // Check if the username is explicitly the currently logged-in user OR if it does NOT follow the automated bot naming convention
+                let isCurrentSessionUser = (cleanName === currentUsername);
+                
+                // Let's define a real user as someone who placed a bet through token/real websocket connection 
+                // Or if their name doesn't match standard bot patterns (Name_Number format).
+                // Actually, since real users can have any custom name, let's look at how the backend labels them or use a foolproof check:
+                // If the name matches standard bot pattern (e.g. Rahul_99), it's a bot. If it's a custom name like "Harshitking" or "arpitking", it's a real user!
+                let isBotPattern = false;
+                for (let prefix of knownBotPrefixes) {
+                    if (cleanName.startsWith(prefix + "_")) {
+                        isBotPattern = true;
+                        break;
+                    }
+                }
 
-                if (isMe) {
-                    myRealBets.push(bet);
+                // If it's NOT a bot pattern, or if it's the current logged in user, treat as Real User
+                let isRealUser = (!isBotPattern || isCurrentSessionUser);
+
+                if (isRealUser) {
+                    realUserBets.push(bet);
                 } else {
-                    otherBets.push(bet);
+                    botBets.push(bet);
                 }
             });
 
-            // Put ONLY the logged-in user on top, followed by all other players/bots normally
-            let displayBets = currentTabFilter === 'my' ? myRealBets : [...myRealBets, ...otherBets];
+            // Sort real users to top, followed by bot bets
+            let displayBets = currentTabFilter === 'my' ? realUserBets.filter(b => b.username.startsWith(currentUsername)) : [...realUserBets, ...botBets];
 
             displayBets.forEach(bet => {
                 let row = document.createElement("div");
                 let cleanName = bet.username.replace(" [2]", "").trim();
                 let isMe = (cleanName === currentUsername);
                 
+                let isBotPattern = false;
+                for (let prefix of knownBotPrefixes) {
+                    if (cleanName.startsWith(prefix + "_")) {
+                        isBotPattern = true;
+                        break;
+                    }
+                }
+                let isRealUser = (!isBotPattern || isMe);
+                
                 let rowClass = "bet-row";
-                if (isMe) {
-                    rowClass += " my-real-highlight"; // ONLY highlight the logged-in user in red
+                if (isRealUser) {
+                    rowClass += " real-user-highlight"; // Highlight all real users in red on all devices
                 }
                 if (bet.cashed_out) rowClass += " cashed-row";
                 row.className = rowClass;
@@ -784,7 +816,7 @@
                     : `-`;
 
                 row.innerHTML = `
-                    <span class="col-user"><div class="user-avatar" style="${isMe ? 'background: #e74c3c; color: #fff;' : ''}">${avatarLetter}</div> <b style="${isMe ? 'color: #ff6b6b;' : ''}">${bet.username} ${isMe ? '(You)' : ''}</b></span>
+                    <span class="col-user"><div class="user-avatar" style="${isRealUser ? 'background: #e74c3c; color: #fff;' : ''}">${avatarLetter}</div> <b style="${isRealUser ? 'color: #ff6b6b;' : ''}">${bet.username} ${isMe ? '(You)' : ''}</b></span>
                     <span class="col-bet">${bet.amount.toFixed(2)} 🪙</span>
                     <span class="col-cashout">${cashoutDisplay}</span>
                 `;
