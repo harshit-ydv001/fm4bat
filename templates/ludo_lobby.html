@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ludo Battle - Lobby & Matchmaking</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background-color: #0b0e14; color: #fff;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 15px;
+        }
+        .container {
+            width: 100%; max-width: 480px; background: #141822;
+            border: 2px solid #2a2f40; border-radius: 12px; padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin-top: 20px;
+        }
+        h2 { color: #f1c40f; text-align: center; margin-bottom: 20px; font-style: italic; }
+        
+        .section-title { font-size: 13px; color: #8a99ad; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; }
+        
+        .mode-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .mode-btn {
+            flex: 1; background: #1c212e; border: 2px solid #374151; color: #fff;
+            padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center;
+            transition: all 0.2s;
+        }
+        .mode-btn.active { border-color: #f1c40f; background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
+
+        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .amount-btn {
+            background: #1c212e; border: 1px solid #374151; color: #fff;
+            padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center;
+        }
+        .amount-btn.active { border-color: #34d399; background: rgba(52, 211, 153, 0.1); color: #34d399; }
+
+        .start-btn {
+            width: 100%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold;
+            font-size: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+        .start-btn:active { transform: scale(0.98); }
+
+        #matchmaking-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 14, 20, 0.95); z-index: 100;
+            flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+        }
+        .spinner {
+            width: 60px; height: 60px; border: 6px solid #2a2f40; border-top: 6px solid #f1c40f;
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .players-found { display: flex; gap: 15px; margin-top: 25px; }
+        .found-card {
+            background: #1c212e; border: 1px solid #374151; border-radius: 10px;
+            padding: 10px; text-align: center; width: 90px;
+        }
+        .found-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #34d399; margin-bottom: 6px; }
+        .found-name { font-size: 11px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>⚔️ LUDO BATTLE LOBBY</h2>
+
+        <div class="section-title">Select Mode</div>
+        <div class="mode-selector">
+            <div class="mode-btn active" onclick="setMode(2)" id="mode-2">2 Players</div>
+            <div class="mode-btn" onclick="setMode(4)" id="mode-4">4 Players</div>
+        </div>
+
+        <div class="section-title">Select Entry Coin Amount</div>
+        <div class="amount-grid">
+            <div class="amount-btn active" onclick="setAmount(100, this)">🪙 100</div>
+            <div class="amount-btn" onclick="setAmount(500, this)">🪙 500</div>
+            <div class="amount-btn" onclick="setAmount(1000, this)">🪙 1,000</div>
+            <div class="amount-btn" onclick="setAmount(5000, this)">🪙 5,000</div>
+            <div class="amount-btn" onclick="setAmount(10000, this)">🪙 10,000</div>
+            <div class="amount-btn" onclick="setAmount(25000, this)">🪙 25,000</div>
+        </div>
+
+        <button class="start-btn" onclick="startMatchmaking()">Find Match & Play</button>
+    </div>
+
+    <div id="matchmaking-screen">
+        <div class="spinner"></div>
+        <h3 id="match-status" style="color: #f1c40f; margin-bottom: 5px;">Finding Online Opponents...</h3>
+        <p style="font-size: 12px; color: #8a99ad;">Matching with players of similar skill level</p>
+        
+        <div class="players-found" id="players-list"></div>
+    </div>
+
+    <script>
+        let selectedMode = 2;
+        let selectedAmount = 100;
+
+        function setMode(mode) {
+            selectedMode = mode;
+            document.getElementById('mode-2').classList.toggle('active', mode === 2);
+            document.getElementById('mode-4').classList.toggle('active', mode === 4);
+        }
+
+        function setAmount(amount, el) {
+            selectedAmount = amount;
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        const botProfiles = [
+            { name: "Rahul_99", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" },
+            { name: "Priya_King", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" },
+            { name: "Aman_Pro", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" },
+            { name: "Simran_x", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" }
+        ];
+
+        function startMatchmaking() {
+            const screen = document.getElementById('matchmaking-screen');
+            const statusText = document.getElementById('match-status');
+            const list = document.getElementById('players-list');
+            
+            screen.style.display = 'flex';
+            list.innerHTML = `
+                <div class="found-card">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="found-avatar">
+                    <div class="found-name">You (Host)</div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                statusText.innerText = "Opponent Found! Connecting...";
+                let bot1 = botProfiles[Math.floor(Math.random() * botProfiles.length)];
+                list.innerHTML += `
+                    <div class="found-card">
+                        <img src="${bot1.avatar}" class="found-avatar">
+                        <div class="found-name">${bot1.name}</div>
+                    </div>
+                `;
+            }, 1500);
+
+            if (selectedMode === 4) {
+                setTimeout(() => {
+                    let bot2 = botProfiles[Math.floor(Math.random() * botProfiles.length)];
+                    let bot3 = botProfiles[Math.floor(Math.random() * botProfiles.length)];
+                    list.innerHTML += `
+                        <div class="found-card">
+                            <img src="${bot2.avatar}" class="found-avatar">
+                            <div class="found-name">${bot2.name}</div>
+                        </div>
+                        <div class="found-card">
+                            <img src="${bot3.avatar}" class="found-avatar">
+                            <div class="found-name">${bot3.name}</div>
+                        </div>
+                    `;
+                }, 2800);
+            }
+
+            setTimeout(() => {
+                statusText.innerText = "Starting Game...";
+                setTimeout(() => {
+                    window.location.href = `/games/ludo/play?mode=${selectedMode}&amount=${selectedAmount}`;
+                }, 800);
+            }, selectedMode === 4 ? 3800 : 2500);
+        }
+    </script>
+</body>
+</html>

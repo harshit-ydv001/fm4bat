@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - fm4bat (Real Dice Sound)</title>
+    <title>Ludo Battle - Playable</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
-            background-color: #0b0e14;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-bottom: 20px;
+            background-color: #0b0e14; color: #fff;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding-bottom: 20px;
         }
         .navbar {
             width: 100%; max-width: 480px; background: #12151c; display: flex;
@@ -22,18 +18,11 @@
         .brand-logo { font-size: 16px; font-weight: 900; color: #f1c40f; font-style: italic; text-decoration: none; }
         
         .ludo-container {
-            width: 100%; max-width: 480px;
-            background: #141822;
-            border: 2px solid #2a2f40;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px;
+            width: 100%; max-width: 480px; background: #141822;
+            border: 2px solid #2a2f40; display: flex; flex-direction: column; align-items: center; padding: 10px;
         }
 
-        .players-row {
-            width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px;
-        }
+        .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; }
         .player-card {
             background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
         }
@@ -42,17 +31,10 @@
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
-        /* Classic 15x15 Ludo Board Grid */
         .board {
-            width: 360px; height: 360px;
-            background: #ffffff;
-            border: 4px solid #111;
-            position: relative;
-            display: grid;
-            grid-template-columns: repeat(15, 1fr);
-            grid-template-rows: repeat(15, 1fr);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.85);
-            border-radius: 4px;
+            width: 360px; height: 360px; background: #ffffff; border: 4px solid #111;
+            position: relative; display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(15, 1fr);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.85); border-radius: 4px;
         }
 
         .base-green { grid-column: 1 / 7; grid-row: 1 / 7; background: #2ecc71; padding: 10px; border: 2px solid #111; display: flex; align-items: center; justify-content: center; z-index: 2; }
@@ -69,34 +51,21 @@
         .token {
             width: 24px; height: 24px; background: #222; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; font-size: 14px;
-            border: 2px solid #999; cursor: not-allowed;
-            place-self: center; z-index: 10;
-            transition: all 0.2s ease-in-out;
+            border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10; transition: all 0.2s ease-in-out;
         }
         
         .token.red-token { border-color: #fff; background: #b93d30; }
         .token.movable {
-            cursor: pointer;
-            box-shadow: 0 0 12px 4px #00ffcc;
-            transform: scale(1.15);
-            border-color: #00ffcc;
-            animation: pulse 1s infinite;
+            cursor: pointer; box-shadow: 0 0 12px 4px #00ffcc; transform: scale(1.15); border-color: #00ffcc; animation: pulse 1s infinite;
         }
-        @keyframes pulse {
-            0% { transform: scale(1.15); }
-            50% { transform: scale(1.25); }
-            100% { transform: scale(1.15); }
-        }
+        @keyframes pulse { 0% { transform: scale(1.15); } 50% { transform: scale(1.25); } 100% { transform: scale(1.15); } }
 
         .center-home {
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
-            display: flex; justify-content: center; align-items: center; font-size: 26px;
-            border: 2px solid #111; z-index: 1;
+            display: flex; justify-content: center; align-items: center; font-size: 26px; border: 2px solid #111; z-index: 1;
         }
 
-        .cell {
-            background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold;
-        }
+        .cell { background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; }
         .green-cell { background: #2ecc71; color: #fff; }
         .yellow-cell { background: #f1c40f; color: #000; }
         .red-cell { background: #e74c3c; color: #fff; }
@@ -106,40 +75,27 @@
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
-        /* 3D Dots Dice Styles */
-        .dice-container {
-            perspective: 400px;
-            width: 52px; height: 52px;
-        }
+        .dice-container { perspective: 400px; width: 52px; height: 52px; }
         .dice-3d {
-            width: 100%; height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(-20deg);
-            transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
         }
         .dice-face {
             position: absolute; width: 52px; height: 52px;
             background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
             border: 2.5px solid #d97706; border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.4);
-            display: grid; padding: 6px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.4); display: grid; padding: 6px;
         }
 
-        .dot {
-            width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center;
-        }
-
+        .dot { width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center; }
         .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
         .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
         .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
         .face-2 .dot:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; }
-
         .face-3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
         .face-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
         .face-3 .dot:nth-child(2) { grid-column: 2; grid-row: 2; }
         .face-3 .dot:nth-child(3) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
-
         .face-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
         .face-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
         .face-5 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
@@ -147,7 +103,6 @@
         .face-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
         .face-5 .dot:nth-child(4) { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
         .face-5 .dot:nth-child(5) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
-
         .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
 
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
@@ -158,7 +113,6 @@
         .dice-face.bottom { transform: rotateX(-90deg) translateZ(26px); }
 
         .status-msg { font-size: 11px; color: #34d399; font-weight: bold; text-align: center; flex: 1; padding: 0 8px; }
-        
         .roll-btn {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white; border: none; padding: 9px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
@@ -170,42 +124,27 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (REAL DICE SOUND)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
         <div class="players-row">
             <div class="player-card">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Bhoomi">
-                <div class="player-info"><span class="player-name">Bhoomi (Green)</span><span class="player-coins">🪙 9,010</span></div>
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
+                <div class="player-info"><span class="player-name" id="opp-name">Opponent (Bot)</span><span class="player-coins">🪙 Active</span></div>
             </div>
-            <div class="player-card">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="player-avatar" alt="Irafan">
-                <div class="player-info"><span class="player-name">Irafan (Yellow)</span><span class="player-coins">🪙 1,010</span></div>
+            <div class="player-card" style="border-color: #34d399;">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="You">
+                <div class="player-info"><span class="player-name">You (Red)</span><span class="player-coins">🪙 Active</span></div>
             </div>
         </div>
 
         <div class="board" id="ludo-board">
-            <div class="base-green">
-                <div class="inner-box">
-                    <div class="token" style="background: #2ecc71;">🪖</div><div class="token" style="background: #2ecc71;">🪖</div>
-                    <div class="token" style="background: #2ecc71;">🪖</div><div class="token" style="background: #2ecc71;">🪖</div>
-                </div>
-            </div>
-            <div class="base-yellow">
-                <div class="inner-box">
-                    <div class="token" style="background: #f1c40f;">🪖</div><div class="token" style="background: #f1c40f;">🪖</div>
-                    <div class="token" style="background: #f1c40f;">🪖</div><div class="token" style="background: #f1c40f;">🪖</div>
-                </div>
-            </div>
+            <div class="base-green"><div class="inner-box"><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div><div class="token" style="background:#2ecc71;">🪖</div></div></div>
+            <div class="base-yellow"><div class="inner-box"><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div><div class="token" style="background:#f1c40f;">🪖</div></div></div>
             <div class="center-home">🏆</div>
-            <div class="base-blue">
-                <div class="inner-box">
-                    <div class="token" style="background: #3498db;">🪖</div><div class="token" style="background: #3498db;">🪖</div>
-                    <div class="token" style="background: #3498db;">🪖</div><div class="token" style="background: #3498db;">🪖</div>
-                </div>
-            </div>
+            <div class="base-blue"><div class="inner-box"><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div></div></div>
             
             <div class="base-red" id="red-base-area">
                 <div class="inner-box" id="red-inner-box">
@@ -216,20 +155,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="players-row" style="margin-top: 8px; margin-bottom: 0;">
-            <div class="player-card" style="border-color: #34d399;">
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="Guest_3">
-                <div class="player-info"><span class="player-name">Guest_3 (You - Red)</span><span class="player-coins">🪙 9,010</span></div>
-            </div>
-            <div class="player-card">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="player-avatar" alt="Rose">
-                <div class="player-info"><span class="player-name">Rose (Blue)</span><span class="player-coins">🪙 17,010</span></div>
-            </div>
-        </div>
     </div>
 
-    <!-- Control Panel -->
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
@@ -247,94 +174,53 @@
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
         function playSound(type) {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             if (type === 'dice') {
-                // Real wooden dice cup shaking rattle sound using rapid multi-clicks
-                let rattles = 8;
-                for (let i = 0; i < rattles; i++) {
+                for (let i = 0; i < 6; i++) {
                     setTimeout(() => {
-                        if (audioCtx.state === 'closed') return;
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-
+                        osc.connect(gain); gain.connect(audioCtx.destination);
                         osc.type = 'square';
-                        // Random frequencies for wooden cup clatter feel
-                        osc.frequency.setValueAtTime(120 + Math.random() * 300, audioCtx.currentTime);
-                        
-                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                        
-                        osc.start();
-                        osc.stop(audioCtx.currentTime + 0.05);
-                    }, i * 70); // spaced out rattling
+                        osc.frequency.setValueAtTime(150 + Math.random() * 250, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                        osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+                    }, i * 60);
                 }
             } else if (type === 'step') {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
+                osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(500, audioCtx.currentTime);
                 osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.06);
-                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.06);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.06);
             } else if (type === 'win') {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-
+                osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12); // E5
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24); // G5
-                osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.36); // C6
-                
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.12);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.24);
                 gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.7);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.7);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
             }
         }
 
         const board = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
-                let isTrack = false;
                 if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
                     (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
-                    isTrack = true;
-                }
-                
-                if (isTrack) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.style.gridRow = r; cell.style.gridColumn = c;
-                    
-                    if (r===7 && c===2) { cell.classList.add('green-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===3 && c===7) { cell.innerHTML = '⭐'; }
-                    else if (r===2 && c===9) { cell.classList.add('yellow-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===7 && c===13) { cell.innerHTML = '⭐'; }
-                    else if (r===9 && c===14) { cell.classList.add('blue-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===13 && c===9) { cell.innerHTML = '⭐'; }
-                    else if (r===14 && c===7) { cell.classList.add('red-cell'); cell.innerHTML = '⭐'; }
-                    else if (r===9 && c===3) { cell.innerHTML = '⭐'; }
-                    
-                    else if (r===8 && c>=2 && c<=6) cell.classList.add('green-cell');
-                    else if (c===8 && r>=2 && r<=6) cell.classList.add('yellow-cell');
-                    else if (r===8 && c>=10 && c<=14) cell.classList.add('blue-cell');
-                    else if (c===8 && r>=10 && r<=14) cell.classList.add('red-cell');
-
                     board.appendChild(cell);
                 }
             }
@@ -374,8 +260,8 @@
         function rollDice() {
             if(isWaitingForMove) return;
             rollBtn.disabled = true;
-            statusEl.innerText = "Shaking dice cup...";
-            playSound('dice'); // Play realistic rattling cup sound
+            statusEl.innerText = "Rolling dice...";
+            playSound('dice');
 
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
@@ -384,7 +270,6 @@
 
             setTimeout(() => {
                 currentRoll = Math.floor(Math.random() * 6) + 1;
-                
                 let targetTransform = "";
                 switch(currentRoll) {
                     case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
@@ -394,7 +279,6 @@
                     case 5: targetTransform = "rotateX(90deg) rotateY(0deg)"; break;
                     case 6: targetTransform = "rotateX(180deg) rotateY(0deg)"; break;
                 }
-
                 diceCube.style.transition = "transform 0.4s ease-out";
                 diceCube.style.transform = targetTransform;
 
@@ -409,18 +293,12 @@
             tokens.forEach(t => {
                 const el = document.getElementById(t.id);
                 el.classList.remove('movable');
-
                 if (t.done) return;
                 
                 if (t.pos === -1 && currentRoll === 6) {
-                    el.classList.add('movable');
-                    movableCount++;
-                    autoMoveTokenId = t.id;
-                }
-                else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
-                    el.classList.add('movable');
-                    movableCount++;
-                    autoMoveTokenId = t.id;
+                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
+                } else if (t.pos >= 0 && (t.pos + currentRoll) <= 56) {
+                    el.classList.add('movable'); movableCount++; autoMoveTokenId = t.id;
                 }
             });
 
@@ -431,7 +309,7 @@
                 statusEl.innerText = `Rolled ${currentRoll}. Moving step by step...`;
                 setTimeout(() => stepByStepMove(autoMoveTokenId, currentRoll), 400);
             } else {
-                statusEl.innerText = `Rolled ${currentRoll}. Click a glowing commando!`;
+                statusEl.innerText = `Rolled ${currentRoll}. Click your glowing commando!`;
                 isWaitingForMove = true;
             }
         }
@@ -439,7 +317,6 @@
         function stepByStepMove(tokenId, stepsLeft) {
             let t = tokens.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
-
             tokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
             isWaitingForMove = false;
 

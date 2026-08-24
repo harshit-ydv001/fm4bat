@@ -75,13 +75,11 @@ async def signup_user(
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
-    # Check if username already exists
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         conn.close()
         return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
-    # Check if identifier already exists
     cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
     if cursor.fetchone():
         conn.close()
@@ -147,12 +145,29 @@ async def crash_game_page(request: Request):
     return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
+# Ludo Lobby Route (Dashboard se ludo click karne par ye open hoga)
 @app.get("/games/ludo", response_class=HTMLResponse)
-async def ludo_game_page(request: Request):
+async def ludo_lobby_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    return templates.TemplateResponse("ludo.html", {"request": request, "username": username})
+    return templates.TemplateResponse("ludo_lobby.html", {"request": request, "username": username})
+
+
+# Ludo Playable Game Route (Matchmaking ke baad ye game start karega)
+@app.get("/games/ludo/play", response_class=HTMLResponse)
+async def ludo_game_play_page(request: Request):
+    username = request.cookies.get("session_user")
+    if not username:
+        return RedirectResponse(url="/", status_code=303)
+    
+    mode = request.query_params.get("mode", "2")
+    amount = request.query_params.get("amount", "100")
+    
+    return templates.TemplateResponse(
+        "ludo.html", 
+        {"request": request, "username": username, "mode": mode, "amount": amount}
+    )
 
 
 @app.websocket("/ws/crash")
