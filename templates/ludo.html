@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Corrected Turn</title>
+    <title>Ludo Battle - Clean Working Bot</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -25,18 +25,25 @@
         .players-row { width: 100%; display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
         .player-card {
             background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 6px 10px; width: 48%; display: flex; align-items: center; gap: 8px;
-            transition: all 0.3s ease; position: relative;
+            transition: all 0.3s ease;
         }
-        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.7); background: rgba(241, 196, 15, 0.08); }
+        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 14px rgba(241, 196, 15, 0.8); background: rgba(241, 196, 15, 0.1); }
         .player-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
         .player-info { display: flex; flex-direction: column; font-size: 10px; flex: 1; }
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
 
         .mini-dice {
-            width: 28px; height: 28px; background: #fff; border: 2px solid #d97706; border-radius: 6px;
+            width: 30px; height: 30px; background: #fff; border: 2px solid #d97706; border-radius: 6px;
             display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #111;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .mini-dice.rolling { animation: shakeDice 0.4s infinite ease-in-out; background: #fef08a; }
+        @keyframes shakeDice {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-12deg) scale(1.1); }
+            50% { transform: rotate(12deg) scale(1.1); }
+            75% { transform: rotate(-8deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
         }
 
         .board {
@@ -59,7 +66,7 @@
         .token {
             width: 24px; height: 24px; background: #222; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; font-size: 13px;
-            border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10; transition: all 0.2s ease-in-out;
+            border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10;
         }
         
         .token.red-token { border-color: #fff; background: #b93d30; }
@@ -84,15 +91,12 @@
         .dice-container { perspective: 400px; width: 52px; height: 52px; }
         .dice-3d {
             width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
-            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 0.8s ease;
+            transform: rotateX(-20deg) rotateY(-20deg); transition: transform 0.8s cubic-bezier(0.15, 0.85, 0.35, 1.2);
         }
         .dice-face {
             position: absolute; width: 52px; height: 52px;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-            border: 2.5px solid #d97706; border-radius: 10px; display: grid; padding: 6px;
+            background: #fff; border: 2.5px solid #d97706; border-radius: 10px; display: grid; padding: 6px;
         }
-
-        .dot { width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center; }
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
@@ -118,7 +122,7 @@
     <div class="ludo-container">
         <div class="players-row">
             <div class="player-card" id="opp-card">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" id="opp-avatar" alt="Opponent">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
                 <div class="player-info">
                     <span class="player-name" id="opp-name">Rahul_99</span>
                     <span class="player-coins">Online</span>
@@ -172,15 +176,15 @@
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
-        <button class="roll-btn" id="roll-btn" onclick="userRoll()">Roll Dice</button>
+        <button class="roll-btn" id="roll-btn" onclick="onUserRollClick()">Roll Dice</button>
     </div>
 
     <script>
-        const bots = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
-        let chosenBotName = bots[Math.floor(Math.random() * bots.length)];
+        const botsList = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
+        let chosenBotName = botsList[Math.floor(Math.random() * botsList.length)];
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
-        const board = document.getElementById('ludo-board');
+        const ludoBoard = document.getElementById('ludo-board');
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
                 if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
@@ -188,12 +192,12 @@
                     let cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.style.gridRow = r; cell.style.gridColumn = c;
-                    board.appendChild(cell);
+                    ludoBoard.appendChild(cell);
                 }
             }
         }
 
-        const redPath = [
+        const redPathCoords = [
             [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
             [7,1], [7,2], [7,3], [7,4], [7,5], [7,6], [6,7], [5,7], [4,7], [3,7], [2,7], [1,7], [1,8],
             [1,9], [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
@@ -201,7 +205,7 @@
             [14,8], [13,8], [12,8], [11,8], [10,8], [9,8]
         ];
 
-        const greenPath = [
+        const greenPathCoords = [
             [2,9], [3,9], [4,9], [5,9], [6,9], [7,10], [7,11], [7,12], [7,13], [7,14], [7,15], [8,15],
             [9,15], [9,14], [9,13], [9,12], [9,11], [9,10], [10,9], [11,9], [12,9], [13,9], [14,9], [15,9], [15,8],
             [15,7], [14,7], [13,7], [12,7], [11,7], [10,7], [9,6], [9,5], [9,4], [9,3], [9,2], [9,1], [8,1],
@@ -209,125 +213,123 @@
             [2,8], [3,8], [4,8], [5,8], [6,8], [7,8]
         ];
 
-        let redTokens = [{id:'red-0', pos:-1, done:false}, {id:'red-1', pos:-1, done:false}, {id:'red-2', pos:-1, done:false}, {id:'red-3', pos:-1, done:false}];
-        let greenTokens = [{id:'green-0', pos:-1, done:false}, {id:'green-1', pos:-1, done:false}, {id:'green-2', pos:-1, done:false}, {id:'green-3', pos:-1, done:false}];
+        let redTokensArr = [{id:'red-0', pos:-1, done:false}, {id:'red-1', pos:-1, done:false}, {id:'red-2', pos:-1, done:false}, {id:'red-3', pos:-1, done:false}];
+        let greenTokensArr = [{id:'green-0', pos:-1, done:false}, {id:'green-1', pos:-1, done:false}, {id:'green-2', pos:-1, done:false}, {id:'green-3', pos:-1, done:false}];
 
-        let turn = 'user'; // 'user' or 'bot'
-        let rollVal = 0;
-        let isWaitingClick = false;
+        let playerTurn = 'user'; 
+        let activeDiceVal = 0;
+        let isWaitingForTokenClick = false;
 
-        function setTurn(nextPlayer) {
-            turn = nextPlayer;
-            isWaitingClick = false;
-            if (turn === 'user') {
-                document.getElementById("user-card").classList.add('active-turn');
-                document.getElementById("opp-card").classList.remove('active-turn');
-                document.getElementById("game-status").innerText = "Your Turn (Red). Roll the dice!";
-                document.getElementById("roll-btn").disabled = false;
-                document.getElementById("opp-mini-dice").innerText = "🎲";
-            } else {
-                document.getElementById("user-card").classList.remove('active-turn');
-                document.getElementById("opp-card").classList.add('active-turn');
-                document.getElementById("game-status").innerText = `${chosenBotName}'s turn...`;
-                document.getElementById("roll-btn").disabled = true;
-                document.getElementById("user-mini-dice").innerText = "🎲";
-                setTimeout(botPlay, 1000);
-            }
-        }
-
-        function rotateDice(val, callback) {
+        function runDiceAnimation(val, player, onFinish) {
             let cube = document.getElementById("dice-cube");
-            let rot = "";
-            switch(val) {
-                case 1: rot = "rotateX(0deg) rotateY(0deg)"; break;
-                case 2: rot = "rotateX(-90deg) rotateY(0deg)"; break;
-                case 3: rot = "rotateY(-90deg) rotateX(0deg)"; break;
-                case 4: rot = "rotateY(90deg) rotateX(0deg)"; break;
-                case 5: rot = "rotateX(90deg) rotateY(0deg)"; break;
-                case 6: rot = "rotateX(180deg) rotateY(0deg)"; break;
-            }
-            cube.style.transform = rot;
-            setTimeout(callback, 700);
+            let rx = (Math.floor(Math.random() * 3) + 4) * 360;
+            let ry = (Math.floor(Math.random() * 3) + 4) * 360;
+            cube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+
+            let miniEl = (player === 'user') ? document.getElementById("user-mini-dice") : document.getElementById("opp-mini-dice");
+            miniEl.classList.add('rolling');
+            miniEl.innerText = "🎲";
+
+            setTimeout(() => {
+                miniEl.classList.remove('rolling');
+                miniEl.innerText = val;
+
+                let finalTransform = "";
+                switch(val) {
+                    case 1: finalTransform = "rotateX(0deg) rotateY(0deg)"; break;
+                    case 2: finalTransform = "rotateX(-90deg) rotateY(0deg)"; break;
+                    case 3: finalTransform = "rotateY(-90deg) rotateX(0deg)"; break;
+                    case 4: finalTransform = "rotateY(90deg) rotateX(0deg)"; break;
+                    case 5: finalTransform = "rotateX(90deg) rotateY(0deg)"; break;
+                    case 6: finalTransform = "rotateX(180deg) rotateY(0deg)"; break;
+                }
+                cube.style.transform = finalTransform;
+                if (onFinish) onFinish();
+            }, 800);
         }
 
-        function userRoll() {
-            if (turn !== 'user' || isWaitingClick) return;
+        function onUserRollClick() {
+            if (playerTurn !== 'user' || isWaitingForTokenClick) return;
             document.getElementById("roll-btn").disabled = true;
-            rollVal = Math.floor(Math.random() * 6) + 1;
-            document.getElementById("game-status").innerText = `You rolled ${rollVal}`;
-            document.getElementById("user-mini-dice").innerText = rollVal;
+            activeDiceVal = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("game-status").innerText = "Rolling...";
 
-            rotateDice(rollVal, () => evaluateTurn('user'));
+            runDiceAnimation(activeDiceVal, 'user', () => {
+                document.getElementById("game-status").innerText = `You rolled ${activeDiceVal}!`;
+                evaluateGameTurn('user');
+            });
         }
 
-        function botPlay() {
-            if (turn !== 'bot') return;
-            rollVal = Math.floor(Math.random() * 6) + 1;
-            document.getElementById("game-status").innerText = `${chosenBotName} rolled ${rollVal}`;
-            document.getElementById("opp-mini-dice").innerText = rollVal;
+        function runBotTurn() {
+            if (playerTurn !== 'bot') return;
+            activeDiceVal = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("game-status").innerText = `${chosenBotName} is rolling...`;
 
-            rotateDice(rollVal, () => evaluateTurn('bot'));
+            runDiceAnimation(activeDiceVal, 'bot', () => {
+                document.getElementById("game-status").innerText = `${chosenBotName} rolled ${activeDiceVal}!`;
+                setTimeout(() => evaluateGameTurn('bot'), 800);
+            });
         }
 
-        function evaluateTurn(player) {
-            let tokens = (player === 'user') ? redTokens : greenTokens;
-            let movable = tokens.filter(t => !t.done && ((t.pos === -1 && rollVal === 6) || (t.pos >= 0 && t.pos + rollVal <= 56)));
+        function evaluateGameTurn(player) {
+            let tokens = (player === 'user') ? redTokensArr : greenTokensArr;
+            let movable = tokens.filter(t => !t.done && ((t.pos === -1 && activeDiceVal === 6) || (t.pos >= 0 && t.pos + activeDiceVal <= 56)));
 
             if (movable.length === 0) {
-                document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} got ${rollVal}. No moves!`;
-                setTimeout(() => nextPlayerTurn(player, false), 1500);
+                document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. No moves!`;
+                setTimeout(() => switchPlayerTurn(player, false), 1500);
             } else if (player === 'bot' || movable.length === 1) {
-                let chosenToken = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
-                moveTokenSteps(chosenToken.id, rollVal, player);
+                let chosen = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
+                moveTokenSteps(chosen.id, activeDiceVal, player);
             } else {
-                document.getElementById("game-status").innerText = `Got ${rollVal}. Click your glowing token!`;
-                isWaitingClick = true;
+                document.getElementById("game-status").innerText = `Rolled ${activeDiceVal}. Click your glowing token!`;
+                isWaitingForTokenClick = true;
                 movable.forEach(t => document.getElementById(t.id).classList.add('movable'));
             }
         }
 
-        redTokens.forEach(t => {
+        redTokensArr.forEach(t => {
             document.getElementById(t.id).addEventListener('click', () => {
-                if (turn === 'user' && isWaitingClick && document.getElementById(t.id).classList.contains('movable')) {
-                    redTokens.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
-                    isWaitingClick = false;
+                if (playerTurn === 'user' && isWaitingForTokenClick && document.getElementById(t.id).classList.contains('movable')) {
+                    redTokensArr.forEach(tok => document.getElementById(tok.id).classList.remove('movable'));
+                    isWaitingForTokenClick = false;
                     document.getElementById("game-status").innerText = "Moving token...";
-                    moveTokenSteps(t.id, rollVal, 'user');
+                    moveTokenSteps(t.id, activeDiceVal, 'user');
                 }
             });
         });
 
         function moveTokenSteps(tokenId, stepsLeft, player) {
-            let tokensList = (player === 'user') ? redTokens : greenTokens;
-            let pathList = (player === 'user') ? redPath : greenPath;
+            let tokensList = (player === 'user') ? redTokensArr : greenTokensArr;
+            let pathList = (player === 'user') ? redPathCoords : greenPathCoords;
             let t = tokensList.find(tok => tok.id === tokenId);
             let el = document.getElementById(tokenId);
 
             if (t.pos === -1) {
                 t.pos = 0;
-                board.appendChild(el);
+                ludoBoard.appendChild(el);
                 el.innerText = player === 'user' ? "🚀" : "🛸";
                 el.style.gridRow = pathList[t.pos][0];
                 el.style.gridColumn = pathList[t.pos][1];
-                finishTurnAction(t, player);
+                checkTurnCompletion(t, player);
                 return;
             }
 
-            let timer = setInterval(() => {
+            let stepTimer = setInterval(() => {
                 if (stepsLeft > 0 && t.pos < 56) {
                     t.pos++;
                     el.style.gridRow = pathList[t.pos][0];
                     el.style.gridColumn = pathList[t.pos][1];
                     stepsLeft--;
                 } else {
-                    clearInterval(timer);
-                    finishTurnAction(t, player);
+                    clearInterval(stepTimer);
+                    checkTurnCompletion(t, player);
                 }
             }, 180);
         }
 
-        function finishTurnAction(t, player) {
-            let tokensList = (player === 'user') ? redTokens : greenTokens;
+        function checkTurnCompletion(t, player) {
+            let tokensList = (player === 'user') ? redTokensArr : greenTokensArr;
             let el = document.getElementById(t.id);
 
             if (t.pos === 56) {
@@ -341,24 +343,37 @@
                 return;
             }
 
-            let gotSix = (rollVal === 6 && !t.done);
+            let gotSix = (activeDiceVal === 6 && !t.done);
             if (gotSix) {
                 document.getElementById("game-status").innerText = "Rolled 6! Extra turn!";
                 if (player === 'user') {
                     document.getElementById("roll-btn").disabled = false;
                 } else {
-                    setTimeout(botPlay, 1000);
+                    setTimeout(runBotTurn, 1000);
                 }
             } else {
-                setTimeout(() => {
-                    setTurn(player === 'user' ? 'bot' : 'user');
-                }, 1200);
+                setTimeout(() => switchPlayerTurn(player, true), 1200);
             }
         }
 
-        function nextPlayerTurn(currentPlayer, delayed) {
-            let next = (currentPlayer === 'user') ? 'bot' : 'user';
-            setTimeout(() => setTurn(next), delayed ? 1200 : 200);
+        function switchPlayerTurn(currentPlayer, delayed) {
+            playerTurn = (currentPlayer === 'user') ? 'bot' : 'user';
+            isWaitingForTokenClick = false;
+
+            if (playerTurn === 'user') {
+                document.getElementById("user-card").classList.add('active-turn');
+                document.getElementById("opp-card").classList.remove('active-turn');
+                document.getElementById("game-status").innerText = "Your Turn (Red). Roll the dice!";
+                document.getElementById("roll-btn").disabled = false;
+                document.getElementById("opp-mini-dice").innerText = "🎲";
+            } else {
+                document.getElementById("user-card").classList.remove('active-turn');
+                document.getElementById("opp-card").classList.add('active-turn');
+                document.getElementById("game-status").innerText = `${chosenBotName}'s turn...`;
+                document.getElementById("roll-btn").disabled = true;
+                document.getElementById("user-mini-dice").innerText = "🎲";
+                setTimeout(runBotTurn, delayed ? 1000 : 200);
+            }
         }
     </script>
 </body>
