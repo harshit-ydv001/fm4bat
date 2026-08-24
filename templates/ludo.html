@@ -89,6 +89,7 @@
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
             display: flex; justify-content: center; align-items: center; font-size: 24px;
             border: 2px solid #111;
+            position: relative;
         }
 
         /* Track Grid Cells */
@@ -98,7 +99,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
         }
         .green-cell { background: #2ecc71; color: #fff; }
@@ -156,7 +157,7 @@
             </div>
         </div>
 
-        <!-- Full Complete Classic Ludo Board -->
+        <!-- 100% Complete Classic Ludo Board Grid -->
         <div class="board">
             <!-- Bases -->
             <div class="base-green">
@@ -197,8 +198,8 @@
                 </div>
             </div>
 
-            <!-- Complete Track Path Grid System matching reference -->
-            <!-- Top Arm Tracks (Cols 7, 8, 9; Rows 1 to 6) -->
+            <!-- COMPLETE TRACK CELLS FOR ALL 4 ARMS -->
+            <!-- TOP ARM (Rows 1-6, Cols 7-9) -->
             <div class="cell" style="grid-column: 7; grid-row: 1;"></div>
             <div class="cell green-cell" style="grid-column: 8; grid-row: 1;" id="track-1">START</div>
             <div class="cell" style="grid-column: 9; grid-row: 1;"></div>
@@ -223,7 +224,29 @@
             <div class="cell yellow-cell" style="grid-column: 8; grid-row: 6;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 6;"></div>
 
-            <!-- Left Arm Tracks (Cols 1 to 6; Rows 7, 8, 9) -->
+            <!-- RIGHT ARM (Rows 7-9, Cols 10-15) -->
+            <div class="cell" style="grid-column: 10; grid-row: 7;"></div>
+            <div class="cell" style="grid-column: 11; grid-row: 7;"></div>
+            <div class="cell" style="grid-column: 12; grid-row: 7;"></div>
+            <div class="cell" style="grid-column: 13; grid-row: 7;"></div>
+            <div class="cell" style="grid-column: 14; grid-row: 7;" id="track-17">⭐</div>
+            <div class="cell" style="grid-column: 15; grid-row: 7;"></div>
+
+            <div class="cell blue-cell" style="grid-column: 10; grid-row: 8;"></div>
+            <div class="cell blue-cell" style="grid-column: 11; grid-row: 8;"></div>
+            <div class="cell blue-cell" style="grid-column: 12; grid-row: 8;"></div>
+            <div class="cell blue-cell" style="grid-column: 13; grid-row: 8;"></div>
+            <div class="cell blue-cell" style="grid-column: 14; grid-row: 8;"></div>
+            <div class="cell blue-cell" style="grid-column: 15; grid-row: 8;"></div>
+
+            <div class="cell" style="grid-column: 10; grid-row: 9;" id="track-18"></div>
+            <div class="cell" style="grid-column: 11; grid-row: 9;" id="track-19"></div>
+            <div class="cell" style="grid-column: 12; grid-row: 9;"></div>
+            <div class="cell" style="grid-column: 13; grid-row: 9;"></div>
+            <div class="cell" style="grid-column: 14; grid-row: 9;"></div>
+            <div class="cell" style="grid-column: 15; grid-row: 9;"></div>
+
+            <!-- LEFT ARM (Rows 7-9, Cols 1-6) -->
             <div class="cell" style="grid-column: 1; grid-row: 7;"></div>
             <div class="cell" style="grid-column: 2; grid-row: 7;" id="track-6">⭐</div>
             <div class="cell" style="grid-column: 3; grid-row: 7;" id="track-7"></div>
@@ -245,7 +268,7 @@
             <div class="cell" style="grid-column: 5; grid-row: 9;" id="track-11">⭐</div>
             <div class="cell" style="grid-column: 6; grid-row: 9;" id="track-12"></div>
 
-            <!-- Bottom Arm Tracks (Cols 7, 8, 9; Rows 10 to 15) -->
+            <!-- BOTTOM ARM (Rows 10-15, Cols 7-9) -->
             <div class="cell" style="grid-column: 7; grid-row: 10;" id="track-13"></div>
             <div class="cell red-cell" style="grid-column: 8; grid-row: 10;"></div>
             <div class="cell" style="grid-column: 9; grid-row: 10;"></div>
@@ -267,7 +290,7 @@
             <div class="cell" style="grid-column: 9; grid-row: 14;"></div>
 
             <div class="cell" style="grid-column: 7; grid-row: 15;"></div>
-            <div class="cell red-cell" style="grid-column: 8; grid-row: 15;"></div>
+            <div class="cell red-cell" style="grid-column: 8; grid-row: 15;" id="track-max"></div>
             <div class="cell" style="grid-column: 9; grid-row: 15;"></div>
         </div>
 
@@ -299,7 +322,7 @@
 
     <script>
         let currentStep = 0;
-        const maxSteps = 16;
+        const maxSteps = 18;
 
         function rollDice() {
             const diceEl = document.getElementById("dice-value");
@@ -322,20 +345,20 @@
                         currentStep = 1;
                         token.innerText = "";
                         document.getElementById("track-1").innerHTML = "🚀";
-                        statusEl.innerText = `Rolled 6! Token entered the track boxes!`;
+                        statusEl.innerText = `Rolled 6! Token entered the complete track!`;
                     } else {
                         statusEl.innerText = `Rolled ${roll}. Need a 6 to exit base!`;
                     }
                 } else {
-                    let oldEl = document.getElementById(`track-${currentStep}`);
+                    let oldEl = currentStep === maxSteps ? document.getElementById("track-max") : document.getElementById(`track-${currentStep}`);
                     if(oldEl) {
-                        oldEl.innerHTML = (currentStep === 1 ? "START" : (currentStep === 2 || currentStep === 6 || currentStep === 11 || currentStep === 16 ? "⭐" : ""));
+                        oldEl.innerHTML = (currentStep === 1 ? "START" : "");
                     }
 
                     currentStep += roll;
                     if (currentStep >= maxSteps) {
                         currentStep = maxSteps;
-                        document.getElementById(`track-${maxSteps}`).innerHTML = "👑";
+                        document.getElementById("track-max").innerHTML = "👑";
                         statusEl.innerText = `🎉 Victory! Reached Home! Won 500 Coins!`;
                         setTimeout(() => {
                             window.location.href = "/dashboard";
@@ -344,8 +367,10 @@
                         let newEl = document.getElementById(`track-${currentStep}`);
                         if(newEl) {
                             newEl.innerHTML = "🚀";
+                        } else {
+                            document.getElementById("track-max").innerHTML = "🚀";
                         }
-                        statusEl.innerText = `Rolled ${roll}. Moving along the complete track boxes!`;
+                        statusEl.innerText = `Rolled ${roll}. Moving along the full track boxes!`;
                     }
                 }
                 rollBtn.disabled = false;
