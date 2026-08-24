@@ -28,7 +28,6 @@ def init_db():
             password TEXT
         )
     """)
-    # Insert default admin user if not exists
     cursor.execute("INSERT OR IGNORE INTO users (identifier, username, password) VALUES (?, ?, ?)", 
                    ("admin", "admin", "admin123"))
     conn.commit()
@@ -55,7 +54,6 @@ async def login_user(identifier: str = Form(...), password: str = Form(...)):
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
     
-    # Check by identifier (email/phone) or username
     cursor.execute("SELECT username, password FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
     row = cursor.fetchone()
     conn.close()
@@ -77,13 +75,17 @@ async def signup_user(
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
-    # Check if identifier or username already exists
-    cursor.execute("SELECT * FROM users WHERE identifier = ? OR username = ?", (identifier, username))
-    existing = cursor.fetchone()
-
-    if existing:
+    # Check if username already exists
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    if cursor.fetchone():
         conn.close()
-        return RedirectResponse(url="/?error=UserAlreadyExists", status_code=303)
+        return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
+
+    # Check if identifier already exists
+    cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
+    if cursor.fetchone():
+        conn.close()
+        return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
 
     cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", (identifier, username, password))
     conn.commit()
