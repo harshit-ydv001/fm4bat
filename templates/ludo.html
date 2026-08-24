@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Perfect Turn Loop</title>
+    <title>Ludo Battle - Pro Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -36,14 +36,6 @@
         .mini-dice {
             width: 30px; height: 30px; background: #fff; border: 2px solid #d97706; border-radius: 6px;
             display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #111;
-        }
-        .mini-dice.rolling { animation: shakeDice 0.4s infinite ease-in-out; background: #fef08a; }
-        @keyframes shakeDice {
-            0% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(-12deg) scale(1.1); }
-            50% { transform: rotate(12deg) scale(1.1); }
-            75% { transform: rotate(-8deg) scale(1.1); }
-            100% { transform: rotate(0deg) scale(1); }
         }
 
         .board {
@@ -82,12 +74,16 @@
             display: flex; justify-content: center; align-items: center; font-size: 26px; border: 2px solid #111; z-index: 1;
         }
 
-        .cell { background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; }
-        
+        .cell { background: #fff; border: 1px solid #dcdcdc; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; }
+        .cell.safe { background: #e2e8f0; }
+        .cell.red-path { background: #fee2e2; }
+        .cell.green-path { background: #dcfce7; }
+
         .control-panel {
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
+        /* Proper 3D Dice with Dot Faces */
         .dice-container { perspective: 400px; width: 52px; height: 52px; }
         .dice-3d {
             width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
@@ -95,8 +91,28 @@
         }
         .dice-face {
             position: absolute; width: 52px; height: 52px;
-            background: #fff; border: 2.5px solid #d97706; border-radius: 10px; display: grid; padding: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: 2.5px solid #d97706; border-radius: 10px; display: grid; padding: 6px;
         }
+        .dot { width: 7px; height: 7px; background: #111; border-radius: 50%; align-self: center; justify-self: center; }
+        
+        .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-2 .dot:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; }
+        .face-3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-3 .dot:nth-child(2) { grid-column: 2; grid-row: 2; }
+        .face-3 .dot:nth-child(3) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+        .face-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
+        .face-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-5 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-5 .dot:nth-child(2) { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
+        .face-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
+        .face-5 .dot:nth-child(4) { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+        .face-5 .dot:nth-child(5) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+        .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
+
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
@@ -115,7 +131,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (REAL VS BOT)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (PRO)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -167,12 +183,12 @@
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
-                <div class="dice-face front">1</div>
-                <div class="dice-face back">6</div>
-                <div class="dice-face right">3</div>
-                <div class="dice-face left">4</div>
-                <div class="dice-face top">2</div>
-                <div class="dice-face bottom">5</div>
+                <div class="dice-face front face-1"><div class="dot"></div></div>
+                <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
+                <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
             </div>
         </div>
         <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
@@ -180,6 +196,34 @@
     </div>
 
     <script>
+        // Sound Engine using Web Audio API
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (type === 'dice') {
+                for(let i=0; i<5; i++) {
+                    setTimeout(() => {
+                        let osc = audioCtx.createOscillator();
+                        let g = audioCtx.createGain();
+                        osc.connect(g); g.connect(audioCtx.destination);
+                        osc.frequency.setValueAtTime(200 + Math.random()*300, audioCtx.currentTime);
+                        g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                    }, i * 60);
+                }
+            } else if (type === 'step') {
+                let osc = audioCtx.createOscillator();
+                let g = audioCtx.createGain();
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+                g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+            }
+        }
+
         const botsList = ["Rahul_99", "Priya_King", "Aman_Pro", "Simran_x"];
         let chosenBotName = botsList[Math.floor(Math.random() * botsList.length)];
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
@@ -191,6 +235,7 @@
                     (r >= 7 && r <= 9 && c <= 6) || (r >= 7 && r <= 9 && c >= 10)) {
                     let cell = document.createElement('div');
                     cell.className = 'cell';
+                    if((r===8 && c===2) || (r===2 && c===8) || (r===8 && c===14) || (r===14 && c===8)) cell.classList.add('safe');
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     ludoBoard.appendChild(cell);
                 }
@@ -221,19 +266,16 @@
         let isWaitingForTokenClick = false;
 
         function runDiceAnimation(val, player, onFinish) {
+            playSfx('dice');
             let cube = document.getElementById("dice-cube");
             let rx = (Math.floor(Math.random() * 3) + 4) * 360;
             let ry = (Math.floor(Math.random() * 3) + 4) * 360;
             cube.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
 
             let miniEl = (player === 'user') ? document.getElementById("user-mini-dice") : document.getElementById("opp-mini-dice");
-            miniEl.classList.add('rolling');
-            miniEl.innerText = "🎲";
+            miniEl.innerText = val;
 
             setTimeout(() => {
-                miniEl.classList.remove('rolling');
-                miniEl.innerText = val;
-
                 let finalTransform = "";
                 switch(val) {
                     case 1: finalTransform = "rotateX(0deg) rotateY(0deg)"; break;
@@ -277,7 +319,6 @@
 
             if (movable.length === 0) {
                 document.getElementById("game-status").innerText = `${player === 'user' ? 'You' : chosenBotName} rolled ${activeDiceVal}. No moves!`;
-                // FIX: No moves hone par bhi turant turn switch hogi!
                 setTimeout(() => switchPlayerTurn(player, false), 1500);
             } else if (player === 'bot' || movable.length === 1) {
                 let chosen = (player === 'bot') ? movable[Math.floor(Math.random() * movable.length)] : movable[0];
@@ -310,6 +351,7 @@
                 t.pos = 0;
                 ludoBoard.appendChild(el);
                 el.innerText = player === 'user' ? "🚀" : "🛸";
+                playSfx('step');
                 el.style.gridRow = pathList[t.pos][0];
                 el.style.gridColumn = pathList[t.pos][1];
                 checkTurnCompletion(t, player);
@@ -319,6 +361,7 @@
             let stepTimer = setInterval(() => {
                 if (stepsLeft > 0 && t.pos < 56) {
                     t.pos++;
+                    playSfx('step');
                     el.style.gridRow = pathList[t.pos][0];
                     el.style.gridColumn = pathList[t.pos][1];
                     stepsLeft--;
@@ -326,7 +369,7 @@
                     clearInterval(stepTimer);
                     checkTurnCompletion(t, player);
                 }
-            }, 180);
+            }, 200);
         }
 
         function checkTurnCompletion(t, player) {
