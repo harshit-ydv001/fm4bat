@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ludo Battle - Real Bot Turn Play</title>
+    <title>Ludo Battle - Real Vs Bot Match</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body {
@@ -27,8 +27,8 @@
             background: #1c212e; border: 1px solid #374151; border-radius: 8px; padding: 5px 8px; width: 48%; display: flex; align-items: center; gap: 6px;
             transition: all 0.3s ease;
         }
-        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
-        .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
+        .player-card.active-turn { border-color: #f1c40f; box-shadow: 0 0 12px rgba(241, 196, 15, 0.6); background: rgba(241, 196, 15, 0.05); }
+        .player-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; }
         .player-info { display: flex; flex-direction: column; font-size: 10px; }
         .player-name { font-weight: bold; color: #fff; }
         .player-coins { color: #f1c40f; font-weight: bold; }
@@ -52,7 +52,7 @@
         
         .token {
             width: 24px; height: 24px; background: #222; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 14px;
+            display: flex; justify-content: center; align-items: center; font-size: 13px;
             border: 2px solid #999; cursor: not-allowed; place-self: center; z-index: 10; transition: all 0.2s ease-in-out;
         }
         
@@ -60,9 +60,9 @@
         .token.green-token { border-color: #fff; background: #27ae60; }
         
         .token.movable {
-            cursor: pointer; box-shadow: 0 0 12px 4px #00ffcc; transform: scale(1.15); border-color: #00ffcc; animation: pulse 1s infinite;
+            cursor: pointer; box-shadow: 0 0 14px 4px #00ffcc; transform: scale(1.2); border-color: #00ffcc; animation: pulse 1s infinite;
         }
-        @keyframes pulse { 0% { transform: scale(1.15); } 50% { transform: scale(1.25); } 100% { transform: scale(1.15); } }
+        @keyframes pulse { 0% { transform: scale(1.2); } 50% { transform: scale(1.3); } 100% { transform: scale(1.2); } }
 
         .center-home {
             grid-column: 7 / 10; grid-row: 7 / 10; background: #111;
@@ -124,15 +124,15 @@
 <body>
 
     <div class="navbar">
-        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (VS BOT)</a>
+        <a href="/games/ludo" class="brand-logo">⚔️ LUDO BATTLE (REAL VS BOT)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
     <div class="ludo-container">
         <div class="players-row">
             <div class="player-card" id="opp-card">
-                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" alt="Opponent">
-                <div class="player-info"><span class="player-name" id="opp-name">Opponent (Green)</span><span class="player-coins">🪙 Bot Active</span></div>
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="player-avatar" id="opp-avatar" alt="Opponent">
+                <div class="player-info"><span class="player-name" id="opp-name">Rahul_99</span><span class="player-coins" id="opp-status">Online</span></div>
             </div>
             <div class="player-card active-turn" id="user-card">
                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" class="player-avatar" alt="You">
@@ -141,7 +141,6 @@
         </div>
 
         <div class="board" id="ludo-board">
-            <!-- Green Base (Bot Tokens) -->
             <div class="base-green" id="green-base-area">
                 <div class="inner-box" id="green-inner-box">
                     <div class="token green-token" id="green-0">🪖</div>
@@ -154,7 +153,6 @@
             <div class="center-home">🏆</div>
             <div class="base-blue"><div class="inner-box"><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div><div class="token" style="background:#3498db;">🪖</div></div></div>
             
-            <!-- Red Base (Your Playable Tokens) -->
             <div class="base-red" id="red-base-area">
                 <div class="inner-box" id="red-inner-box">
                     <div class="token red-token" id="red-0">🪖</div>
@@ -182,6 +180,17 @@
     </div>
 
     <script>
+        // Randomly assign a realistic opponent profile
+        const bots = [
+            { name: "Rahul_99", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100" },
+            { name: "Priya_King", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" },
+            { name: "Aman_Pro", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" },
+            { name: "Simran_x", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" }
+        ];
+        let chosenBot = bots[Math.floor(Math.random() * bots.length)];
+        document.getElementById("opp-name").innerText = chosenBot.name + " (Green)";
+        document.getElementById("opp-avatar").src = chosenBot.avatar;
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -235,7 +244,6 @@
             }
         }
 
-        // Red Player Path (Starts from bottom arm [14,7])
         const redPath = [
             [14,7], [13,7], [12,7], [11,7], [10,7],
             [9,6], [9,5], [9,4], [9,3], [9,2], [9,1],
@@ -253,7 +261,6 @@
             [9,8]
         ];
 
-        // Green Bot Path (Starts from top arm [2,9] and loops around)
         const greenPath = [
             [2,9], [3,9], [4,9], [5,9], [6,9],
             [7,10], [7,11], [7,12], [7,13], [7,14], [7,15],
@@ -285,7 +292,7 @@
             { id: 'green-3', pos: -1, done: false }
         ];
 
-        let currentTurn = 'user'; // 'user' (Red) or 'bot' (Green)
+        let currentTurn = 'user';
         let currentRoll = 0;
         let isWaitingForMove = false;
 
@@ -304,9 +311,9 @@
             } else {
                 userCard.classList.remove('active-turn');
                 oppCard.classList.add('active-turn');
-                statusEl.innerText = "Opponent's Turn (Green)...";
+                statusEl.innerText = `${chosenBot.name}'s turn...`;
                 rollBtn.disabled = true;
-                setTimeout(botTurn, 1000); // Bot rolls after 1 second
+                setTimeout(botTurn, 1200);
             }
         }
 
@@ -344,7 +351,6 @@
             }, 900);
         }
 
-        // --- USER TURN LOGIC ---
         function checkMovableTokens() {
             let movableCount = 0;
             let autoMoveTokenId = null;
@@ -373,20 +379,17 @@
             }
         }
 
-        // --- BOT TURN LOGIC ---
         function botTurn() {
             playSound('dice');
             animateDiceRoll(() => {
-                statusEl.innerText = `Opponent rolled ${currentRoll}!`;
+                statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}!`;
                 
-                // Find movable bot tokens
                 let validTokens = greenTokens.filter(t => !t.done && ((t.pos === -1 && currentRoll === 6) || (t.pos >= 0 && t.pos + currentRoll <= 56)));
 
                 if (validTokens.length === 0) {
-                    statusEl.innerText = `Opponent rolled ${currentRoll}. No valid moves!`;
+                    statusEl.innerText = `${chosenBot.name} rolled ${currentRoll}. No valid moves!`;
                     setTimeout(switchTurn, 1500);
                 } else {
-                    // Pick one token randomly to move
                     let chosenToken = validTokens[Math.floor(Math.random() * validTokens.length)];
                     setTimeout(() => stepByStepMove(chosenToken.id, currentRoll, 'bot'), 800);
                 }
@@ -438,24 +441,23 @@
                 t.done = true;
                 el.innerText = "👑";
                 playSound('win');
-                statusEl.innerText = player === 'user' ? `🎉 Your Commando reached Home!` : `⚠️ Opponent Commando reached Home!`;
+                statusEl.innerText = player === 'user' ? `🎉 Your Commando reached Home!` : `⚠️ ${chosenBot.name}'s Commando reached Home!`;
             }
 
             if (tokensList.every(tok => tok.done)) {
                 playSound('win');
-                let winMsg = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : "😞 OPPONENT WON THE BATTLE! 😞";
+                let winMsg = player === 'user' ? "🎉 YOU WON THE BATTLE! 🎉" : `😞 ${chosenBot.name} WON THE BATTLE! 😞`;
                 statusEl.innerText = winMsg;
-                setTimeout(() => window.location.href = "/dashboard", 3000);
+                setTimeout(() => window.location.href = "/dashboard", 3500);
                 return;
             }
 
-            // If 6 is rolled, same player gets another turn
             if (currentRoll === 6 && !t.done) {
                 statusEl.innerText = `Rolled 6! Roll again!`;
                 if (player === 'user') {
                     rollBtn.disabled = false;
                 } else {
-                    setTimeout(botTurn, 1500); // Bot rolls again
+                    setTimeout(botTurn, 1500);
                 }
             } else {
                 setTimeout(switchTurn, 1200);
