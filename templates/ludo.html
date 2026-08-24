@@ -106,7 +106,7 @@
             width: 100%; max-width: 480px; background: #12151c; padding: 12px 15px; margin-top: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1e222d;
         }
         
-        /* STYLISH 3D ROTATING DICE */
+        /* REAL LUDO 3D DOTS DICE */
         .dice-container {
             perspective: 400px;
             width: 52px; height: 52px;
@@ -120,14 +120,39 @@
         }
         .dice-face {
             position: absolute; width: 52px; height: 52px;
-            background: linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%);
-            color: #111; font-size: 20px; font-weight: 900;
-            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
             border: 2.5px solid #d97706; border-radius: 10px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.4);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.4);
+            display: grid; padding: 6px;
         }
-        
-        /* Exact 3D Cube Face Positions */
+
+        /* Dice Dot Styling */
+        .dot {
+            width: 8px; height: 8px; background: #111; border-radius: 50%; align-self: center; justify-self: center;
+        }
+
+        /* Face layouts using CSS grid */
+        .face-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .face-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        .face-2 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-2 .dot:nth-child(2) { grid-column: 2; grid-row: 2; justify-self: end; align-self: end; }
+
+        .face-3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-3 .dot:nth-child(2) { grid-column: 2; grid-row: 2; }
+        .face-3 .dot:nth-child(3) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+
+        .face-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; }
+        .face-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+        .face-5 .dot:nth-child(1) { grid-column: 1; grid-row: 1; justify-self: start; align-self: start; }
+        .face-5 .dot:nth-child(2) { grid-column: 3; grid-row: 1; justify-self: end; align-self: start; }
+        .face-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
+        .face-5 .dot:nth-child(4) { grid-column: 1; grid-row: 3; justify-self: start; align-self: end; }
+        .face-5 .dot:nth-child(5) { grid-column: 3; grid-row: 3; justify-self: end; align-self: end; }
+
+        .face-6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 2px; }
+
+        /* 3D Transformations */
         .dice-face.front  { transform: rotateY(0deg) translateZ(26px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(26px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(26px); }
@@ -148,7 +173,7 @@
 <body>
 
     <div class="navbar">
-        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (STYLISH 3D)</a>
+        <a href="/dashboard" class="brand-logo">⚔️ LUDO BATTLE (REAL DICE)</a>
         <a href="/dashboard" style="color: #8a99ad; text-decoration: none; font-size: 11px;">🏠 Lobby</a>
     </div>
 
@@ -207,19 +232,25 @@
         </div>
     </div>
 
-    <!-- Stylish 3D Dice Control Panel -->
+    <!-- Real Ludo 3D Dots Dice Control Panel -->
     <div class="control-panel">
         <div class="dice-container">
             <div class="dice-3d" id="dice-cube">
-                <div class="dice-face front">1</div>
-                <div class="dice-face back">6</div>
-                <div class="dice-face right">3</div>
-                <div class="dice-face left">4</div>
-                <div class="dice-face top">2</div>
-                <div class="dice-face bottom">5</div>
+                <!-- Face 1 -->
+                <div class="dice-face front face-1"><div class="dot"></div></div>
+                <!-- Face 6 -->
+                <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <!-- Face 3 -->
+                <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <!-- Face 4 -->
+                <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+                <!-- Face 2 -->
+                <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
+                <!-- Face 5 -->
+                <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
             </div>
         </div>
-        <div class="status-msg" id="game-status">Your Turn (Red). Roll the 3D dice!</div>
+        <div class="status-msg" id="game-status">Your Turn (Red). Roll the dice!</div>
         <button class="roll-btn" id="roll-dice-btn" onclick="rollDice()">Roll Dice</button>
     </div>
 
@@ -291,9 +322,8 @@
         function rollDice() {
             if(isWaitingForMove) return;
             rollBtn.disabled = true;
-            statusEl.innerText = "Rolling 3D dice...";
+            statusEl.innerText = "Rolling dice...";
 
-            // Heavy random 3D rotations for rolling effect
             let rx = (Math.floor(Math.random() * 4) + 4) * 360;
             let ry = (Math.floor(Math.random() * 4) + 4) * 360;
             diceCube.style.transition = "transform 0.9s cubic-bezier(0.15, 0.85, 0.35, 1.2)";
@@ -302,7 +332,6 @@
             setTimeout(() => {
                 currentRoll = Math.floor(Math.random() * 6) + 1;
                 
-                // Exact precise rotations so the rolled face lands directly flat in front
                 let targetTransform = "";
                 switch(currentRoll) {
                     case 1: targetTransform = "rotateX(0deg) rotateY(0deg)"; break;
