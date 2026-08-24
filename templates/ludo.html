@@ -227,7 +227,7 @@
 
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playRealisticDiceSound() {
+        function playRealisticDiceStudy() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             for(let i=0; i<12; i++) {
                 let delay = i * 45 + Math.random() * 25;
@@ -263,16 +263,12 @@
 
         const ludoBoard = document.getElementById('ludo-board');
         
-        // Exact Star positions as marked by user on the screenshot reference
+        // Exact Star positions as precisely marked by user on the screenshot lines
         const safeCoords = [
-            [8,2],  // Green start star (left)
-            [14,7], // Red start star (bottom)
-            [2,8],  // Yellow start star (top)
-            [8,14], // Blue start star (right)
-            [7,2],  // Green track star
-            [13,8], // Red track star
-            [9,14], // Blue track star
-            [3,8]   // Yellow track star
+            [6, 2],  // Yellow star mark (top column as per user line)
+            [12, 12],// Blue star mark (right column as per user line)
+            [8, 12], // Green star mark (left column as per user line)
+            [10, 2]  // Red star mark (bottom column as per user line)
         ];
 
         for(let r = 1; r <= 15; r++) {
@@ -320,7 +316,7 @@
         let isWaitingForTokenClick = false;
 
         function runDiceAnimation(val, player, onFinish) {
-            playRealisticDiceSound();
+            playRealisticDiceStudy();
             let cube = document.getElementById("dice-cube");
             let rx = (Math.floor(Math.random() * 3) + 4) * 360;
             let ry = (Math.floor(Math.random() * 3) + 4) * 360;
@@ -435,7 +431,7 @@
             let currentCoords = currentPath[activeToken.pos];
 
             let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
-            if (isSafe) return; // Safe point par goti cut nahi hogi
+            if (isSafe) return;
 
             let opponentTokens = (player === 'user') ? greenTokensArr : redTokensArr;
             let opponentPath = (player === 'user') ? greenPathCoords : redPathCoords;
