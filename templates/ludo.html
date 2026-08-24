@@ -262,7 +262,11 @@
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
         const ludoBoard = document.getElementById('ludo-board');
-        const safeCoords = [[8,2], [2,8], [8,14], [14,8]];
+        // Exact Ludo star safe points including start positions and regular star spots
+        const safeCoords = [
+            [8,2], [2,8], [8,14], [14,8], 
+            [7,2], [14,7], [9,2], [13,8]
+        ];
 
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
@@ -423,9 +427,8 @@
             let currentPath = (player === 'user') ? redPathCoords : greenPathCoords;
             let currentCoords = currentPath[activeToken.pos];
 
-            // Check if current landing cell is a safe star
             let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
-            if (isSafe) return; // Safe point par goti cut nahi hogi
+            if (isSafe) return;
 
             let opponentTokens = (player === 'user') ? greenTokensArr : redTokensArr;
             let opponentPath = (player === 'user') ? greenPathCoords : redPathCoords;
@@ -434,11 +437,9 @@
                 if (opp.pos >= 0 && opp.pos < 50 && !opp.done) {
                     let oppCoords = opponentPath[opp.pos];
                     if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
-                        // Capture opponent token! Send back to base
                         opp.pos = -1;
                         let oppEl = document.getElementById(opp.id);
                         oppEl.innerText = "♟️";
-                        // Move element back to its respective base container
                         if (player === 'user') {
                             document.getElementById("green-inner-box").appendChild(oppEl);
                         } else {
