@@ -43,9 +43,7 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def root_login(request: Request):
-    username = request.cookies.get("session_user")
-    if username:
-        return RedirectResponse(url="/dashboard", status_code=303)
+    # Session cookie check hata diya hai taaki website band karke kholne par hamesha login page hi aaye
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -60,6 +58,7 @@ async def login_user(identifier: str = Form(...), password: str = Form(...)):
 
     if row and row[1] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
+        # Session cookie (max_age hata diya hai, ab browser band karte hi session expire ho jayega)
         response.set_cookie(key="session_user", value=row[0])
         return response
         
@@ -75,11 +74,13 @@ async def signup_user(
     conn = sqlite3.connect("users.db")
     cursor = conn.cursor()
 
+    # Check if username already exists
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         conn.close()
         return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
+    # Check if email/identifier already exists (Ek Gmail se ek hi account restriction)
     cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
     if cursor.fetchone():
         conn.close()
@@ -137,14 +138,6 @@ async def logout_user():
     return response
 
 
-# Extra safety route to forcefully wipe cookies
-@app.get("/force-logout")
-async def force_logout():
-    response = RedirectResponse(url="/", status_code=303)
-    response.delete_cookie(key="session_user")
-    return response
-
-
 @app.get("/games/crash", response_class=HTMLResponse)
 async def crash_game_page(request: Request):
     username = request.cookies.get("session_user")
@@ -153,7 +146,6 @@ async def crash_game_page(request: Request):
     return templates.TemplateResponse("crash.html", {"request": request, "username": username})
 
 
-# Ludo Lobby Route (Strict Authentication Check)
 @app.get("/games/ludo", response_class=HTMLResponse)
 async def ludo_lobby_page(request: Request):
     username = request.cookies.get("session_user")
@@ -162,7 +154,6 @@ async def ludo_lobby_page(request: Request):
     return templates.TemplateResponse("ludo_lobby.html", {"request": request, "username": username})
 
 
-# Ludo Playable Game Route (Strict Authentication Check)
 @app.get("/games/ludo/play", response_class=HTMLResponse)
 async def ludo_game_play_page(request: Request):
     username = request.cookies.get("session_user")
