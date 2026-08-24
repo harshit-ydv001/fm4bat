@@ -262,6 +262,8 @@
         document.getElementById("opp-name").innerText = chosenBotName + " (Green)";
 
         const ludoBoard = document.getElementById('ludo-board');
+        const safeCoords = [[8,2], [2,8], [8,14], [14,8]];
+
         for(let r = 1; r <= 15; r++) {
             for(let c = 1; c <= 15; c++) {
                 if ((r <= 6 && c >= 7 && c <= 9) || (r >= 10 && c >= 7 && c <= 9) || 
@@ -269,13 +271,13 @@
                     let cell = document.createElement('div');
                     cell.className = 'cell';
                     
-                    if((r===8 && c===2) || (r===2 && c===8) || (r===8 && c===14) || (r===14 && c===8)) cell.classList.add('safe-star');
+                    if(safeCoords.some(coord => coord[0] === r && coord[1] === c)) cell.classList.add('safe-star');
                     if(r === 14 && c === 7) cell.classList.add('red-start-cell');
-                    if(r === 7 && c === 2) cell.classList.add('green-start-cell'); // Updated green start cell on left arm
+                    if(r === 7 && c === 2) cell.classList.add('green-start-cell');
                     
                     if(r >= 10 && c === 8 && r <= 14) cell.classList.add('red-home-col');
-                    if(r === 8 && c >= 2 && c <= 6) cell.classList.add('green-home-col');     // Left arm home path (Green)
-                    if(r >= 2 && c === 8 && r <= 6) cell.classList.add('yellow-home-col');   // Top arm home path (Yellow)
+                    if(r === 8 && c >= 2 && c <= 6) cell.classList.add('green-home-col');
+                    if(r >= 2 && c === 8 && r <= 6) cell.classList.add('yellow-home-col');
 
                     cell.style.gridRow = r; cell.style.gridColumn = c;
                     ludoBoard.appendChild(cell);
@@ -395,6 +397,7 @@
                 playStepSound();
                 el.style.gridRow = pathList[t.pos][0];
                 el.style.gridColumn = pathList[t.pos][1];
+                checkForCaptures(t, player);
                 checkTurnCompletion(t, player);
                 return;
             }
@@ -408,9 +411,43 @@
                     stepsLeft--;
                 } else {
                     clearInterval(stepTimer);
+                    checkForCaptures(t, player);
                     checkTurnCompletion(t, player);
                 }
             }, 180);
+        }
+
+        function checkForCaptures(activeToken, player) {
+            if (activeToken.pos === -1 || activeToken.pos >= 50 || activeToken.done) return;
+            
+            let currentPath = (player === 'user') ? redPathCoords : greenPathCoords;
+            let currentCoords = currentPath[activeToken.pos];
+
+            // Check if current landing cell is a safe star
+            let isSafe = safeCoords.some(s => s[0] === currentCoords[0] && s[1] === currentCoords[1]);
+            if (isSafe) return; // Safe point par goti cut nahi hogi
+
+            let opponentTokens = (player === 'user') ? greenTokensArr : redTokensArr;
+            let opponentPath = (player === 'user') ? greenPathCoords : redPathCoords;
+
+            opponentTokens.forEach(opp => {
+                if (opp.pos >= 0 && opp.pos < 50 && !opp.done) {
+                    let oppCoords = opponentPath[opp.pos];
+                    if (oppCoords[0] === currentCoords[0] && oppCoords[1] === currentCoords[1]) {
+                        // Capture opponent token! Send back to base
+                        opp.pos = -1;
+                        let oppEl = document.getElementById(opp.id);
+                        oppEl.innerText = "♟️";
+                        // Move element back to its respective base container
+                        if (player === 'user') {
+                            document.getElementById("green-inner-box").appendChild(oppEl);
+                        } else {
+                            document.getElementById("red-inner-box").appendChild(oppEl);
+                        }
+                        document.getElementById("game-status").innerText = "Captured opponent token! Extra turn!";
+                    }
+                }
+            });
         }
 
         function checkTurnCompletion(t, player) {
