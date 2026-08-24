@@ -5,22 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login / Signup - fm4bat</title>
     <style>
-        body { background-color: #030712; color: #ffffff; font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-card { background: #111827; border: 1px solid #1f2937; padding: 30px; border-radius: 16px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .brand-logo { text-align: center; font-size: 24px; font-weight: bold; color: #34d399; margin-bottom: 5px; letter-spacing: 1px; }
-        h2 { text-align: center; color: #9ca3af; font-size: 15px; margin-top: 0; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; background: #030712; border: 1px solid #374151; padding: 10px 12px; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color 0.2s; }
-        input:focus { border-color: #34d399; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background: radial-gradient(circle at center, #0f172a 0%, #030712 100%); 
+            color: #ffffff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden;
+        }
+        .auth-card { 
+            background: rgba(17, 24, 39, 0.85); 
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(52, 211, 153, 0.2); 
+            padding: 35px 28px; 
+            border-radius: 20px; 
+            width: 380px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(52, 211, 153, 0.1); 
+            position: relative;
+        }
+        .brand-logo { text-align: center; font-size: 26px; font-weight: 900; color: #34d399; margin-bottom: 4px; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(52, 211, 153, 0.4); }
+        h2 { text-align: center; color: #9ca3af; font-size: 14px; margin-bottom: 24px; font-weight: 500; }
+        
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input { 
+            width: 100%; 
+            background: rgba(3, 7, 18, 0.7); 
+            border: 1px solid #374151; 
+            padding: 12px 14px; 
+            border-radius: 10px; 
+            color: white; 
+            font-size: 14px; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        input:focus { 
+            border-color: #34d399; 
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.3); 
+        }
+        
         .password-container { position: relative; }
-        .eye-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; }
-        .btn-submit { width: 100%; background: #059669; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; transition: background 0.2s; }
-        .btn-submit:hover { background: #047857; }
-        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 18px; }
+        .eye-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none; opacity: 0.7; }
+        .eye-icon:hover { opacity: 1; }
+
+        .forgot-link {
+            text-align: right;
+            font-size: 12px;
+            color: #34d399;
+            cursor: pointer;
+            margin-top: -8px;
+            margin-bottom: 16px;
+            display: block;
+            font-weight: 600;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        .btn-submit { 
+            width: 100%; 
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%); 
+            color: white; 
+            border: none; 
+            padding: 13px; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 14px; 
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+            transition: all 0.3s ease; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-submit:hover { 
+            background: linear-gradient(135deg, #047857 0%, #059669 100%); 
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.6);
+            transform: translateY(-1px);
+        }
+        
+        .toggle-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 20px; }
         .toggle-text span { color: #34d399; font-weight: bold; cursor: pointer; }
         .toggle-text span:hover { text-decoration: underline; }
-        .otp-hint { font-size: 11px; color: #34d399; margin-top: 4px; display: block; }
+        
+        .otp-hint { font-size: 11px; color: #34d399; margin-top: 6px; display: block; background: rgba(52, 211, 153, 0.1); padding: 6px; border-radius: 6px; border-left: 3px solid #34d399; }
+        
+        .back-to-login {
+            text-align: center; font-size: 12px; color: #9ca3af; margin-top: 15px; cursor: pointer; display: none;
+        }
+        .back-to-login span { color: #34d399; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -31,7 +104,7 @@
         
         <form action="/login" method="POST" id="auth-form" onsubmit="return handleFormSubmit(event)">
             
-            <!-- Signup Fields -->
+            <!-- Signup Username Field -->
             <div class="form-group" id="username-field" style="display: none;">
                 <label>Choose Username</label>
                 <input type="text" name="username" id="input-username" placeholder="e.g. fm4bat_user">
@@ -43,14 +116,17 @@
             </div>
 
             <div class="form-group" id="password-group">
-                <label>Password</label>
+                <label id="password-label">Password</label>
                 <div class="password-container">
                     <input type="password" name="password" id="password-input" required placeholder="Enter password">
                     <span class="eye-icon" id="eye-toggle" onclick="togglePassword()">👁️‍🗨️</span>
                 </div>
             </div>
 
-            <!-- OTP Verification Field (Hidden initially during Signup) -->
+            <!-- Forgot Password link -->
+            <span class="forgot-link" id="forgot-password-btn" onclick="showForgotPassword()">Forgot Password?</span>
+
+            <!-- OTP Verification Field (Used for Signup & Forgot Password) -->
             <div class="form-group" id="otp-field" style="display: none;">
                 <label>Enter 4-Digit OTP</label>
                 <input type="text" name="entered_otp" id="input-otp" maxlength="4" placeholder="Enter code received">
@@ -63,10 +139,14 @@
         <div class="toggle-text" id="toggle-container">
             Don't have an account? <span onclick="toggleAuthMode()">Sign Up</span>
         </div>
+        
+        <div class="back-to-login" id="back-login" onclick="resetToLogin()">
+            Remember password? <span>Login here</span>
+        </div>
     </div>
 
     <script>
-        let isLogin = true;
+        let mode = 'login'; // 'login', 'signup', 'forgot'
         let otpStep = false; 
         let generatedOtp = "";
 
@@ -83,8 +163,6 @@
         }
 
         function toggleAuthMode() {
-            isLogin = !isLogin;
-            otpStep = false;
             const title = document.getElementById("form-title");
             const btn = document.getElementById("submit-btn");
             const usernameField = document.getElementById("username-field");
@@ -93,21 +171,15 @@
             const passwordGroup = document.getElementById("password-group");
             const otpField = document.getElementById("otp-field");
             const toggleContainer = document.getElementById("toggle-container");
+            const forgotLink = document.getElementById("forgot-password-btn");
+            const backLogin = document.getElementById("back-login");
 
             otpField.style.display = "none";
             passwordGroup.style.display = "block";
+            otpStep = false;
 
-            if (isLogin) {
-                title.innerText = "Login to your account";
-                btn.innerText = "Login";
-                usernameField.style.display = "none";
-                document.getElementById("input-username").required = false;
-                
-                identifierLabel.innerText = "Username / Email / Phone";
-                identifierInput.placeholder = "Enter username, email or phone";
-                
-                toggleContainer.innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
-            } else {
+            if (mode === 'login') {
+                mode = 'signup';
                 title.innerText = "Create New Account";
                 btn.innerText = "Send OTP";
                 usernameField.style.display = "block";
@@ -116,20 +188,60 @@
                 identifierLabel.innerText = "Gmail ID or Phone Number";
                 identifierInput.placeholder = "Enter email or phone number";
                 
+                forgotLink.style.display = "none";
+                backLogin.style.display = "none";
                 toggleContainer.innerHTML = 'Already have an account? <span onclick="toggleAuthMode()">Login</span>';
+            } else {
+                resetToLogin();
             }
+        }
+
+        function resetToLogin() {
+            mode = 'login';
+            otpStep = false;
+            document.getElementById("form-title").innerText = "Login to your account";
+            document.getElementById("submit-btn").innerText = "Login";
+            document.getElementById("username-field").style.display = "none";
+            document.getElementById("input-username").required = false;
+            document.getElementById("identifier-label").innerText = "Username / Email / Phone";
+            document.getElementById("input-identifier").placeholder = "Enter username, email or phone";
+            document.getElementById("password-group").style.display = "block";
+            document.getElementById("password-input").required = true;
+            document.getElementById("password-label").innerText = "Password";
+            document.getElementById("otp-field").style.display = "none";
+            document.getElementById("forgot-password-btn").style.display = "block";
+            document.getElementById("back-login").style.display = "none";
+            document.getElementById("toggle-container").style.display = "block";
+            document.getElementById("toggle-container").innerHTML = 'Don\'t have an account? <span onclick="toggleAuthMode()">Sign Up</span>';
+        }
+
+        function showForgotPassword() {
+            mode = 'forgot';
+            otpStep = false;
+            document.getElementById("form-title").innerText = "Reset Password";
+            document.getElementById("submit-btn").innerText = "Send OTP";
+            document.getElementById("username-field").style.display = "none";
+            document.getElementById("input-username").required = false;
+            document.getElementById("identifier-label").innerText = "Registered Username / Email";
+            document.getElementById("input-identifier").placeholder = "Enter your username or email";
+            document.getElementById("password-group").style.display = "none"; // Hide password initially
+            document.getElementById("password-input").required = false;
+            document.getElementById("otp-field").style.display = "none";
+            document.getElementById("forgot-password-btn").style.display = "none";
+            document.getElementById("toggle-container").style.display = "none";
+            document.getElementById("back-login").style.display = "block";
         }
 
         function handleFormSubmit(event) {
             const form = document.getElementById("auth-form");
             
-            if (isLogin) {
+            if (mode === 'login') {
                 form.action = "/login";
-                return true; // Allow normal submit
-            } else {
+                return true;
+            } 
+            else if (mode === 'signup') {
                 if (!otpStep) {
-                    event.preventDefault(); // Stop form submission for Step 1 of Signup
-                    
+                    event.preventDefault();
                     const identifierVal = document.getElementById("input-identifier").value;
                     const usernameVal = document.getElementById("input-username").value;
                     const passwordVal = document.getElementById("password-input").value;
@@ -140,17 +252,49 @@
                     }
 
                     generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-                    
                     document.getElementById("otp-field").style.display = "block";
-                    document.getElementById("otp-display-hint").innerText = `Mock OTP sent to ${identifierVal}: [ ${generatedOtp} ]`;
+                    document.getElementById("otp-display-hint").innerText = `Mock OTP sent: [ ${generatedOtp} ]`;
                     document.getElementById("submit-btn").innerText = "Verify & Register";
                     otpStep = true;
                     return false;
                 } else {
-                    // Step 2 of Signup: Verify OTP
                     const enteredOtp = document.getElementById("input-otp").value;
                     if (enteredOtp === generatedOtp) {
                         form.action = "/signup";
+                        return true;
+                    } else {
+                        event.preventDefault();
+                        alert("Invalid OTP! Please check the code shown above.");
+                        return false;
+                    }
+                }
+            } 
+            else if (mode === 'forgot') {
+                if (!otpStep) {
+                    event.preventDefault();
+                    const identifierVal = document.getElementById("input-identifier").value;
+                    if (!identifierVal) {
+                        alert("Please enter your username or email first!");
+                        return false;
+                    }
+
+                    generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+                    document.getElementById("otp-field").style.display = "block";
+                    document.getElementById("otp-display-hint").innerText = `Reset OTP sent: [ ${generatedOtp} ]`;
+                    
+                    // Show password field now so user can enter new password
+                    document.getElementById("password-group").style.display = "block";
+                    document.getElementById("password-label").innerText = "New Password";
+                    document.getElementById("password-input").required = true;
+                    document.getElementById("password-input").placeholder = "Enter new password";
+
+                    document.getElementById("submit-btn").innerText = "Verify & Reset Password";
+                    otpStep = true;
+                    return false;
+                } else {
+                    const enteredOtp = document.getElementById("input-otp").value;
+                    if (enteredOtp === generatedOtp) {
+                        form.action = "/forgot-password";
                         return true;
                     } else {
                         event.preventDefault();
