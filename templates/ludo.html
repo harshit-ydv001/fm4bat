@@ -263,12 +263,14 @@
 
         const ludoBoard = document.getElementById('ludo-board');
         
-        // Exact Star positions as precisely marked by user on the screenshot lines
+        // Exact Star positions precisely matching user's marked lines on columns:
+        // Yellow arm left column (row 2, col 8) -> wait, looking at user's mark:
+        // Yellow top column, Green left column, Red bottom column, Blue right column
         const safeCoords = [
-            [6, 2],  // Yellow star mark (top column as per user line)
-            [12, 12],// Blue star mark (right column as per user line)
-            [8, 12], // Green star mark (left column as per user line)
-            [10, 2]  // Red star mark (bottom column as per user line)
+            [2, 8],   // Yellow start star (top column)
+            [14, 8],  // Red start star (bottom column)
+            [8, 2],   // Green start star (left column)
+            [8, 14]   // Blue start star (right column)
         ];
 
         for(let r = 1; r <= 15; r++) {
