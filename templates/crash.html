@@ -30,7 +30,7 @@
         .history-bar {
             width: 100%; max-width: 480px; display: flex; gap: 5px; padding: 6px 10px; background: #0f1219; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid #1a1e29;
         }
-        .history-pill { background: #181d28; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: bold; color: #2ecc71; }
+        .history-pill { background: #181d28; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: bold; color: #2ecc71; cursor: pointer; }
         .history-pill.pill-red { color: #e74c3c; }
 
         .game-info-bar {
@@ -40,7 +40,7 @@
         .game-container {
             width: 100%; max-width: 480px; 
             background: linear-gradient(135deg, #0f172a 0%, #0b0e14 100%);
-            height: 220px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #1e222d;
+            height: 190px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; border-bottom: 2px solid #1e222d;
         }
         
         .grid-bg {
@@ -64,64 +64,106 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3;
         }
 
-        .multiplier-display { font-size: 44px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
-        .status-text { font-size: 11px; color: #00f0ff; font-weight: bold; margin-bottom: 4px; letter-spacing: 1px; text-transform: uppercase; }
+        .multiplier-display { font-size: 38px; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
+        .status-text { font-size: 10px; color: #00f0ff; font-weight: bold; margin-bottom: 3px; letter-spacing: 1px; text-transform: uppercase; }
         
         .plane-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
         .plane { 
-            position: absolute; bottom: 15px; left: 20px; font-size: 42px; 
+            position: absolute; bottom: 12px; left: 15px; font-size: 36px; 
             filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.9));
             transition: transform 0.05s linear; will-change: transform; 
         }
 
-        .betting-section { width: 100%; max-width: 480px; padding: 8px; display: flex; flex-direction: column; gap: 8px; background: #0b0e14; }
-        .bet-panel { background: #141822; border: 1px solid #1e222d; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        /* Dual Betting Section (Panel 1 and Panel 2) */
+        .betting-section { width: 100%; max-width: 480px; padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; background: #0b0e14; }
+        .bet-panel { background: #141822; border: 1px solid #1e222d; border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
         .bet-mode-tabs { display: flex; background: #0b0e14; border-radius: 6px; padding: 2px; width: fit-content; }
-        .bet-mode-tab { background: transparent; border: none; color: #8a99ad; font-size: 11px; padding: 3px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .bet-mode-tab { background: transparent; border: none; color: #8a99ad; font-size: 10px; padding: 2px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .bet-mode-tab.active { background: #1c212e; color: #fff; }
 
         .bet-controls-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .amount-control { display: flex; background: #0b0e14; border-radius: 8px; border: 1px solid #1e222d; align-items: center; overflow: hidden; }
-        .amount-btn { background: #181d28; color: #fff; border: none; padding: 8px 10px; font-size: 15px; cursor: pointer; }
-        .amount-input { width: 65px; background: transparent; border: none; color: #fff; text-align: center; font-size: 13px; font-weight: bold; outline: none; }
-        .action-btn { flex: 1; background: #2ecc71; color: #fff; border: none; padding: 11px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); text-transform: uppercase; }
+        .amount-btn { background: #181d28; color: #fff; border: none; padding: 5px 8px; font-size: 13px; cursor: pointer; }
+        .amount-input { width: 55px; background: transparent; border: none; color: #fff; text-align: center; font-size: 12px; font-weight: bold; outline: none; }
+        .action-btn { flex: 1; background: #2ecc71; color: #fff; border: none; padding: 9px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; text-align: center; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); text-transform: uppercase; }
         .action-btn:disabled { background: #1c212e !important; color: #6c7a9c !important; cursor: not-allowed !important; box-shadow: none; }
         .quick-presets { display: flex; gap: 4px; }
-        .preset-pill { background: #181d28; border: none; color: #8a99ad; padding: 3px 6px; border-radius: 6px; font-size: 11px; cursor: pointer; flex: 1; text-align: center; }
+        .preset-pill { background: #181d28; border: none; color: #8a99ad; padding: 2px 5px; border-radius: 6px; font-size: 10px; cursor: pointer; flex: 1; text-align: center; }
 
-        /* Extended Table to Fill Bottom Space */
-        .stats-section { width: 100%; max-width: 480px; background: #12151c; border-top: 1px solid #1e222d; margin-top: 4px; display: flex; flex-direction: column; flex: 1; }
+        /* Full Screen All Bets Table Layout */
+        .stats-section { 
+            width: 100%; max-width: 480px; 
+            background: #12151c; 
+            border-top: 1px solid #1e222d; 
+            margin-top: 2px; 
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+        }
         .stats-tabs { display: flex; background: #0f1219; border-bottom: 1px solid #1e222d; padding: 0 10px; }
-        .stats-tab { padding: 8px 12px; font-size: 11px; color: #8a99ad; background: none; border: none; cursor: pointer; font-weight: bold; }
+        .stats-tab { padding: 8px 14px; font-size: 11px; color: #8a99ad; background: none; border: none; cursor: pointer; font-weight: bold; }
         .stats-tab.active { color: #fff; border-bottom: 2px solid #e74c3c; }
         
         .bets-header {
             display: flex; justify-content: space-between; padding: 6px 12px; font-size: 10px; color: #5a6882; background: #141822; border-bottom: 1px solid #1a1e29; font-weight: bold;
         }
         .bets-list { 
-            height: 260px; /* Extended height to remove blank space */
+            flex: 1;
+            height: calc(100vh - 510px);
+            min-height: 200px;
             overflow-y: auto; 
-            padding: 0 12px; 
+            padding: 0 8px; 
         }
-        .bet-row { display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 6px 0; border-bottom: 1px solid #181c25; color: #8a99ad; }
+        .bet-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 11px; padding: 6px 8px; border-bottom: 1px solid #181c25; color: #b0bec5; 
+        }
         
+        /* Real Aviator Green Cashout Row Highlight */
+        .bet-row.cashed-row {
+            background: rgba(46, 204, 113, 0.12);
+            border-radius: 6px;
+            margin-bottom: 2px;
+        }
+
         .bet-row.my-bet {
             color: #00f0ff !important;
             font-weight: bold;
-            background: rgba(0, 240, 255, 0.08);
-            padding-left: 8px; padding-right: 8px;
-            border-radius: 4px;
+            background: rgba(0, 240, 255, 0.12);
+            border-radius: 6px;
         }
-        .col-user { width: 40%; text-align: left; }
+
+        .col-user { width: 35%; text-align: left; display: flex; align-items: center; gap: 6px; }
         .col-bet { width: 30%; text-align: center; }
-        .col-cashout { width: 30%; text-align: right; }
+        .col-cashout { width: 35%; text-align: right; }
         
-        .cashed-badge {
-            background: rgba(46, 204, 113, 0.15);
+        .user-avatar {
+            width: 22px; height: 22px; border-radius: 50%; background: #242833; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff;
+        }
+        .multiplier-badge {
+            background: rgba(46, 204, 113, 0.25);
             color: #2ecc71;
             padding: 2px 6px;
-            border-radius: 6px;
+            border-radius: 10px;
             font-weight: bold;
+            font-size: 10px;
+        }
+
+        /* Full Screen History Modal View */
+        .history-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 14, 20, 0.95); z-index: 100; flex-direction: column; align-items: center; padding: 15px;
+        }
+        .history-modal-content {
+            width: 100%; max-width: 480px; background: #12151c; border: 1px solid #1e222d; border-radius: 12px; display: flex; flex-direction: column; height: 90vh; overflow: hidden;
+        }
+        .history-modal-header {
+            display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #141822; border-bottom: 1px solid #1e222d; font-weight: bold; font-size: 14px;
+        }
+        .close-modal-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+        .history-list-full { flex: 1; overflow-y: auto; padding: 10px; }
+        .history-full-row {
+            display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid #181c25; font-size: 13px; align-items: center;
         }
     </style>
 </head>
@@ -135,7 +177,7 @@
         </div>
     </div>
 
-    <div class="history-bar" id="history-bar"></div>
+    <div class="history-bar" id="history-bar" onclick="openHistoryModal()"></div>
 
     <div class="game-info-bar">
         <span>Round ID: <span id="round-id-disp">28479568</span></span>
@@ -151,15 +193,15 @@
             <div class="multiplier-display" id="multiplier-display">1.00x</div>
         </div>
 
-        <svg class="flight-svg" viewBox="0 0 480 220" preserveAspectRatio="none">
+        <svg class="flight-svg" viewBox="0 0 480 180" preserveAspectRatio="none">
             <defs>
                 <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="rgba(0, 240, 255, 0.25)"/>
                     <stop offset="100%" stop-color="rgba(0, 240, 255, 0.0)"/>
                 </linearGradient>
             </defs>
-            <path id="area-path" d="M 0 220 L 0 220 L 480 220 Z" fill="url(#curveGradient)" />
-            <path id="line-path" d="M 0 220 L 0 220" fill="none" stroke="#00f0ff" stroke-width="3.5" />
+            <path id="area-path" d="M 0 180 L 0 180 L 480 180 Z" fill="url(#curveGradient)" />
+            <path id="line-path" d="M 0 180 L 0 180" fill="none" stroke="#00f0ff" stroke-width="3.5" />
         </svg>
         
         <div class="plane-container">
@@ -167,7 +209,9 @@
         </div>
     </div>
 
+    <!-- Dual Betting Panels (Panel 1 & Panel 2) -->
     <div class="betting-section">
+        <!-- Panel 1 -->
         <div class="bet-panel">
             <div class="bet-mode-tabs">
                 <button class="bet-mode-tab active">Bet</button>
@@ -175,26 +219,49 @@
             </div>
             <div class="bet-controls-row">
                 <div class="amount-control">
-                    <button class="amount-btn" onclick="adjustBet(-10)">-</button>
-                    <input type="text" id="bet-amount" class="amount-input" value="50.00">
-                    <button class="amount-btn" onclick="adjustBet(10)">+</button>
+                    <button class="amount-btn" onclick="adjustBet(1, -10)">-</button>
+                    <input type="text" id="bet-amount-1" class="amount-input" value="50.00">
+                    <button class="amount-btn" onclick="adjustBet(1, 10)">+</button>
                 </div>
-                <button class="action-btn" id="btn-action" onclick="handleWagerAction()" disabled>WAIT FOR NEXT ROUND</button>
+                <button class="action-btn" id="btn-action-1" onclick="handleWagerAction(1)" disabled>WAIT FOR NEXT ROUND</button>
             </div>
             <div class="quick-presets">
-                <button class="preset-pill" onclick="setPreset(10)">10</button>
-                <button class="preset-pill" onclick="setPreset(50)">50</button>
-                <button class="preset-pill" onclick="setPreset(100)">100</button>
-                <button class="preset-pill" onclick="setPreset(1000)">1,000</button>
+                <button class="preset-pill" onclick="setPreset(1, 10)">10</button>
+                <button class="preset-pill" onclick="setPreset(1, 50)">50</button>
+                <button class="preset-pill" onclick="setPreset(1, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(1, 1000)">1,000</button>
+            </div>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="bet-panel">
+            <div class="bet-mode-tabs">
+                <button class="bet-mode-tab active">Bet</button>
+                <button class="bet-mode-tab">Auto</button>
+            </div>
+            <div class="bet-controls-row">
+                <div class="amount-control">
+                    <button class="amount-btn" onclick="adjustBet(2, -10)">-</button>
+                    <input type="text" id="bet-amount-2" class="amount-input" value="50.00">
+                    <button class="amount-btn" onclick="adjustBet(2, 10)">+</button>
+                </div>
+                <button class="action-btn" id="btn-action-2" onclick="handleWagerAction(2)" disabled>WAIT FOR NEXT ROUND</button>
+            </div>
+            <div class="quick-presets">
+                <button class="preset-pill" onclick="setPreset(2, 10)">10</button>
+                <button class="preset-pill" onclick="setPreset(2, 50)">50</button>
+                <button class="preset-pill" onclick="setPreset(2, 100)">100</button>
+                <button class="preset-pill" onclick="setPreset(2, 1000)">1,000</button>
             </div>
         </div>
     </div>
 
+    <!-- Full Page All Bets Section -->
     <div class="stats-section">
         <div class="stats-tabs">
             <button class="stats-tab active">All Bets (<span id="player-count">0</span>)</button>
             <button class="stats-tab">My Bets</button>
-            <button class="stats-tab">Top</button>
+            <button class="stats-tab" onclick="openHistoryModal()">History 📊</button>
         </div>
         <div class="bets-header">
             <span class="col-user">User</span>
@@ -204,15 +271,37 @@
         <div class="bets-list" id="live-bets-list"></div>
     </div>
 
+    <!-- Full Screen History Modal -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-modal-content">
+            <div class="history-modal-header">
+                <span>Detailed Round History</span>
+                <button class="close-modal-btn" onclick="closeHistoryModal()">✕</button>
+            </div>
+            <div class="bets-header">
+                <span style="width: 50%;">Multiplier</span>
+                <span style="width: 50%; text-align: right;">Status / Result</span>
+            </div>
+            <div class="history-list-full" id="fullHistoryList"></div>
+        </div>
+    </div>
+
     <script>
         const currentUsername = "{{ username }}";
 
         let ws;
         let balance = 1000.00;
-        let currentWager = 0;
-        let isPlaying = false;
-        let hasCashedOut = false;
+        
+        let bet1Active = false;
+        let bet1Cashed = false;
+        let bet1Wager = 0;
+
+        let bet2Active = false;
+        let bet2Cashed = false;
+        let bet2Wager = 0;
+
         let roundInProgress = true;
+        let globalHistory = [];
 
         function connectWebSocket() {
             const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -223,7 +312,8 @@
                 const display = document.getElementById("multiplier-display");
                 const status = document.getElementById("game-status");
                 const plane = document.getElementById("plane");
-                const actionBtn = document.getElementById("btn-action");
+                const btn1 = document.getElementById("btn-action-1");
+                const btn2 = document.getElementById("btn-action-2");
                 const roundDisp = document.getElementById("round-id-disp");
                 const linePath = document.getElementById("line-path");
                 const areaPath = document.getElementById("area-path");
@@ -233,26 +323,35 @@
                 }
 
                 if (data.history) {
+                    globalHistory = data.history;
                     updateHistoryBar(data.history);
                 }
 
                 if (data.type === "ROUND_READY") {
                     roundInProgress = false;
-                    isPlaying = false;
-                    hasCashedOut = false;
+                    bet1Active = false;
+                    bet1Cashed = false;
+                    bet2Active = false;
+                    bet2Cashed = false;
 
                     status.innerText = "WAITING FOR TAKE OFF";
                     status.style.color = "#00f0ff";
                     display.innerText = "1.00x";
                     display.style.color = "#fff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
-                    if(linePath) linePath.setAttribute("d", "M 15 205 L 15 205");
-                    if(areaPath) areaPath.setAttribute("d", "M 15 220 L 15 205 L 15 220 Z");
+                    if(linePath) linePath.setAttribute("d", "M 15 165 L 15 165");
+                    if(areaPath) areaPath.setAttribute("d", "M 15 180 L 15 165 L 15 180 Z");
                     
-                    let currentVal = document.getElementById("bet-amount").value;
-                    actionBtn.innerText = `BET ${parseFloat(currentVal).toFixed(2)} 🪙`;
-                    actionBtn.style.background = "#2ecc71";
-                    actionBtn.disabled = false;
+                    let v1 = document.getElementById("bet-amount-1").value;
+                    let v2 = document.getElementById("bet-amount-2").value;
+
+                    btn1.innerText = `BET ${parseFloat(v1).toFixed(2)} 🪙`;
+                    btn1.style.background = "#2ecc71";
+                    btn1.disabled = false;
+
+                    btn2.innerText = `BET ${parseFloat(v2).toFixed(2)} 🪙`;
+                    btn2.style.background = "#2ecc71";
+                    btn2.disabled = false;
                 } 
                 else if (data.type === "ROUND_STARTED") {
                     roundInProgress = true;
@@ -260,14 +359,24 @@
                     status.style.color = "#00f0ff";
                     if(plane) plane.style.transform = `translate(15px, -15px) rotate(15deg)`;
                     
-                    if (isPlaying && !hasCashedOut) {
-                        actionBtn.innerText = "CASH OUT";
-                        actionBtn.style.background = "#f1c40f";
-                        actionBtn.disabled = false;
-                    } else if (!isPlaying) {
-                        actionBtn.innerText = "WAIT FOR NEXT ROUND";
-                        actionBtn.style.background = "#1c212e";
-                        actionBtn.disabled = true;
+                    if (bet1Active && !bet1Cashed) {
+                        btn1.innerText = "CASH OUT";
+                        btn1.style.background = "#f1c40f";
+                        btn1.disabled = false;
+                    } else if (!bet1Active) {
+                        btn1.innerText = "WAIT FOR NEXT ROUND";
+                        btn1.style.background = "#1c212e";
+                        btn1.disabled = true;
+                    }
+
+                    if (bet2Active && !bet2Cashed) {
+                        btn2.innerText = "CASH OUT";
+                        btn2.style.background = "#f1c40f";
+                        btn2.disabled = false;
+                    } else if (!bet2Active) {
+                        btn2.innerText = "WAIT FOR NEXT ROUND";
+                        btn2.style.background = "#1c212e";
+                        btn2.disabled = true;
                     }
                 } 
                 else if (data.type === "TICK") {
@@ -277,16 +386,16 @@
                     
                     let progress = Math.log(data.multiplier) * 0.9;
                     let xPos = 15 + (progress * 90);
-                    let yPos = 15 + (progress * 45);
+                    let yPos = 15 + (progress * 40);
                     
                     if (xPos > 360) xPos = 360;
-                    if (yPos > 140) yPos = 140;
+                    if (yPos > 120) yPos = 120;
                     
                     let hover = Math.sin(Date.now() / 200) * 4;
                     let finalY = yPos + hover;
 
                     let svgX = xPos + 10;
-                    let svgY = 220 - finalY;
+                    let svgY = 180 - finalY;
 
                     let angle = 15 - (progress * 1.2);
                     if (angle < 4) angle = 4;
@@ -294,16 +403,23 @@
                     if(plane) plane.style.transform = `translate(${xPos}px, -${finalY}px) rotate(${angle}deg)`;
 
                     if(linePath && areaPath) {
-                        let pathString = `M 15 205 Q ${svgX * 0.45} 205, ${svgX} ${svgY}`;
+                        let pathString = `M 15 165 Q ${svgX * 0.45} 165, ${svgX} ${svgY}`;
                         linePath.setAttribute("d", pathString);
-                        areaPath.setAttribute("d", `M 15 220 L 15 205 Q ${svgX * 0.45} 205, ${svgX} ${svgY} L ${svgX} 220 Z`);
+                        areaPath.setAttribute("d", `M 15 180 L 15 165 Q ${svgX * 0.45} 165, ${svgX} ${svgY} L ${svgX} 180 Z`);
                     }
 
-                    if (isPlaying && !hasCashedOut && actionBtn) {
-                        let currentWin = (currentWager * data.multiplier).toFixed(2);
-                        actionBtn.innerText = `CASH OUT (${currentWin} 🪙)`;
-                        actionBtn.style.background = "#f1c40f";
-                        actionBtn.disabled = false;
+                    if (bet1Active && !bet1Cashed && btn1) {
+                        let currentWin = (bet1Wager * data.multiplier).toFixed(2);
+                        btn1.innerText = `CASH OUT (${currentWin} 🪙)`;
+                        btn1.style.background = "#f1c40f";
+                        btn1.disabled = false;
+                    }
+
+                    if (bet2Active && !bet2Cashed && btn2) {
+                        let currentWin = (bet2Wager * data.multiplier).toFixed(2);
+                        btn2.innerText = `CASH OUT (${currentWin} 🪙)`;
+                        btn2.style.background = "#f1c40f";
+                        btn2.disabled = false;
                     }
                 } 
                 else if (data.type === "ROUND_CRASHED") {
@@ -316,12 +432,18 @@
                     status.style.color = "#e74c3c";
                     if(plane) plane.style.transform = `translate(370px, 20px) rotate(65deg)`;
 
-                    isPlaying = false;
-                    hasCashedOut = false;
+                    bet1Active = false;
+                    bet1Cashed = false;
+                    bet2Active = false;
+                    bet2Cashed = false;
                     
-                    actionBtn.innerText = "WAIT FOR NEXT ROUND";
-                    actionBtn.style.background = "#1c212e";
-                    actionBtn.disabled = true;
+                    btn1.innerText = "WAIT FOR NEXT ROUND";
+                    btn1.style.background = "#1c212e";
+                    btn1.disabled = true;
+
+                    btn2.innerText = "WAIT FOR NEXT ROUND";
+                    btn2.style.background = "#1c212e";
+                    btn2.disabled = true;
                 }
 
                 if (data.bets || data.active_bets) {
@@ -336,9 +458,9 @@
             };
         }
 
-        function handleWagerAction() {
-            const amountInput = document.getElementById("bet-amount");
-            const actionBtn = document.getElementById("btn-action");
+        function handleWagerAction(panelNum) {
+            const amountInput = document.getElementById(`bet-amount-${panelNum}`);
+            const actionBtn = document.getElementById(`btn-action-${panelNum}`);
             const amount = parseFloat(amountInput.value);
 
             if (!amount || amount <= 0) {
@@ -346,21 +468,26 @@
                 return;
             }
 
-            if (roundInProgress && !isPlaying) {
-                return; 
-            }
+            if (roundInProgress && panelNum === 1 && !bet1Active) return;
+            if (roundInProgress && panelNum === 2 && !bet2Active) return;
 
-            if (!roundInProgress && !isPlaying) {
+            if (!roundInProgress) {
                 if (amount > balance) { 
                     alert("Insufficient Token Balance!"); 
                     return; 
                 }
-                currentWager = amount;
                 balance -= amount;
                 updateBalanceDisplay();
 
-                isPlaying = true;
-                hasCashedOut = false;
+                if (panelNum === 1) {
+                    bet1Active = true;
+                    bet1Cashed = false;
+                    bet1Wager = amount;
+                } else {
+                    bet2Active = true;
+                    bet2Cashed = false;
+                    bet2Wager = amount;
+                }
                 
                 actionBtn.innerText = "BET PLACED";
                 actionBtn.style.background = "#1c212e";
@@ -371,27 +498,39 @@
                         action: "PLACE_BET", 
                         amount: amount, 
                         mode: "token", 
-                        username: currentUsername 
+                        username: currentUsername + (panelNum === 2 ? " [2]" : "")
                     }));
                 }
             } 
-            else if (roundInProgress && isPlaying && !hasCashedOut) {
-                hasCashedOut = true;
+            else if (roundInProgress) {
                 let currentMult = parseFloat(document.getElementById("multiplier-display").innerText);
-                let winAmount = currentWager * currentMult;
                 
-                balance += winAmount;
-                updateBalanceDisplay();
+                if (panelNum === 1 && bet1Active && !bet1Cashed) {
+                    bet1Cashed = true;
+                    let winAmount = bet1Wager * currentMult;
+                    balance += winAmount;
+                    updateBalanceDisplay();
 
-                actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
-                actionBtn.style.background = "#2ecc71";
-                actionBtn.disabled = true;
+                    actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
+                    actionBtn.style.background = "#2ecc71";
+                    actionBtn.disabled = true;
+                } 
+                else if (panelNum === 2 && bet2Active && !bet2Cashed) {
+                    bet2Cashed = true;
+                    let winAmount = bet2Wager * currentMult;
+                    balance += winAmount;
+                    updateBalanceDisplay();
+
+                    actionBtn.innerText = `CASHED OUT (${winAmount.toFixed(2)} 🪙)`;
+                    actionBtn.style.background = "#2ecc71";
+                    actionBtn.disabled = true;
+                }
 
                 if (ws && ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({ 
                         action: "CASH_OUT", 
                         mode: "token", 
-                        username: currentUsername 
+                        username: currentUsername + (panelNum === 2 ? " [2]" : "")
                     }));
                 }
             }
@@ -416,6 +555,30 @@
             });
         }
 
+        function openHistoryModal() {
+            const modal = document.getElementById("historyModal");
+            const fullList = document.getElementById("fullHistoryList");
+            fullList.innerHTML = "";
+
+            let reversed = [...globalHistory].reverse();
+            reversed.forEach((val) => {
+                let row = document.createElement("div");
+                row.className = "history-full-row";
+                let colorClass = val < 2.00 ? "color: #e74c3c;" : "color: #2ecc71;";
+                row.innerHTML = `
+                    <span style="font-weight: bold; font-size: 14px; ${colorClass}">${val.toFixed(2)}x</span>
+                    <span style="color: #8a99ad; font-size: 11px;">Round completed</span>
+                `;
+                fullList.appendChild(row);
+            });
+
+            modal.style.display = "flex";
+        }
+
+        function closeHistoryModal() {
+            document.getElementById("historyModal").style.display = "none";
+        }
+
         function updateLiveBetsUI(betsObj) {
             const listContainer = document.getElementById("live-bets-list");
             const countEl = document.getElementById("player-count");
@@ -430,7 +593,7 @@
 
             keys.forEach(uid => {
                 let bet = betsObj[uid];
-                let isMe = (bet.username === currentUsername);
+                let isMe = bet.username.startsWith(currentUsername);
                 if (isMe) {
                     myBets.push(bet);
                 } else {
@@ -442,15 +605,20 @@
 
             sortedBets.forEach(bet => {
                 let row = document.createElement("div");
-                let isMe = (bet.username === currentUsername);
-                row.className = "bet-row " + (isMe ? "my-bet" : "");
+                let isMe = bet.username.startsWith(currentUsername);
+                
+                let rowClass = "bet-row";
+                if (isMe) rowClass += " my-bet";
+                if (bet.cashed_out) rowClass += " cashed-row";
+                row.className = rowClass;
 
+                let avatarLetter = bet.username.charAt(0).toUpperCase();
                 let cashoutDisplay = bet.cashed_out 
-                    ? `<span class="cashed-badge">${bet.multiplier.toFixed(2)}x &nbsp; <b>${bet.payout.toFixed(2)} 🪙</b></span>` 
+                    ? `<span class="multiplier-badge">${bet.multiplier.toFixed(2)}x</span> &nbsp; <b>${bet.payout.toFixed(2)} 🪙</b>` 
                     : `-`;
 
                 row.innerHTML = `
-                    <span class="col-user"><b>${bet.username}</b> ${isMe ? '(You)' : ''}</span>
+                    <span class="col-user"><div class="user-avatar">${avatarLetter}</div> <b>${bet.username}</b></span>
                     <span class="col-bet">${bet.amount.toFixed(2)} 🪙</span>
                     <span class="col-cashout">${cashoutDisplay}</span>
                 `;
@@ -458,17 +626,21 @@
             });
         }
 
-        function adjustBet(amount) {
-            const input = document.getElementById("bet-amount");
+        function adjustBet(panelNum, amount) {
+            const input = document.getElementById(`bet-amount-${panelNum}`);
             let val = parseFloat(input.value) + amount;
             if (val < 10) val = 10;
             input.value = val.toFixed(2);
-            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} 🪙`;
+            if (!roundInProgress) {
+                document.getElementById(`btn-action-${panelNum}`).innerText = `BET ${val.toFixed(2)} 🪙`;
+            }
         }
 
-        function setPreset(val) { 
-            document.getElementById("bet-amount").value = val.toFixed(2); 
-            document.getElementById("btn-action").innerText = `BET ${val.toFixed(2)} 🪙`;
+        function setPreset(panelNum, val) { 
+            document.getElementById(`bet-amount-${panelNum}`).value = val.toFixed(2); 
+            if (!roundInProgress) {
+                document.getElementById(`btn-action-${panelNum}`).innerText = `BET ${val.toFixed(2)} 🪙`;
+            }
         }
 
         connectWebSocket();
