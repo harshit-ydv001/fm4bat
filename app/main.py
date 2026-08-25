@@ -62,7 +62,9 @@ init_db()
 @app.on_event("startup")
 async def startup_event():
     try:
+        # Start game engine background loop
         asyncio.create_task(engine.start_all())
+        print("Crash Game Engine Started Successfully!")
     except RuntimeError as e:
         print(f"Engine Startup Error: {e}")
 
@@ -299,7 +301,6 @@ async def ludo_game_play_page(request: Request):
     )
 
 
-# WebSocket Route variants to catch all proxy paths
 @app.websocket("/ws/crash")
 @app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
