@@ -99,7 +99,8 @@ async def login_user(identifier: str = Form(...), password: str = Form(...)):
 
     if row and row[1] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
-        response.set_cookie(key="session_user", value=row[0])
+        # Browser session cookie: Tab/Browser band hote hi auto-logout ho jayega
+        response.set_cookie(key="session_user", value=row[0], httponly=True)
         return response
 
     return RedirectResponse(url="/?error=InvalidCredentials", status_code=303)
@@ -224,7 +225,8 @@ async def verify_otp_action(
             del otp_store[identifier]
 
             response = RedirectResponse(url="/dashboard", status_code=303)
-            response.set_cookie(key="session_user", value=user_data["username"])
+            # Browser session cookie for new signups too
+            response.set_cookie(key="session_user", value=user_data["username"], httponly=True)
             return response
 
         elif type == "forgot":
