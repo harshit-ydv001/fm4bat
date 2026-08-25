@@ -10,7 +10,7 @@ let difficulty = 'easy';
 
 const multipliers = [1.00, 1.44, 2.21, 3.45, 5.53, 9.09];
 
-// Horizontal lanes configuration matching reference
+// Horizontal lanes configuration
 const lanes = [
     { y: 320, speed: 0, cars: [] },
     { y: 260, speed: 2.0, cars: [{x: 50, color: '#eab308'}, {x: 280, color: '#3b82f6'}] },
@@ -25,7 +25,7 @@ let chicken = { x: 30, y: 320 };
 const actionBtn = document.getElementById('actionBtn');
 const betInput = document.getElementById('betAmount');
 
-// Difficulty buttons
+// Difficulty selector
 document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         if (gameState === 'PLAYING') return;
@@ -35,7 +35,7 @@ document.querySelectorAll('.diff-btn').forEach(btn => {
     });
 });
 
-// Bet buttons
+// Bet controls
 document.getElementById('decreaseBet').addEventListener('click', () => {
     if (gameState === 'PLAYING') return;
     let val = parseFloat(betInput.value) || 1;
@@ -47,7 +47,7 @@ document.getElementById('increaseBet').addEventListener('click', () => {
     betInput.value = (val + 1).toFixed(2);
 });
 
-// Main Action Button logic
+// Action button click
 actionBtn.addEventListener('click', () => {
     if (gameState === 'IDLE' || gameState === 'GAMEOVER' || gameState === 'WON') {
         startGame();
@@ -113,13 +113,12 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Left Grass Area (Sidewalk & Tree)
+    // 1. Left Grass Area
     ctx.fillStyle = '#166534';
     ctx.fillRect(0, 0, 70, canvas.height);
     ctx.fillStyle = '#15803d';
     ctx.fillRect(55, 0, 15, canvas.height);
 
-    // Tree icon on grass
     ctx.font = '35px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('🌳', 35, 70);
@@ -130,7 +129,6 @@ function draw() {
     ctx.fillStyle = '#334155';
     ctx.fillRect(70, 0, canvas.width - 70, canvas.height);
 
-    // Horizontal dashed lane lines
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 8]);
@@ -143,7 +141,7 @@ function draw() {
     }
     ctx.setLineDash([]);
 
-    // 3. Manhole Circles with Multipliers (Right side on lanes)
+    // 3. Multiplier Manhole Circles
     lanes.forEach((lane, index) => {
         if (index === 0) return;
         let circleX = 300 + (index * 32);
@@ -162,19 +160,18 @@ function draw() {
         ctx.fillText(`${multipliers[index]}x`, circleX, lane.y + 34);
     });
 
-    // 4. Moving Cars
+    // 4. Cars
     lanes.forEach((lane, index) => {
         if (index === 0) return;
         lane.cars.forEach(car => {
             ctx.fillStyle = car.color;
             ctx.fillRect(car.x, lane.y + 12, 45, 28);
-            // Windshield
             ctx.fillStyle = '#93c5fd';
             ctx.fillRect(car.x + 8, lane.y + 16, 16, 10);
         });
     });
 
-    // 5. Chicken Position Animation
+    // 5. Chicken
     let targetX = currentLane === 0 ? 35 : 120 + (currentLane * 35);
     chicken.x += (targetX - chicken.x) * 0.2;
 

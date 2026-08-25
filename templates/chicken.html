@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chicken Road Game - Fm4bat</title>
-    <!-- Link to the separate CSS file -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/chicken.css') }}">
+    <!-- Direct link to CSS to avoid routing error -->
+    <link rel="stylesheet" href="/static/css/chicken.css">
 </head>
 <body>
 
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <!-- Link to the separate JS file -->
-    <script src="{{ url_for('static', filename='js/chicken.js') }}"></script>
+    <!-- Direct link to JS -->
+    <script src="/static/js/chicken.js"></script>
 </body>
 </html>
