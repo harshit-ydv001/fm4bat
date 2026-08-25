@@ -8,13 +8,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.game.crash.router import router as crash_router
 from app.game.websocket import engine, manager
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.include_router(crash_router)
 
 templates = Jinja2Templates(directory="templates")
 
