@@ -278,12 +278,10 @@ async def ludo_game_play_page(request: Request):
     )
 
 
-# --- CHICKEN ROAD GAME ROUTE ---
+# --- SAFE CHICKEN ROAD GAME ROUTE ---
 @app.get("/chicken", response_class=HTMLResponse)
 async def chicken_game_page(request: Request):
-    username = request.cookies.get("session_user")
-    if not username:
-        return RedirectResponse(url="/", status_code=303)
+    username = request.cookies.get("session_user", "Player")
     return templates.TemplateResponse(
         "chicken.html", {"request": request, "username": username}
     )
