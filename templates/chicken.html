@@ -102,7 +102,6 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 13px;
-            transition: 0.1s;
         }
         .q-btn:hover {
             background: #475569;
@@ -178,19 +177,16 @@
 <body>
 
     <div class="game-wrapper">
-        <!-- Top Bar -->
         <div class="top-bar">
             <div class="logo-box">🐔 CHICKEN ROAD</div>
             <div class="online-tag">Online: 11703</div>
             <div class="balance-box" id="balanceDisplay">₹1000.00</div>
         </div>
 
-        <!-- Canvas Game View -->
         <div class="canvas-area">
             <canvas id="gameCanvas"></canvas>
         </div>
 
-        <!-- Control Panel -->
         <div class="control-panel">
             <div class="bet-row">
                 <div class="quick-bets">
@@ -228,23 +224,23 @@
         canvas.height = 420;
 
         let balance = 1000.00;
-        let gameState = 'IDLE'; // IDLE, PLAYING, WON, GAMEOVER
-        let currentLane = 0; // 0 = grass, 1 to 5 = lanes
+        let gameState = 'IDLE'; 
+        let currentLane = 0; 
         let difficulty = 'easy';
 
         const multipliers = [1.00, 1.10, 1.25, 1.50, 1.80, 2.20];
 
-        // Lanes setup with realistic vehicle types
+        // Exact vibrant colored vehicles matching video
         const lanes = [
             { y: 350, speed: 0, cars: [] },
-            { y: 290, speed: 2.2, cars: [{x: 120, type: 'police', color: '#ffffff'}, {x: 460, type: 'taxi', color: '#eab308'}] },
-            { y: 230, speed: -2.8, cars: [{x: 200, type: 'car', color: '#3b82f6'}, {x: 520, type: 'truck', color: '#f97316'}] },
-            { y: 170, speed: 3.2, cars: [{x: 100, type: 'ice', color: '#06b6d4'}, {x: 420, type: 'fire', color: '#ef4444'}] },
-            { y: 110, speed: -3.8, cars: [{x: 180, type: 'taxi', color: '#eab308'}, {x: 480, type: 'car', color: '#a855f7'}] },
-            { y: 50, speed: 4.2, cars: [{x: 250, type: 'truck', color: '#22c55e'}, {x: 550, type: 'police', color: '#ffffff'}] }
+            { y: 290, speed: 2.5, cars: [{x: 100, color: '#eab308'}, {x: 450, color: '#3b82f6'}] }, // Yellow Taxi, Blue Car
+            { y: 230, speed: -3.0, cars: [{x: 180, color: '#ef4444'}, {x: 500, color: '#f97316'}] }, // Red Car, Orange Truck
+            { y: 170, speed: 3.5, cars: [{x: 120, color: '#06b6d4'}, {x: 420, color: '#a855f7'}] }, // Cyan, Purple
+            { y: 110, speed: -4.0, cars: [{x: 150, color: '#eab308'}, {x: 480, color: '#22c55e'}] }, // Yellow, Green
+            { y: 50, speed: 4.5, cars: [{x: 220, color: '#3b82f6'}, {x: 530, color: '#ef4444'}] }  // Blue, Red
         ];
 
-        let chicken = { x: 50, y: 350, animFrame: 0 };
+        let chicken = { x: 55, y: 350 };
 
         function setBet(val) {
             if (gameState === 'PLAYING') return;
@@ -277,7 +273,7 @@
                 updateBalance();
                 gameState = 'PLAYING';
                 currentLane = 0;
-                chicken.x = 50;
+                chicken.x = 55;
                 chicken.y = lanes[0].y;
                 document.getElementById('actionBtn').innerText = "GO / NEXT LANE";
                 document.getElementById('actionBtn').style.background = "#eab308";
@@ -324,7 +320,6 @@
                     if (car.x > canvas.width + 60) car.x = -90;
                     if (car.x < -90) car.x = canvas.width + 60;
 
-                    // Collision detection
                     if (gameState === 'PLAYING' && currentLane === index) {
                         if (Math.abs(chicken.x - car.x) < 40) {
                             gameState = 'GAMEOVER';
@@ -340,7 +335,7 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Left Grass Area (Start platform)
+            // 1. Left Grass Area
             ctx.fillStyle = '#166534';
             ctx.fillRect(0, 0, 110, canvas.height);
             ctx.fillStyle = '#15803d';
@@ -352,11 +347,11 @@
             ctx.beginPath(); ctx.arc(55, 230, 26, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(55, 370, 26, 0, Math.PI*2); ctx.fill();
 
-            // 2. Asphalt Road background
+            // 2. Asphalt Road
             ctx.fillStyle = '#262626';
             ctx.fillRect(110, 0, canvas.width - 110, canvas.height);
 
-            // White dashed lane markers
+            // Dashed white lines
             ctx.strokeStyle = '#a1a1aa';
             ctx.lineWidth = 2;
             ctx.setLineDash([12, 12]);
@@ -369,58 +364,50 @@
             }
             ctx.setLineDash([]);
 
-            // 3. Multiplier Manholes (Circles) on the right side of lanes
+            // 3. Multiplier Manhole Circles
             lanes.forEach((lane, index) => {
                 if (index === 0) return;
                 let circleX = 490 + (index * 28);
                 
-                // Manhole cover outer rim
-                ctx.fillStyle = '#52525b';
+                ctx.fillStyle = '#3f3f46';
                 ctx.beginPath(); ctx.arc(circleX, lane.y + 30, 24, 0, Math.PI*2); ctx.fill();
                 ctx.strokeStyle = '#d4d4d8'; ctx.lineWidth = 2; ctx.stroke();
 
-                // Multiplier label
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 12px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(`${multipliers[index]}x`, circleX, lane.y + 34);
             });
 
-            // 4. Draw detailed Vehicles (Cars, Trucks, Police, etc.)
+            // 4. Draw Vehicles with clear distinct colors
             lanes.forEach((lane, index) => {
                 if (index === 0) return;
                 lane.cars.forEach(car => {
                     ctx.save();
                     ctx.translate(car.x, lane.y + 10);
 
-                    // Vehicle body base
+                    // Car Body
                     ctx.fillStyle = car.color;
-                    ctx.roundRect(0, 0, 56, 36, 6);
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, 60, 36, 8);
                     ctx.fill();
-                    ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-                    // Windshield
-                    ctx.fillStyle = '#93c5fd';
-                    ctx.fillRect(12, 6, 22, 12);
-
-                    // Details based on vehicle type
-                    if (car.type === 'police') {
-                        ctx.fillStyle = '#ef4444'; ctx.fillRect(20, -4, 6, 4);
-                        ctx.fillStyle = '#3b82f6'; ctx.fillRect(28, -4, 6, 4);
-                    } else if (car.type === 'truck') {
-                        ctx.fillStyle = '#1e293b';
-                        ctx.fillRect(40, 2, 14, 32);
-                    }
+                    // Windshield Windows
+                    ctx.fillStyle = '#bae6fd';
+                    ctx.fillRect(14, 6, 24, 12);
 
                     ctx.restore();
                 });
             });
 
-            // 5. Draw Animated Chicken Player
-            let targetX = currentLane === 0 ? 60 : 200 + (currentLane * 55);
+            // 5. Chicken Player Animation
+            let targetX = currentLane === 0 ? 55 : 210 + (currentLane * 50);
             chicken.x += (targetX - chicken.x) * 0.2;
 
-            ctx.font = '30px Arial';
+            ctx.font = '32px Arial';
             ctx.textAlign = 'center';
             let chickenEmoji = gameState === 'GAMEOVER' ? '💥' : '🐔';
             ctx.fillText(chickenEmoji, chicken.x, chicken.y + 38);
