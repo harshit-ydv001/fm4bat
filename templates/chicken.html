@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Road Game - Fm4bat</title>
+    <!-- Link to the separate CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chicken.css') }}">
+</head>
+<body>
+
+    <div class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <span>🐔 CHICKEN ROAD</span>
+            <span>Balance: ₹1000.00</span>
+        </div>
+
+        <!-- Canvas Game Area -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <!-- Bet Control -->
+            <div class="bet-control">
+                <button id="decreaseBet">-</button>
+                <input type="text" id="betAmount" value="1.00">
+                <button id="increaseBet">+</button>
+            </div>
+
+            <!-- Difficulty Selector -->
+            <div class="difficulty-selector">
+                <button class="diff-btn active" data-diff="easy">Easy</button>
+                <button class="diff-btn" data-diff="medium">Medium</button>
+                <button class="diff-btn" data-diff="hard">Hard</button>
+                <button class="diff-btn" data-diff="hardcore">Hardcore</button>
+            </div>
+
+            <!-- Action Button -->
+            <button id="actionBtn" class="action-btn">Play</button>
+        </div>
+    </div>
+
+    <!-- Link to the separate JS file -->
+    <script src="{{ url_for('static', filename='js/chicken.js') }}"></script>
+</body>
+</html>
