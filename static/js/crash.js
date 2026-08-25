@@ -9,7 +9,12 @@ let currentMode = 'token';
 
 function connectWebSocket() {
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    // Fixed clean WebSocket URL for robust routing on Render
     ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/crash?mode=${currentMode}`);
+
+    ws.onopen = function() {
+        console.log("WebSocket Connected Successfully!");
+    };
 
     ws.onmessage = function(event) {
         const data = JSON.parse(event.data);
@@ -30,7 +35,7 @@ function connectWebSocket() {
             display.style.color = "#34d399";
             if(plane) plane.style.transform = `translate(0px, 0px) rotate(0deg)`;
             
-            if (!isPlaying) {
+            if (!isPlaying && actionBtn) {
                 actionBtn.innerText = "PLACE BET";
                 actionBtn.style.background = "#059669";
                 actionBtn.style.cursor = "pointer";
@@ -43,12 +48,12 @@ function connectWebSocket() {
             status.style.color = "#34d399";
             if(plane) plane.style.transform = `translate(0px, 0px) rotate(0deg)`;
             
-            if (isPlaying && !hasCashedOut) {
+            if (isPlaying && !hasCashedOut && actionBtn) {
                 actionBtn.innerText = "CASH OUT";
                 actionBtn.style.background = "#f59e0b";
                 actionBtn.style.cursor = "pointer";
                 actionBtn.disabled = false;
-            } else {
+            } else if (actionBtn) {
                 actionBtn.innerText = "WAIT FOR NEXT ROUND";
                 actionBtn.style.background = "#1f2937";
                 actionBtn.style.cursor = "not-allowed";
@@ -95,7 +100,12 @@ function connectWebSocket() {
         }
     };
 
+    ws.onerror = function(error) {
+        console.error("WebSocket Error:", error);
+    };
+
     ws.onclose = function() {
+        console.log("WebSocket Closed. Reconnecting in 1.5s...");
         setTimeout(function() {
             connectWebSocket();
         }, 1500);
@@ -170,6 +180,7 @@ document.addEventListener('keydown', function(event) {
 
 function updateBalanceDisplay() {
     const balanceEl = document.getElementById('token-balance');
+    if (!balanceEl) return;
     if (currentMode === 'token') {
         balanceEl.innerText = balance.toFixed(2);
     } else {
@@ -182,7 +193,6 @@ function updateHistoryBar(historyArr) {
     if (!bar) return;
     bar.innerHTML = "";
 
-    // Reverse the history array so the most recent crash appears first (on the left/front)
     let reversedHistory = [...historyArr].reverse();
 
     reversedHistory.slice(0, 20).forEach(val => {
@@ -225,17 +235,17 @@ function switchGameMode(mode) {
     const wagerLabel = document.getElementById('wager-label');
 
     if (mode === 'token') {
-        tokenBtn.className = "mode-btn active-token";
-        realBtn.className = "mode-btn";
-        balanceLabel.innerText = "Token Balance:";
-        currencySymbol.innerText = "🪙";
-        wagerLabel.innerText = "Bet Amount (Tokens)";
+        if(tokenBtn) tokenBtn.className = "mode-btn active-token";
+        if(realBtn) realBtn.className = "mode-btn";
+        if(balanceLabel) balanceLabel.innerText = "Token Balance:";
+        if(currencySymbol) currencySymbol.innerText = "🪙";
+        if(wagerLabel) wagerLabel.innerText = "Bet Amount (Tokens)";
     } else {
-        realBtn.className = "mode-btn active-real";
-        tokenBtn.className = "mode-btn";
-        balanceLabel.innerText = "Real Money Balance:";
-        currencySymbol.innerText = "₹";
-        wagerLabel.innerText = "Bet Amount (₹ INR)";
+        if(realBtn) realBtn.className = "mode-btn active-real";
+        if(tokenBtn) tokenBtn.className = "mode-btn";
+        if(balanceLabel) balanceLabel.innerText = "Real Money Balance:";
+        if(currencySymbol) currencySymbol.innerText = "₹";
+        if(wagerLabel) wagerLabel.innerText = "Bet Amount (₹ INR)";
     }
     updateBalanceDisplay();
 
