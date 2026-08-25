@@ -1,9 +1,8 @@
 import asyncio
 import json
 import random
-from urllib.parse import urlparse
+import sqlite3
 
-import psycopg2
 from fastapi import FastAPI, Form, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -22,24 +21,17 @@ templates = Jinja2Templates(directory="templates")
 # Temporary store for OTP verification (Signup & Forgot Password)
 otp_store = {}
 
-# Supabase PostgreSQL Database URL (Configured with your password)
-DATABASE_URL = "postgresql://postgres:Harshit5575%40@db.kpnboggkawkyjzlxxpxi.supabase.co:5432/postgres"
+# SQLite Database setup for smooth and error-free cloud deployment
+DB_FILE = "users.db"
 
 
 def get_db_connection():
-    parsed_url = urlparse(DATABASE_URL)
-    conn = psycopg2.connect(
-        database=parsed_url.path[1:],
-        user=parsed_url.username,
-        password=parsed_url.password,
-        host=parsed_url.hostname,
-        port=parsed_url.port,
-        sslmode="require",
-    )
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
     return conn
 
 
-# Initialize PostgreSQL Database Table for Permanent User Storage
+# Initialize SQLite Database Table for User Storage
 def init_db():
     try:
         conn = get_db_connection()
@@ -56,18 +48,18 @@ def init_db():
         )
         # Insert admin if not exists
         cursor.execute(
-            "SELECT * FROM users WHERE identifier = %s", ("admin",)
+            "SELECT * FROM users WHERE identifier = ?", ("admin",)
         )
         if not cursor.fetchone():
             cursor.execute(
-                "INSERT INTO users (identifier, username, password, balance) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO users (identifier, username, password, balance) VALUES (?, ?, ?, ?)",
                 ("admin", "admin", "admin123", 10000.0),
             )
         conn.commit()
         cursor.close()
         conn.close()
-        print("Supabase PostgreSQL Database Connected & Initialized Successfully!")
-    except (psycopg2.DatabaseError, ConnectionError, OSError) as db_error:
+        print("SQLite Database Connected & Initialized Successfully!")
+    except sqlite3.Error as db_error:
         print(f"Database Initialization Error: {db_error}")
 
 
@@ -90,17 +82,16 @@ async def login_user(identifier: str = Form(...), password: str = Form(...)):
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT username, password FROM users WHERE identifier = %s OR username = %s",
+        "SELECT username, password FROM users WHERE identifier = ? OR username = ?",
         (identifier, identifier),
     )
     row = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    if row and row[1] == password:
+    if row and row["password"] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
-        # Browser session cookie: Tab/Browser band hote hi auto-logout ho jayega
-        response.set_cookie(key="session_user", value=row[0], httponly=True)
+        response.set_cookie(key="session_user", value=row["username"], httponly=True)
         return response
 
     return RedirectResponse(url="/?error=InvalidCredentials", status_code=303)
@@ -115,13 +106,13 @@ async def signup_user(
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         cursor.close()
         conn.close()
         return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
-    cursor.execute("SELECT * FROM users WHERE identifier = %s", (identifier,))
+    cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
     if cursor.fetchone():
         cursor.close()
         conn.close()
@@ -155,7 +146,7 @@ async def forgot_password_request(
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT identifier FROM users WHERE identifier = %s OR username = %s",
+        "SELECT identifier FROM users WHERE identifier = ? OR username = ?",
         (identifier, identifier),
     )
     row = cursor.fetchone()
@@ -165,7 +156,7 @@ async def forgot_password_request(
     if not row:
         return RedirectResponse(url="/?error=UserNotFound", status_code=303)
 
-    real_identifier = row[0]
+    real_identifier = row["identifier"]
     generated_otp = str(random.randint(1000, 9999))
 
     otp_store[real_identifier] = {
@@ -211,7 +202,7 @@ async def verify_otp_action(
 
         if type == "signup":
             cursor.execute(
-                "INSERT INTO users (identifier, username, password, balance) VALUES (%s, %s, %s, %s)",
+                "INSERT INTO users (identifier, username, password, balance) VALUES (?, ?, ?, ?)",
                 (
                     user_data["identifier"],
                     user_data["username"],
@@ -225,13 +216,12 @@ async def verify_otp_action(
             del otp_store[identifier]
 
             response = RedirectResponse(url="/dashboard", status_code=303)
-            # Browser session cookie for new signups too
             response.set_cookie(key="session_user", value=user_data["username"], httponly=True)
             return response
 
         elif type == "forgot":
             cursor.execute(
-                "UPDATE users SET password = %s WHERE identifier = %s",
+                "UPDATE users SET password = ? WHERE identifier = ?",
                 (user_data["password"], user_data["identifier"]),
             )
             conn.commit()
