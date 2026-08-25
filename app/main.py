@@ -16,10 +16,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-# Temporary store for OTP verification
 otp_store = {}
-
-# SQLite / Database setup
 DB_FILE = "users.db"
 
 
@@ -302,7 +299,7 @@ async def ludo_game_play_page(request: Request):
     )
 
 
-# WebSocket Route with multiple fallback decorators to prevent 404
+# WebSocket Route variants to catch all proxy paths
 @app.websocket("/ws/crash")
 @app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
@@ -324,8 +321,7 @@ async def crash_websocket(websocket: WebSocket):
                 amount = parsed.get("amount")
                 username = parsed.get("username", "Player")
                 user_key = f"user_{id(websocket)}"
-                game_index = game_instance.active_bets
-                game_index[user_key] = {
+                game_instance.active_bets[user_key] = {
                     "username": username,
                     "amount": float(amount),
                     "cashed_out": False,
