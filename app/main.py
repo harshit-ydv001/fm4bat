@@ -278,6 +278,17 @@ async def ludo_game_play_page(request: Request):
     )
 
 
+# --- CHICKEN ROAD GAME ROUTE ---
+@app.get("/chicken", response_class=HTMLResponse)
+async def chicken_game_page(request: Request):
+    username = request.cookies.get("session_user")
+    if not username:
+        return RedirectResponse(url="/", status_code=303)
+    return templates.TemplateResponse(
+        "chicken.html", {"request": request, "username": username}
+    )
+
+
 @app.websocket("/ws/crash")
 @app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
