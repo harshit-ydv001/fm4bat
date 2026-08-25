@@ -1,7 +1,6 @@
 import asyncio
 import json
 import random
-import sqlite3
 
 from fastapi import FastAPI, Form, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.game.websocket import engine, manager
+from app.supabase_client import supabase
 
 app = FastAPI()
 
@@ -17,46 +17,17 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 otp_store = {}
-DB_FILE = "users.db"
 
 
-def get_db_connection():
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def init_db():
+def init_supabase_table():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS users (
-                identifier TEXT PRIMARY KEY,
-                username TEXT UNIQUE,
-                password TEXT,
-                balance REAL DEFAULT 1000.00
-            )
-        """
-        )
-        cursor.execute(
-            "SELECT * FROM users WHERE identifier = ?", ("admin",)
-        )
-        if not cursor.fetchone():
-            cursor.execute(
-                "INSERT INTO users (identifier, username, password, balance) VALUES (?, ?, ?, ?)",
-                ("admin", "admin", "admin123", 10000.0),
-            )
-        conn.commit()
-        cursor.close()
-        conn.close()
-        print("Database Initialized Successfully!")
-    except sqlite3.Error as db_error:
-        print(f"Database Initialization Error: {db_error}")
+        supabase.table("users").select("*").limit(1).execute()
+        print("Supabase Database Connected Successfully!")
+    except Exception as e:  # noqa: BLE001
+        print(f"Supabase Connection Note: {e}")
 
 
-init_db()
+init_supabase_table()
 
 
 @app.on_event("startup")
@@ -75,20 +46,25 @@ async def root_login(request: Request):
 
 @app.post("/login")
 async def login_user(identifier: str = Form(...), password: str = Form(...)):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT username, password FROM users WHERE identifier = ? OR username = ?",
-        (identifier, identifier),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    try:
+        response = (
+            supabase.table("users")
+            .select("*")
+            .or_(f"identifier.eq.{identifier},username.eq.{identifier}")
+            .execute()
+        )
+        users = response.data
 
-    if row and row["password"] == password:
-        response = RedirectResponse(url="/dashboard", status_code=303)
-        response.set_cookie(key="session_user", value=row["username"], httponly=True)
-        return response
+        if users and users[0]["password"] == password:
+            response_redirect = RedirectResponse(
+                url="/dashboard", status_code=303
+            )
+            response_redirect.set_cookie(
+                key="session_user", value=users[0]["username"], httponly=True
+            )
+            return response_redirect
+    except Exception as e:  # noqa: BLE001
+        print(f"Login Error: {e}")
 
     return RedirectResponse(url="/?error=InvalidCredentials", status_code=303)
 
@@ -99,25 +75,28 @@ async def signup_user(
     identifier: str = Form(...),
     password: str = Form(...),
 ):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
-    if cursor.fetchone():
-        cursor.close()
-        conn.close()
-        return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
-
-    cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
-    if cursor.fetchone():
-        cursor.close()
-        conn.close()
-        return RedirectResponse(
-            url="/?error=EmailAlreadyRegistered", status_code=303
+    try:
+        existing_user = (
+            supabase.table("users")
+            .select("*")
+            .eq("username", username)
+            .execute()
         )
+        if existing_user.data:
+            return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
-    cursor.close()
-    conn.close()
+        existing_id = (
+            supabase.table("users")
+            .select("*")
+            .eq("identifier", identifier)
+            .execute()
+        )
+        if existing_id.data:
+            return RedirectResponse(
+                url="/?error=EmailAlreadyRegistered", status_code=303
+            )
+    except Exception as e:  # noqa: BLE001
+        print(f"Signup Check Error: {e}")
 
     generated_otp = str(random.randint(1000, 9999))
     otp_store[identifier] = {
@@ -138,32 +117,33 @@ async def signup_user(
 async def forgot_password_request(
     identifier: str = Form(...), password: str = Form(...)
 ):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT identifier FROM users WHERE identifier = ? OR username = ?",
-        (identifier, identifier),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    conn.close()
+    try:
+        response = (
+            supabase.table("users")
+            .select("*")
+            .or_(f"identifier.eq.{identifier},username.eq.{identifier}")
+            .execute()
+        )
+        users = response.data
+        if not users:
+            return RedirectResponse(url="/?error=UserNotFound", status_code=303)
 
-    if not row:
+        real_identifier = users[0]["identifier"]
+        generated_otp = str(random.randint(1000, 9999))
+        otp_store[real_identifier] = {
+            "action": "forgot",
+            "identifier": real_identifier,
+            "password": password,
+            "otp": generated_otp,
+        }
+
+        return RedirectResponse(
+            url=f"/verify-otp?identifier={real_identifier}&mock_otp={generated_otp}&type=forgot",
+            status_code=303,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"Forgot Password Error: {e}")
         return RedirectResponse(url="/?error=UserNotFound", status_code=303)
-
-    real_identifier = row["identifier"]
-    generated_otp = str(random.randint(1000, 9999))
-    otp_store[real_identifier] = {
-        "action": "forgot",
-        "identifier": real_identifier,
-        "password": password,
-        "otp": generated_otp,
-    }
-
-    return RedirectResponse(
-        url=f"/verify-otp?identifier={real_identifier}&mock_otp={generated_otp}&type=forgot",
-        status_code=303,
-    )
 
 
 @app.get("/verify-otp", response_class=HTMLResponse)
@@ -191,41 +171,39 @@ async def verify_otp_action(
     user_data = otp_store.get(identifier)
 
     if user_data and user_data["otp"] == otp:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        try:
+            if type == "signup":
+                supabase.table("users").insert(
+                    {
+                        "identifier": user_data["identifier"],
+                        "username": user_data["username"],
+                        "password": user_data["password"],
+                        "balance": 1000.0,
+                    }
+                ).execute()
 
-        if type == "signup":
-            cursor.execute(
-                "INSERT INTO users (identifier, username, password, balance) VALUES (?, ?, ?, ?)",
-                (
-                    user_data["identifier"],
-                    user_data["username"],
-                    user_data["password"],
-                    1000.0,
-                ),
-            )
-            conn.commit()
-            cursor.close()
-            conn.close()
-            del otp_store[identifier]
+                del otp_store[identifier]
 
-            response = RedirectResponse(url="/dashboard", status_code=303)
-            response.set_cookie(key="session_user", value=user_data["username"], httponly=True)
-            return response
+                response = RedirectResponse(url="/dashboard", status_code=303)
+                response.set_cookie(
+                    key="session_user",
+                    value=user_data["username"],
+                    httponly=True,
+                )
+                return response
 
-        elif type == "forgot":
-            cursor.execute(
-                "UPDATE users SET password = ? WHERE identifier = ?",
-                (user_data["password"], user_data["identifier"]),
-            )
-            conn.commit()
-            cursor.close()
-            conn.close()
-            del otp_store[identifier]
+            elif type == "forgot":
+                supabase.table("users").update(
+                    {"password": user_data["password"]}
+                ).eq("identifier", user_data["identifier"]).execute()
 
-            return RedirectResponse(
-                url="/?success=PasswordReset", status_code=303
-            )
+                del otp_store[identifier]
+
+                return RedirectResponse(
+                    url="/?success=PasswordReset", status_code=303
+                )
+        except Exception as e:  # noqa: BLE001
+            print(f"OTP Action Database Error: {e}")
 
     return RedirectResponse(
         url=f"/verify-otp?identifier={identifier}&error=InvalidOTP&type={type}",
