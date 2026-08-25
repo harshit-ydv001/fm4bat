@@ -1,8 +1,9 @@
 import asyncio
 import json
 import random
-import sqlite3
+from urllib.parse import urlparse
 
+import psycopg2
 from fastapi import FastAPI, Form, Request, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,21 +22,54 @@ templates = Jinja2Templates(directory="templates")
 # Temporary store for OTP verification (Signup & Forgot Password)
 otp_store = {}
 
-# Initialize SQLite Database for Permanent User Storage
+# Supabase PostgreSQL Database URL (Configured with your password)
+DATABASE_URL = "postgresql://postgres:Harshit5575%40@db.kpnboggkawkyjzlxxpxi.supabase.co:5432/postgres"
+
+
+def get_db_connection():
+    parsed_url = urlparse(DATABASE_URL)
+    conn = psycopg2.connect(
+        database=parsed_url.path[1:],
+        user=parsed_url.username,
+        password=parsed_url.password,
+        host=parsed_url.hostname,
+        port=parsed_url.port,
+        sslmode="require",
+    )
+    return conn
+
+
+# Initialize PostgreSQL Database Table for Permanent User Storage
 def init_db():
-    conn = sqlite3.connect("users.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            identifier TEXT PRIMARY KEY,
-            username TEXT UNIQUE,
-            password TEXT
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                identifier TEXT PRIMARY KEY,
+                username TEXT UNIQUE,
+                password TEXT,
+                balance REAL DEFAULT 1000.00
+            )
+        """
         )
-    """)
-    cursor.execute("INSERT OR IGNORE INTO users (identifier, username, password) VALUES (?, ?, ?)", 
-                   ("admin", "admin", "admin123"))
-    conn.commit()
-    conn.close()
+        # Insert admin if not exists
+        cursor.execute(
+            "SELECT * FROM users WHERE identifier = %s", ("admin",)
+        )
+        if not cursor.fetchone():
+            cursor.execute(
+                "INSERT INTO users (identifier, username, password, balance) VALUES (%s, %s, %s, %s)",
+                ("admin", "admin", "admin123", 10000.0),
+            )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print("Supabase PostgreSQL Database Connected & Initialized Successfully!")
+    except (psycopg2.DatabaseError, ConnectionError, OSError) as db_error:
+        print(f"Database Initialization Error: {db_error}")
+
 
 init_db()
 
@@ -52,18 +86,22 @@ async def root_login(request: Request):
 
 @app.post("/login")
 async def login_user(identifier: str = Form(...), password: str = Form(...)):
-    conn = sqlite3.connect("users.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
-    
-    cursor.execute("SELECT username, password FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
+
+    cursor.execute(
+        "SELECT username, password FROM users WHERE identifier = %s OR username = %s",
+        (identifier, identifier),
+    )
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
 
     if row and row[1] == password:
         response = RedirectResponse(url="/dashboard", status_code=303)
         response.set_cookie(key="session_user", value=row[0])
         return response
-        
+
     return RedirectResponse(url="/?error=InvalidCredentials", status_code=303)
 
 
@@ -73,18 +111,25 @@ async def signup_user(
     identifier: str = Form(...),
     password: str = Form(...),
 ):
-    conn = sqlite3.connect("users.db")
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
     if cursor.fetchone():
+        cursor.close()
         conn.close()
         return RedirectResponse(url="/?error=UsernameTaken", status_code=303)
 
-    cursor.execute("SELECT * FROM users WHERE identifier = ?", (identifier,))
+    cursor.execute("SELECT * FROM users WHERE identifier = %s", (identifier,))
     if cursor.fetchone():
+        cursor.close()
         conn.close()
-        return RedirectResponse(url="/?error=EmailAlreadyRegistered", status_code=303)
+        return RedirectResponse(
+            url="/?error=EmailAlreadyRegistered", status_code=303
+        )
+
+    cursor.close()
+    conn.close()
 
     generated_otp = str(random.randint(1000, 9999))
     otp_store[identifier] = {
@@ -92,72 +137,114 @@ async def signup_user(
         "username": username,
         "identifier": identifier,
         "password": password,
-        "otp": generated_otp
+        "otp": generated_otp,
     }
-    conn.close()
 
-    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&mock_otp={generated_otp}&type=signup", status_code=303)
+    return RedirectResponse(
+        url=f"/verify-otp?identifier={identifier}&mock_otp={generated_otp}&type=signup",
+        status_code=303,
+    )
 
 
 @app.post("/forgot-password-request")
-async def forgot_password_request(identifier: str = Form(...), password: str = Form(...)):
-    conn = sqlite3.connect("users.db")
+async def forgot_password_request(
+    identifier: str = Form(...), password: str = Form(...)
+):
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT identifier FROM users WHERE identifier = ? OR username = ?", (identifier, identifier))
+    cursor.execute(
+        "SELECT identifier FROM users WHERE identifier = %s OR username = %s",
+        (identifier, identifier),
+    )
     row = cursor.fetchone()
+    cursor.close()
     conn.close()
 
     if not row:
         return RedirectResponse(url="/?error=UserNotFound", status_code=303)
 
-    # Use the actual registered identifier
     real_identifier = row[0]
     generated_otp = str(random.randint(1000, 9999))
-    
+
     otp_store[real_identifier] = {
         "action": "forgot",
         "identifier": real_identifier,
         "password": password,
-        "otp": generated_otp
+        "otp": generated_otp,
     }
 
-    return RedirectResponse(url=f"/verify-otp?identifier={real_identifier}&mock_otp={generated_otp}&type=forgot", status_code=303)
+    return RedirectResponse(
+        url=f"/verify-otp?identifier={real_identifier}&mock_otp={generated_otp}&type=forgot",
+        status_code=303,
+    )
 
 
 @app.get("/verify-otp", response_class=HTMLResponse)
-async def verify_otp_page(request: Request, identifier: str, mock_otp: str = "", type: str = "signup"):
-    return templates.TemplateResponse("verify_otp.html", {"request": request, "identifier": identifier, "mock_otp": mock_otp, "type": type})
+async def verify_otp_page(
+    request: Request,
+    identifier: str,
+    mock_otp: str = "",
+    type: str = "signup",
+):
+    return templates.TemplateResponse(
+        "verify_otp.html",
+        {
+            "request": request,
+            "identifier": identifier,
+            "mock_otp": mock_otp,
+            "type": type,
+        },
+    )
 
 
 @app.post("/verify-otp-action")
-async def verify_otp_action(identifier: str = Form(...), otp: str = Form(...), type: str = Form(...)):
+async def verify_otp_action(
+    identifier: str = Form(...), otp: str = Form(...), type: str = Form(...)
+):
     user_data = otp_store.get(identifier)
-    
+
     if user_data and user_data["otp"] == otp:
-        conn = sqlite3.connect("users.db")
+        conn = get_db_connection()
         cursor = conn.cursor()
-        
+
         if type == "signup":
-            cursor.execute("INSERT INTO users (identifier, username, password) VALUES (?, ?, ?)", 
-                           (user_data["identifier"], user_data["username"], user_data["password"]))
+            cursor.execute(
+                "INSERT INTO users (identifier, username, password, balance) VALUES (%s, %s, %s, %s)",
+                (
+                    user_data["identifier"],
+                    user_data["username"],
+                    user_data["password"],
+                    1000.0,
+                ),
+            )
             conn.commit()
+            cursor.close()
             conn.close()
             del otp_store[identifier]
-            
+
             response = RedirectResponse(url="/dashboard", status_code=303)
             response.set_cookie(key="session_user", value=user_data["username"])
             return response
-            
+
         elif type == "forgot":
-            cursor.execute("UPDATE users SET password = ? WHERE identifier = ?", (user_data["password"], user_data["identifier"]))
+            cursor.execute(
+                "UPDATE users SET password = %s WHERE identifier = %s",
+                (user_data["password"], user_data["identifier"]),
+            )
             conn.commit()
+            cursor.close()
             conn.close()
             del otp_store[identifier]
-            
-            return RedirectResponse(url="/?success=PasswordReset", status_code=303)
-    
-    return RedirectResponse(url=f"/verify-otp?identifier={identifier}&error=InvalidOTP&type={type}", status_code=303)
+
+            return RedirectResponse(
+                url="/?success=PasswordReset", status_code=303
+            )
+
+    return RedirectResponse(
+        url=f"/verify-otp?identifier={identifier}&error=InvalidOTP&type={type}",
+        status_code=303,
+    )
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
@@ -175,7 +262,9 @@ async def account_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    return templates.TemplateResponse("account.html", {"request": request, "username": username})
+    return templates.TemplateResponse(
+        "account.html", {"request": request, "username": username}
+    )
 
 
 @app.get("/logout")
@@ -190,7 +279,9 @@ async def crash_game_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    return templates.TemplateResponse("crash.html", {"request": request, "username": username})
+    return templates.TemplateResponse(
+        "crash.html", {"request": request, "username": username}
+    )
 
 
 @app.get("/games/ludo", response_class=HTMLResponse)
@@ -198,7 +289,9 @@ async def ludo_lobby_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    return templates.TemplateResponse("ludo_lobby.html", {"request": request, "username": username})
+    return templates.TemplateResponse(
+        "ludo_lobby.html", {"request": request, "username": username}
+    )
 
 
 @app.get("/games/ludo/play", response_class=HTMLResponse)
@@ -206,13 +299,18 @@ async def ludo_game_play_page(request: Request):
     username = request.cookies.get("session_user")
     if not username:
         return RedirectResponse(url="/", status_code=303)
-    
+
     mode = request.query_params.get("mode", "2")
     amount = request.query_params.get("amount", "100")
-    
+
     return templates.TemplateResponse(
-        "ludo.html", 
-        {"request": request, "username": username, "mode": mode, "amount": amount}
+        "ludo.html",
+        {
+            "request": request,
+            "username": username,
+            "mode": mode,
+            "amount": amount,
+        },
     )
 
 
@@ -220,8 +318,10 @@ async def ludo_game_play_page(request: Request):
 async def crash_websocket(websocket: WebSocket):
     mode = websocket.query_params.get("mode", "token")
     await manager.connect(websocket, mode)
-    
-    game_instance = engine.token_engine if mode == "token" else engine.real_engine
+
+    game_instance = (
+        engine.token_engine if mode == "token" else engine.real_engine
+    )
 
     try:
         while True:
@@ -238,15 +338,19 @@ async def crash_websocket(websocket: WebSocket):
                     "amount": float(amount),
                     "cashed_out": False,
                     "payout": 0.0,
-                    "is_bot": False
+                    "is_bot": False,
                 }
             elif action == "CASH_OUT":
                 username = parsed.get("username", "Player")
                 for bet in game_instance.active_bets.values():
-                    if bet.get("username") == username and not bet.get("cashed_out"):
+                    if bet.get("username") == username and not bet.get(
+                        "cashed_out"
+                    ):
                         bet["cashed_out"] = True
                         bet["multiplier"] = game_instance.multiplier
-                        bet["payout"] = round(bet["amount"] * game_instance.multiplier, 2)
+                        bet["payout"] = round(
+                            bet["amount"] * game_instance.multiplier, 2
+                        )
                         break
             elif action == "SWITCH_MODE":
                 new_mode = parsed.get("mode", "token")
