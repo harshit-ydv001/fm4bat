@@ -11,7 +11,7 @@ let difficulty = 'easy';
 
 const multipliers = [1.00, 1.44, 2.21, 3.45, 5.53, 9.09];
 
-// Lanes: Vertical traffic (Top to Bottom movement)
+// Lanes: Vertical traffic
 const lanes = [
     { x: 180, speed: 2.0, cars: [{y: 50, color: '#eab308'}, {y: 250, color: '#3b82f6'}] },
     { x: 280, speed: -2.5, cars: [{y: 100, color: '#ef4444'}, {y: 300, color: '#ffffff'}] },
@@ -24,6 +24,25 @@ let chicken = { x: 50, y: 200 };
 
 const actionBtn = document.getElementById('actionBtn');
 const betInput = document.getElementById('betAmount');
+
+// Create Cashout & GO buttons dynamically if not present inside controls-section
+const controlsSection = document.querySelector('.controls-section');
+let actionContainer = document.getElementById('gameActionContainer');
+
+if (!actionContainer) {
+    actionContainer = document.createElement('div');
+    actionContainer.id = 'gameActionContainer';
+    actionContainer.style.display = 'flex';
+    actionContainer.style.gap = '10px';
+    actionContainer.innerHTML = `
+        <button id="cashoutBtn" style="display:none; flex:1; background:#eab308; color:#000; border:none; padding:15px; font-size:16px; font-weight:900; border-radius:8px; cursor:pointer;">CASH OUT</button>
+        <button id="goBtn" style="display:none; flex:1; background:#22c55e; color:#fff; border:none; padding:15px; font-size:16px; font-weight:900; border-radius:8px; cursor:pointer;">GO</button>
+    `;
+    controlsSection.appendChild(actionContainer);
+}
+
+const cashoutBtn = document.getElementById('cashoutBtn');
+const goBtn = document.getElementById('goBtn');
 
 // Difficulty selector
 document.querySelectorAll('.diff-btn').forEach(btn => {
@@ -47,53 +66,73 @@ document.getElementById('increaseBet').addEventListener('click', () => {
     betInput.value = (val + 1).toFixed(2);
 });
 
-// Main Action Button (Play / GO / Cash Out workflow)
+// Play Button Click (Starts Game)
 actionBtn.addEventListener('click', () => {
     let bet = parseFloat(betInput.value) || 1.00;
+    if (balance < bet) {
+        alert("Insufficient Balance!");
+        return;
+    }
+    balance -= bet;
+    updateBalance();
+    gameState = 'PLAYING';
+    currentLane = 0;
+    chicken.x = 50;
 
-    if (gameState === 'IDLE' || gameState === 'GAMEOVER' || gameState === 'WON') {
-        if (balance < bet) {
-            alert("Insufficient Balance!");
+    actionBtn.style.display = 'none';
+    cashoutBtn.style.display = 'block';
+    goBtn.style.display = 'block';
+    updateCashoutText();
+});
+
+// GO Button Click (Continue to next lane)
+goBtn.addEventListener('click', () => {
+    if (gameState === 'PLAYING' && currentLane < 5) {
+        let risk = difficulty === 'easy' ? 0.05 : difficulty === 'medium' ? 0.15 : difficulty === 'hard' ? 0.25 : 0.40;
+        if (currentLane >= 1 && Math.random() < risk) {
+            gameState = 'GAMEOVER';
+            endGameUI("CRASHED! PLAY AGAIN", "#ef4444");
             return;
         }
-        balance -= bet;
-        updateBalance();
-        gameState = 'PLAYING';
-        currentLane = 0;
-        chicken.x = 50;
-        actionBtn.innerText = "GO / CASH OUT";
-        actionBtn.style.background = "#eab308";
-        actionBtn.style.color = "#000";
-    } else if (gameState === 'PLAYING') {
-        if (currentLane < 5) {
-            let risk = difficulty === 'easy' ? 0.05 : difficulty === 'medium' ? 0.15 : difficulty === 'hard' ? 0.25 : 0.40;
-            if (currentLane >= 1 && Math.random() < risk) {
-                gameState = 'GAMEOVER';
-                actionBtn.innerText = "CRASHED! PLAY AGAIN";
-                actionBtn.style.background = "#ef4444";
-                actionBtn.style.color = "#fff";
-                return;
-            }
 
-            currentLane++;
-            if (currentLane === 5) {
-                gameState = 'WON';
-                let winAmt = bet * multipliers[5];
-                balance += winAmt;
-                updateBalance();
-                actionBtn.innerText = `WON ₹${winAmt.toFixed(2)}! PLAY AGAIN`;
-                actionBtn.style.background = "#22c55e";
-                actionBtn.style.color = "#fff";
-            } else {
-                let currentWin = (bet * multipliers[currentLane]).toFixed(2);
-                actionBtn.innerText = `CASH OUT ₹${currentWin} / GO`;
-            }
+        currentLane++;
+        if (currentLane === 5) {
+            gameState = 'WON';
+            let winAmt = (parseFloat(betInput.value) * multipliers[5]).toFixed(2);
+            balance += parseFloat(winAmt);
+            updateBalance();
+            endGameUI(`WON ₹${winAmt}! PLAY AGAIN`, "#22c55e");
+        } else {
+            updateCashoutText();
         }
     }
 });
 
+// CASH OUT Button Click (Secure win and exit)
+cashoutBtn.addEventListener('click', () => {
+    if (gameState === 'PLAYING' && currentLane > 0) {
+        let winAmt = (parseFloat(betInput.value) * multipliers[currentLane]).toFixed(2);
+        balance += parseFloat(winAmt);
+        updateBalance();
+        gameState = 'WON';
+        endGameUI(`CASHED OUT ₹${winAmt}! PLAY AGAIN`, "#22c55e");
+    }
+});
+
+function updateCashoutText() {
+    let currentWin = (parseFloat(betInput.value) * multipliers[currentLane]).toFixed(2);
+    cashoutBtn.innerText = `CASH OUT ₹${currentWin}`;
+}
+
+function endGameUI(text, bgColor) {
+    cashoutBtn.style.display = 'none';
+    goBtn.style.display = 'none';
+    actionBtn.style.display = 'block';
+    actionBtn.innerText = text;
+    actionBtn.style.background = bgColor;
+}
+
 function updateBalance() {
-    // Update header balance if available
     const headerBal = document.querySelector('.game-header span:last-child');
     if (headerBal) headerBal.innerText = `Balance: ₹${balance.toFixed(2)}`;
 }
@@ -109,9 +148,7 @@ function update() {
             if (gameState === 'PLAYING' && currentLane === index + 1) {
                 if (Math.abs(chicken.y - car.y) < 30 && Math.abs(chicken.x - lane.x) < 30) {
                     gameState = 'GAMEOVER';
-                    actionBtn.innerText = "CRASHED! PLAY AGAIN";
-                    actionBtn.style.background = "#ef4444";
-                    actionBtn.style.color = "#fff";
+                    endGameUI("CRASHED! PLAY AGAIN", "#ef4444");
                 }
             }
         });
