@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import random
 
 from fastapi import FastAPI, Form, Request, WebSocket
@@ -278,13 +279,17 @@ async def ludo_game_play_page(request: Request):
     )
 
 
-# --- SAFE CHICKEN ROAD GAME ROUTE ---
+# --- LINT-FREE TEMPLATE CHICKEN ROAD ROUTE ---
 @app.get("/chicken", response_class=HTMLResponse)
 async def chicken_game_page(request: Request):
-    username = request.cookies.get("session_user", "Player")
-    return templates.TemplateResponse(
-        "chicken.html", {"request": request, "username": username}
-    )
+    try:
+        html_path = os.path.join("templates", "chicken.html")
+        if os.path.exists(html_path):
+            return templates.TemplateResponse("chicken.html", {"request": request})
+        else:
+            return HTMLResponse(content="<h3>Error: chicken.html file not found!</h3>", status_code=404)
+    except Exception as e:  # noqa: BLE001
+        return HTMLResponse(content=f"<h3>Internal Error: {e}</h3>", status_code=500)
 
 
 @app.websocket("/ws/crash")
