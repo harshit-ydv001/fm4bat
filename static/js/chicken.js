@@ -1,8 +1,8 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = 480;
-canvas.height = 380;
+canvas.width = 720;
+canvas.height = 420;
 
 let gameState = 'IDLE'; // IDLE, PLAYING, WON, GAMEOVER
 let currentLane = 0; // 0 = grass, 1 to 5 = lanes
@@ -10,17 +10,16 @@ let difficulty = 'easy';
 
 const multipliers = [1.00, 1.44, 2.21, 3.45, 5.53, 9.09];
 
-// Horizontal lanes configuration
+// Lanes configuration: Up-to-Down moving cars across vertical columns
 const lanes = [
-    { y: 320, speed: 0, cars: [] },
-    { y: 260, speed: 2.0, cars: [{x: 50, color: '#eab308'}, {x: 280, color: '#3b82f6'}] },
-    { y: 200, speed: -2.5, cars: [{x: 100, color: '#ef4444'}, {x: 350, color: '#ffffff'}] },
-    { y: 140, speed: 3.0, cars: [{x: 80, color: '#06b6d4'}, {x: 300, color: '#a855f7'}] },
-    { y: 80, speed: -3.5, cars: [{x: 150, color: '#eab308'}, {x: 380, color: '#22c55e'}] },
-    { y: 20, speed: 4.0, cars: [{x: 200, color: '#ef4444'}, {x: 400, color: '#ffffff'}] }
+    { x: 180, speed: 2.0, cars: [{y: 50, color: '#eab308'}, {y: 250, color: '#3b82f6'}] },
+    { x: 280, speed: -2.5, cars: [{y: 100, color: '#ef4444'}, {y: 300, color: '#ffffff'}] },
+    { x: 380, speed: 3.0, cars: [{y: 80, color: '#06b6d4'}, {y: 280, color: '#a855f7'}] },
+    { x: 480, speed: -3.5, cars: [{y: 150, color: '#eab308'}, {y: 320, color: '#22c55e'}] },
+    { x: 580, speed: 4.0, cars: [{y: 50, color: '#ef4444'}, {y: 200, color: '#ffffff'}] }
 ];
 
-let chicken = { x: 30, y: 320 };
+let chicken = { x: 50, y: 200 };
 
 const actionBtn = document.getElementById('actionBtn');
 const betInput = document.getElementById('betAmount');
@@ -59,10 +58,9 @@ actionBtn.addEventListener('click', () => {
 function startGame() {
     gameState = 'PLAYING';
     currentLane = 0;
-    chicken.x = 30;
-    chicken.y = lanes[0].y;
+    chicken.x = 50;
     actionBtn.innerText = "GO / NEXT LANE";
-    actionBtn.style.background = "#eab308";
+    actionBtn.style.background = "#22c55e";
 }
 
 function stepForward() {
@@ -76,8 +74,6 @@ function stepForward() {
         }
 
         currentLane++;
-        chicken.y = lanes[currentLane].y;
-
         if (currentLane === 5) {
             gameState = 'WON';
             let winAmt = (parseFloat(betInput.value) * multipliers[5]).toFixed(2);
@@ -85,22 +81,21 @@ function stepForward() {
             actionBtn.style.background = "#22c55e";
         } else {
             actionBtn.innerText = `CASH OUT / NEXT (${multipliers[currentLane]}x)`;
-            actionBtn.style.background = "#22c55e";
         }
     }
 }
 
 function update() {
     lanes.forEach((lane, index) => {
-        if (index === 0) return;
         let speedMult = difficulty === 'medium' ? 1.3 : difficulty === 'hard' ? 1.6 : difficulty === 'hardcore' ? 2.0 : 1.0;
         lane.cars.forEach(car => {
-            car.x += lane.speed * speedMult;
-            if (car.x > canvas.width + 40) car.x = -60;
-            if (car.x < -60) car.x = canvas.width + 40;
+            car.y += lane.speed * speedMult;
+            if (car.y > canvas.height + 40) car.y = -60;
+            if (car.y < -60) car.y = canvas.height + 40;
 
-            if (gameState === 'PLAYING' && currentLane === index) {
-                if (Math.abs(chicken.x - car.x) < 30) {
+            // Collision check with chicken
+            if (gameState === 'PLAYING' && currentLane === index + 1) {
+                if (Math.abs(chicken.y - car.y) < 30 && Math.abs(chicken.x - lane.x) < 30) {
                     gameState = 'GAMEOVER';
                     actionBtn.innerText = "CRASHED! PLAY AGAIN";
                     actionBtn.style.background = "#ef4444";
@@ -113,71 +108,73 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Left Grass Area
+    // 1. Left Sidewalk / Grass Area with Tree & Lamp Post
     ctx.fillStyle = '#166534';
-    ctx.fillRect(0, 0, 70, canvas.height);
+    ctx.fillRect(0, 0, 120, canvas.height);
     ctx.fillStyle = '#15803d';
-    ctx.fillRect(55, 0, 15, canvas.height);
+    ctx.fillRect(100, 0, 20, canvas.height);
 
-    ctx.font = '35px Arial';
+    // Tree icon
+    ctx.font = '45px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('🌳', 35, 70);
-    ctx.fillText('🌳', 35, 190);
-    ctx.fillText('🌳', 35, 310);
+    ctx.fillText('🌳', 60, 100);
+    ctx.fillText('🌳', 60, 280);
 
-    // 2. Asphalt Road
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(70, 0, canvas.width - 70, canvas.height);
+    // 2. Asphalt Road Background
+    ctx.fillStyle = '#374151';
+    ctx.fillRect(120, 0, canvas.width - 120, canvas.height);
 
-    ctx.strokeStyle = '#94a3b8';
+    // Vertical dashed road lines
+    ctx.strokeStyle = '#9ca3af';
     ctx.lineWidth = 2;
-    ctx.setLineDash([8, 8]);
-    for (let i = 1; i < 6; i++) {
-        let yPos = i * 60;
+    ctx.setLineDash([15, 15]);
+    for (let i = 1; i < 5; i++) {
+        let xPos = 120 + (i * 100);
         ctx.beginPath();
-        ctx.moveTo(70, yPos);
-        ctx.lineTo(canvas.width, yPos);
+        ctx.moveTo(xPos, 0);
+        ctx.lineTo(xPos, canvas.height);
         ctx.stroke();
     }
     ctx.setLineDash([]);
 
-    // 3. Multiplier Manhole Circles
+    // 3. Manhole Circles with Multipliers (Placed on road columns)
     lanes.forEach((lane, index) => {
-        if (index === 0) return;
-        let circleX = 300 + (index * 32);
+        let circleX = lane.x;
+        let circleY = 340;
 
-        ctx.fillStyle = '#1e293b';
+        ctx.fillStyle = '#1f2937';
         ctx.beginPath();
-        ctx.arc(circleX, lane.y + 30, 20, 0, Math.PI * 2);
+        ctx.arc(circleX, circleY, 28, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#4b5563';
+        ctx.lineWidth = 3;
         ctx.stroke();
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 11px Arial';
+        ctx.font = 'bold 13px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(`${multipliers[index]}x`, circleX, lane.y + 34);
+        ctx.fillText(`${multipliers[index + 1]}x`, circleX, circleY + 5);
     });
 
-    // 4. Cars
+    // 4. Cars moving vertically (Top to bottom / Bottom to top)
     lanes.forEach((lane, index) => {
-        if (index === 0) return;
         lane.cars.forEach(car => {
             ctx.fillStyle = car.color;
-            ctx.fillRect(car.x, lane.y + 12, 45, 28);
+            ctx.fillRect(lane.x - 22, car.y, 44, 55);
+            // Windshield
             ctx.fillStyle = '#93c5fd';
-            ctx.fillRect(car.x + 8, lane.y + 16, 16, 10);
+            ctx.fillRect(lane.x - 16, car.y + 10, 32, 16);
         });
     });
 
-    // 5. Chicken
-    let targetX = currentLane === 0 ? 35 : 120 + (currentLane * 35);
+    // 5. Chicken Movement (Left to Right across lanes)
+    let targetX = currentLane === 0 ? 60 : lanes[currentLane - 1].x;
     chicken.x += (targetX - chicken.x) * 0.2;
+    chicken.y = 200; // Fixed vertical center for chicken
 
-    ctx.font = '28px Arial';
+    ctx.font = '40px Arial';
     let chickenEmoji = gameState === 'GAMEOVER' ? '💥' : '🐔';
-    ctx.fillText(chickenEmoji, chicken.x, chicken.y + 35);
+    ctx.fillText(chickenEmoji, chicken.x, chicken.y);
 }
 
 function loop() {
