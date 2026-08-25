@@ -9,7 +9,6 @@ let currentMode = 'token';
 
 function connectWebSocket() {
     const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    // Fixed clean WebSocket URL for robust routing on Render
     ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/crash?mode=${currentMode}`);
 
     ws.onopen = function() {
@@ -105,7 +104,6 @@ function connectWebSocket() {
     };
 
     ws.onclose = function() {
-        console.log("WebSocket Closed. Reconnecting in 1.5s...");
         setTimeout(function() {
             connectWebSocket();
         }, 1500);
