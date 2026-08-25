@@ -4,13 +4,14 @@ const ctx = canvas.getContext('2d');
 canvas.width = 720;
 canvas.height = 420;
 
+let balance = 1000.00;
 let gameState = 'IDLE'; // IDLE, PLAYING, WON, GAMEOVER
 let currentLane = 0; // 0 = grass, 1 to 5 = lanes
 let difficulty = 'easy';
 
 const multipliers = [1.00, 1.44, 2.21, 3.45, 5.53, 9.09];
 
-// Lanes configuration: Up-to-Down moving cars across vertical columns
+// Lanes: Vertical traffic (Top to Bottom movement)
 const lanes = [
     { x: 180, speed: 2.0, cars: [{y: 50, color: '#eab308'}, {y: 250, color: '#3b82f6'}] },
     { x: 280, speed: -2.5, cars: [{y: 100, color: '#ef4444'}, {y: 300, color: '#ffffff'}] },
@@ -46,43 +47,55 @@ document.getElementById('increaseBet').addEventListener('click', () => {
     betInput.value = (val + 1).toFixed(2);
 });
 
-// Action button click
+// Main Action Button (Play / GO / Cash Out workflow)
 actionBtn.addEventListener('click', () => {
+    let bet = parseFloat(betInput.value) || 1.00;
+
     if (gameState === 'IDLE' || gameState === 'GAMEOVER' || gameState === 'WON') {
-        startGame();
+        if (balance < bet) {
+            alert("Insufficient Balance!");
+            return;
+        }
+        balance -= bet;
+        updateBalance();
+        gameState = 'PLAYING';
+        currentLane = 0;
+        chicken.x = 50;
+        actionBtn.innerText = "GO / CASH OUT";
+        actionBtn.style.background = "#eab308";
+        actionBtn.style.color = "#000";
     } else if (gameState === 'PLAYING') {
-        stepForward();
+        if (currentLane < 5) {
+            let risk = difficulty === 'easy' ? 0.05 : difficulty === 'medium' ? 0.15 : difficulty === 'hard' ? 0.25 : 0.40;
+            if (currentLane >= 1 && Math.random() < risk) {
+                gameState = 'GAMEOVER';
+                actionBtn.innerText = "CRASHED! PLAY AGAIN";
+                actionBtn.style.background = "#ef4444";
+                actionBtn.style.color = "#fff";
+                return;
+            }
+
+            currentLane++;
+            if (currentLane === 5) {
+                gameState = 'WON';
+                let winAmt = bet * multipliers[5];
+                balance += winAmt;
+                updateBalance();
+                actionBtn.innerText = `WON ₹${winAmt.toFixed(2)}! PLAY AGAIN`;
+                actionBtn.style.background = "#22c55e";
+                actionBtn.style.color = "#fff";
+            } else {
+                let currentWin = (bet * multipliers[currentLane]).toFixed(2);
+                actionBtn.innerText = `CASH OUT ₹${currentWin} / GO`;
+            }
+        }
     }
 });
 
-function startGame() {
-    gameState = 'PLAYING';
-    currentLane = 0;
-    chicken.x = 50;
-    actionBtn.innerText = "GO / NEXT LANE";
-    actionBtn.style.background = "#22c55e";
-}
-
-function stepForward() {
-    if (currentLane < 5) {
-        let risk = difficulty === 'easy' ? 0.05 : difficulty === 'medium' ? 0.15 : difficulty === 'hard' ? 0.25 : 0.40;
-        if (currentLane >= 1 && Math.random() < risk) {
-            gameState = 'GAMEOVER';
-            actionBtn.innerText = "CRASHED! PLAY AGAIN";
-            actionBtn.style.background = "#ef4444";
-            return;
-        }
-
-        currentLane++;
-        if (currentLane === 5) {
-            gameState = 'WON';
-            let winAmt = (parseFloat(betInput.value) * multipliers[5]).toFixed(2);
-            actionBtn.innerText = `WON ₹${winAmt}! PLAY AGAIN`;
-            actionBtn.style.background = "#22c55e";
-        } else {
-            actionBtn.innerText = `CASH OUT / NEXT (${multipliers[currentLane]}x)`;
-        }
-    }
+function updateBalance() {
+    // Update header balance if available
+    const headerBal = document.querySelector('.game-header span:last-child');
+    if (headerBal) headerBal.innerText = `Balance: ₹${balance.toFixed(2)}`;
 }
 
 function update() {
@@ -93,12 +106,12 @@ function update() {
             if (car.y > canvas.height + 40) car.y = -60;
             if (car.y < -60) car.y = canvas.height + 40;
 
-            // Collision check with chicken
             if (gameState === 'PLAYING' && currentLane === index + 1) {
                 if (Math.abs(chicken.y - car.y) < 30 && Math.abs(chicken.x - lane.x) < 30) {
                     gameState = 'GAMEOVER';
                     actionBtn.innerText = "CRASHED! PLAY AGAIN";
                     actionBtn.style.background = "#ef4444";
+                    actionBtn.style.color = "#fff";
                 }
             }
         });
@@ -108,13 +121,12 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Left Sidewalk / Grass Area with Tree & Lamp Post
+    // 1. Left Sidewalk / Grass Area
     ctx.fillStyle = '#166534';
     ctx.fillRect(0, 0, 120, canvas.height);
     ctx.fillStyle = '#15803d';
     ctx.fillRect(100, 0, 20, canvas.height);
 
-    // Tree icon
     ctx.font = '45px Arial';
     ctx.textAlign = 'center';
     ctx.fillText('🌳', 60, 100);
@@ -124,7 +136,6 @@ function draw() {
     ctx.fillStyle = '#374151';
     ctx.fillRect(120, 0, canvas.width - 120, canvas.height);
 
-    // Vertical dashed road lines
     ctx.strokeStyle = '#9ca3af';
     ctx.lineWidth = 2;
     ctx.setLineDash([15, 15]);
@@ -137,7 +148,7 @@ function draw() {
     }
     ctx.setLineDash([]);
 
-    // 3. Manhole Circles with Multipliers (Placed on road columns)
+    // 3. Manhole Circles with Multipliers
     lanes.forEach((lane, index) => {
         let circleX = lane.x;
         let circleY = 340;
@@ -156,21 +167,20 @@ function draw() {
         ctx.fillText(`${multipliers[index + 1]}x`, circleX, circleY + 5);
     });
 
-    // 4. Cars moving vertically (Top to bottom / Bottom to top)
-    lanes.forEach((lane, index) => {
+    // 4. Vertical Moving Cars
+    lanes.forEach((lane) => {
         lane.cars.forEach(car => {
             ctx.fillStyle = car.color;
             ctx.fillRect(lane.x - 22, car.y, 44, 55);
-            // Windshield
             ctx.fillStyle = '#93c5fd';
             ctx.fillRect(lane.x - 16, car.y + 10, 32, 16);
         });
     });
 
-    // 5. Chicken Movement (Left to Right across lanes)
+    // 5. Chicken Position
     let targetX = currentLane === 0 ? 60 : lanes[currentLane - 1].x;
     chicken.x += (targetX - chicken.x) * 0.2;
-    chicken.y = 200; // Fixed vertical center for chicken
+    chicken.y = 200;
 
     ctx.font = '40px Arial';
     let chickenEmoji = gameState === 'GAMEOVER' ? '💥' : '🐔';
