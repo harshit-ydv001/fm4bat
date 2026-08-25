@@ -14,11 +14,11 @@
                 <span class="logo-main">CHICKEN</span><span class="logo-sub">2ROAD</span>
             </div>
             <div class="live-wins-ticker" id="liveWinsTicker">
-                <span class="win-badge">👑 Milanos</span> <span class="win-amt">+₹3816.00</span>
+                <span class="win-badge">👑 Amber Gener...</span> <span class="win-amt">+$554.00</span>
             </div>
             <div class="header-right">
                 <button class="info-btn">ⓘ How to play?</button>
-                <div class="balance-pill" id="balanceDisplay">₹1000.00 Ⓢ</div>
+                <div class="balance-pill" id="balanceDisplay">999 693.3 Ⓢ</div>
                 <button class="fullscreen-btn">⛶</button>
             </div>
         </div>
@@ -72,7 +72,7 @@
         canvas.width = 720;
         canvas.height = 380;
 
-        let balance = 1000.00;
+        let balance = 999693.30;
         let gameState = 'IDLE'; 
         let currentLane = 0; 
         let difficulty = 'easy';
@@ -81,7 +81,7 @@
 
         const lanes = [
             { x: 180, speed: 2.2, cars: [{y: 40, color: '#eab308'}, {y: 220, color: '#3b82f6'}] },
-            { x: 280, speed: -2.8, cars: [{y: 80, color: '#ef4444'}, {y: 260, color: '#ffffff'}] },
+            { x: 280, speed: -2.8, cars: [{y: 100, color: '#ef4444'}, {y: 260, color: '#ffffff'}] },
             { x: 380, speed: 3.2, cars: [{y: 60, color: '#06b6d4'}, {y: 240, color: '#a855f7'}] },
             { x: 480, speed: -3.8, cars: [{y: 120, color: '#eab308'}, {y: 280, color: '#22c55e'}] },
             { x: 580, speed: 4.2, cars: [{y: 40, color: '#ef4444'}, {y: 180, color: '#ffffff'}] }
@@ -132,8 +132,21 @@
 
         function goNextLane() {
             if (gameState === 'PLAYING' && currentLane < 5) {
+                // Check exact collision at the moment of clicking GO
+                let targetLaneIdx = currentLane;
+                let lane = lanes[targetLaneIdx];
+                let collided = false;
+
+                lane.cars.forEach(car => {
+                    // If a car is currently passing through the target circle/zone (y between 140 and 320)
+                    if (car.y > 140 && car.y < 340) {
+                        collided = true;
+                    }
+                });
+
+                // Difficulty risk factor
                 let risk = difficulty === 'easy' ? 0.05 : difficulty === 'medium' ? 0.15 : difficulty === 'hard' ? 0.25 : 0.40;
-                if (currentLane >= 1 && Math.random() < risk) {
+                if (collided || (currentLane >= 1 && Math.random() < risk)) {
                     gameState = 'GAMEOVER';
                     endGame("CRASHED! PLAY AGAIN", "#ef4444");
                     return;
@@ -175,13 +188,12 @@
         }
 
         function updateBalance() {
-            document.getElementById('balanceDisplay').innerText = `₹${balance.toFixed(2)} Ⓢ`;
+            document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
         }
 
         function update() {
             lanes.forEach((lane, index) => {
-                // Cars stop moving on lanes where barrier is already placed
-                if (index < currentLane) return;
+                if (index < currentLane) return; // Cars stop moving behind barrier
 
                 let speedMult = difficulty === 'medium' ? 1.3 : difficulty === 'hard' ? 1.6 : difficulty === 'hardcore' ? 2.0 : 1.0;
                 lane.cars.forEach(car => {
@@ -189,7 +201,7 @@
                     if (car.y > canvas.height + 30) car.y = -50;
                     if (car.y < -50) car.y = canvas.height + 30;
 
-                    // Collision check with car on active lane
+                    // Continuous real-time collision check
                     if (gameState === 'PLAYING' && currentLane === index + 1) {
                         if (Math.abs(chicken.y - car.y) < 25 && Math.abs(chicken.x - lane.x) < 25) {
                             gameState = 'GAMEOVER';
@@ -230,7 +242,7 @@
             }
             ctx.setLineDash([]);
 
-            // Manholes (Circles)
+            // Manholes
             lanes.forEach((lane, index) => {
                 let circleX = lane.x;
                 let circleY = 320;
@@ -249,7 +261,7 @@
                 ctx.fillText(`${multipliers[index + 1]}x`, circleX, circleY + 4);
             });
 
-            // Barriers on crossed lanes (Cars stop here)
+            // Barriers on crossed lanes
             for (let i = 0; i < currentLane; i++) {
                 let barrierX = lanes[i].x;
                 ctx.font = '30px Arial';
@@ -259,7 +271,7 @@
 
             // Cars
             lanes.forEach((lane, index) => {
-                if (index < currentLane) return; // Do not animate cars behind barriers
+                if (index < currentLane) return;
                 lane.cars.forEach(car => {
                     ctx.fillStyle = car.color;
                     ctx.fillRect(lane.x - 18, car.y, 36, 45);
@@ -268,10 +280,10 @@
                 });
             });
 
-            // Chicken landing directly inside the multiplier circle
+            // Chicken
             let targetX = currentLane === 0 ? 50 : lanes[currentLane - 1].x;
             chicken.x += (targetX - chicken.x) * 0.2;
-            chicken.y = currentLane === 0 ? 190 : 310; // Lands right inside the circle
+            chicken.y = currentLane === 0 ? 190 : 310;
 
             ctx.font = '35px Arial';
             let chickenEmoji = gameState === 'GAMEOVER' ? '💥' : '🐔';
