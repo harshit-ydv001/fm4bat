@@ -305,6 +305,7 @@ async def ludo_game_play_page(request: Request):
 
 
 @app.websocket("/ws/crash")
+@app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
     await websocket.accept()
     mode = websocket.query_params.get("mode", "token")
