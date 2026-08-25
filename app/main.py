@@ -16,10 +16,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-# Temporary store for OTP verification (Signup & Forgot Password)
+# Temporary store for OTP verification
 otp_store = {}
 
-# SQLite Database setup for smooth and error-free cloud deployment
+# SQLite / Database setup
 DB_FILE = "users.db"
 
 
@@ -29,7 +29,6 @@ def get_db_connection():
     return conn
 
 
-# Initialize SQLite Database Table for User Storage
 def init_db():
     try:
         conn = get_db_connection()
@@ -44,7 +43,6 @@ def init_db():
             )
         """
         )
-        # Insert admin if not exists
         cursor.execute(
             "SELECT * FROM users WHERE identifier = ?", ("admin",)
         )
@@ -56,7 +54,7 @@ def init_db():
         conn.commit()
         cursor.close()
         conn.close()
-        print("SQLite Database Connected & Initialized Successfully!")
+        print("Database Initialized Successfully!")
     except sqlite3.Error as db_error:
         print(f"Database Initialization Error: {db_error}")
 
@@ -66,7 +64,10 @@ init_db()
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(engine.start_all())
+    try:
+        asyncio.create_task(engine.start_all())
+    except RuntimeError as e:
+        print(f"Engine Startup Error: {e}")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -78,7 +79,6 @@ async def root_login(request: Request):
 async def login_user(identifier: str = Form(...), password: str = Form(...)):
     conn = get_db_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         "SELECT username, password FROM users WHERE identifier = ? OR username = ?",
         (identifier, identifier),
@@ -142,7 +142,6 @@ async def forgot_password_request(
 ):
     conn = get_db_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         "SELECT identifier FROM users WHERE identifier = ? OR username = ?",
         (identifier, identifier),
@@ -156,7 +155,6 @@ async def forgot_password_request(
 
     real_identifier = row["identifier"]
     generated_otp = str(random.randint(1000, 9999))
-
     otp_store[real_identifier] = {
         "action": "forgot",
         "identifier": real_identifier,
@@ -304,6 +302,7 @@ async def ludo_game_play_page(request: Request):
     )
 
 
+# WebSocket Route with multiple fallback decorators to prevent 404
 @app.websocket("/ws/crash")
 @app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
@@ -325,7 +324,8 @@ async def crash_websocket(websocket: WebSocket):
                 amount = parsed.get("amount")
                 username = parsed.get("username", "Player")
                 user_key = f"user_{id(websocket)}"
-                game_instance.active_bets[user_key] = {
+                game_index = game_instance.active_bets
+                game_index[user_key] = {
                     "username": username,
                     "amount": float(amount),
                     "cashed_out": False,
