@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Road 2 - Fm4bat</title>
+    <title>Chicken Road Game - Fm4bat</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -15,7 +15,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             min-height: 100vh;
         }
         .game-wrapper {
@@ -58,17 +58,6 @@
             gap: 12px;
             border-top: 1px solid #334155;
         }
-        .settings-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #111827;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-        .diff-buttons { display: flex; gap: 4px; }
-        .diff-btn { background: #334155; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold; }
-        .diff-btn.active { background: #22c55e; color: #000; }
         .bet-presets { display: flex; gap: 12px; align-items: center; justify-content: center; }
         .quick-bet-chips { display: flex; gap: 6px; }
         .chip-btn { background: #334155; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
@@ -89,20 +78,6 @@
         .playing-btns-group { display: flex; width: 100%; gap: 10px; }
         .cashout-action-btn { flex: 2; background: #eab308; color: #000; border: none; padding: 14px; font-size: 16px; font-weight: 900; border-radius: 8px; cursor: pointer; text-align: center; }
         .go-action-btn { flex: 1; background: #22c55e; color: #fff; border: none; padding: 14px; font-size: 18px; font-weight: 900; border-radius: 8px; cursor: pointer; text-align: center; }
-        
-        .strategy-guide {
-            margin-top: 15px;
-            width: 100%;
-            max-width: 820px;
-            background: #111827;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #374151;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #9ca3af;
-        }
-        .strategy-guide h3 { color: #fff; margin-top: 0; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -110,7 +85,7 @@
     <div class="game-wrapper">
         <div class="top-bar">
             <div class="logo-area">
-                <span class="logo-main">CHICKEN</span><span class="logo-sub">2ROAD</span> <span style="font-size:10px; background:#eab308; color:#000; padding:2px 6px; border-radius:4px; font-weight:bold;">DEMO MODE</span>
+                <span class="logo-main">CHICKEN</span><span class="logo-sub">2ROAD</span>
             </div>
             <div class="balance-pill" id="balanceDisplay">1 000 000.00 Ⓢ</div>
         </div>
@@ -120,16 +95,6 @@
         </div>
 
         <div class="control-panel">
-            <div class="settings-row">
-                <span style="font-size: 12px; font-weight: bold;">Difficulty Mode:</span>
-                <div class="diff-buttons">
-                    <button class="diff-btn active" onclick="setDifficulty('easy', this)">Easy</button>
-                    <button class="diff-btn" onclick="setDifficulty('medium', this)">Medium</button>
-                    <button class="diff-btn" onclick="setDifficulty('hard', this)">Hard</button>
-                    <button class="diff-btn" onclick="setDifficulty('hardcore', this)">Hardcore</button>
-                </div>
-            </div>
-
             <div class="bet-presets">
                 <div class="quick-bet-chips">
                     <button class="chip-btn" onclick="setBetVal(2)">2 $</button>
@@ -140,20 +105,13 @@
             </div>
 
             <div class="action-bar">
-                <button id="playBtn" class="play-main-btn" onclick="startPlay()">PLAY (DEMO)</button>
+                <button id="playBtn" class="play-main-btn" onclick="startPlay()">PLAY</button>
                 <div id="playingActionBtns" class="playing-btns-group" style="display: none;">
                     <button id="cashoutBtn" class="cashout-action-btn" onclick="cashOutGame()">COLLECT TOKENS (<span id="cashoutAmt">0.0</span>)</button>
                     <button id="goBtn" class="go-action-btn" onclick="goNextLane()">GO</button>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="strategy-guide">
-        <h3>Chicken Road 2 Strategy & Tips</h3>
-        <p><strong>Start with Demo Mode:</strong> Use demo mode to understand game mechanics, test difficulties (Easy, Medium, Hard, Hardcore), and observe multiplier pacing without financial risk.</p>
-        <p><strong>Set a Cash-Out Target:</strong> Decide your target multiplier before crossing. Avoid emotional decisions and secure frequent small wins or higher multipliers based on your risk appetite.</p>
-        <p><em>Responsible Gaming:</em> Treat the game as pure entertainment. Set session limits and never chase losses.</p>
     </div>
 
     <script>
@@ -164,8 +122,6 @@
         let gameState = 'IDLE'; 
         let currentStep = 0;
         let cameraX = 0; 
-        let difficulty = 'easy';
-        let betAmount = 3.00;
         let lastTime = 0;
 
         // Assets
@@ -175,16 +131,16 @@
         const imgHatch = new Image(); imgHatch.src = '/static/images/hatch_2.png';
         const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
 
-        const multipliers = [1.00, 1.09, 1.25, 1.43, 1.66, 1.94, 2.30, 2.80, 3.50, 4.50, 5.80, 7.50];
+        const multipliers = [1.00, 1.09, 1.25, 1.43, 1.66, 1.94, 2.30, 2.80, 3.50, 4.50];
 
         let lanes = [];
         function initLanes() {
             lanes = [];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 25; i++) {
                 lanes.push({
                     x: 300 + (i * 160),
                     dir: i % 2 === 0 ? 1 : -1,
-                    speed: 160 + (i % 3) * 40,
+                    speed: 180 + (i % 3) * 45,
                     cars: [
                         { y: -150 - (i * 110), type: i % 4 },
                         { y: 650 + (i * 110), type: (i + 1) % 4 }
@@ -198,22 +154,10 @@
 
         function setBetVal(val) {
             if (gameState === 'PLAYING') return;
-            betAmount = val;
-        }
-
-        function setDifficulty(diff, btn) {
-            if (gameState === 'PLAYING') return;
-            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            difficulty = diff;
         }
 
         function startPlay() {
-            if (balance < betAmount) {
-                alert("Demo balance exhausted!");
-                return;
-            }
-            balance -= betAmount;
+            balance -= 3.00;
             document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
             gameState = 'PLAYING';
             currentStep = 0;
@@ -237,7 +181,7 @@
         function cashOutGame() {
             if (gameState === 'PLAYING' && currentStep > 0) {
                 let mult = multipliers[Math.min(currentStep, multipliers.length - 1)];
-                let winAmt = betAmount * mult;
+                let winAmt = 3.00 * mult;
                 balance += winAmt;
                 document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
                 gameState = 'WON';
@@ -247,7 +191,7 @@
 
         function updateCashoutDisplay() {
             let mult = multipliers[Math.min(currentStep + 1, multipliers.length - 1)];
-            let amt = betAmount * mult;
+            let amt = 3.00 * mult;
             document.getElementById('cashoutAmt').innerText = amt.toFixed(2);
         }
 
@@ -262,14 +206,11 @@
         function update(deltaTime) {
             if (gameState !== 'PLAYING') return;
 
-            let speedMult = difficulty === 'medium' ? 1.3 : difficulty === 'hard' ? 1.6 : difficulty === 'hardcore' ? 2.0 : 1.0;
-            let crashRisk = difficulty === 'easy' ? 0.01 : difficulty === 'medium' ? 0.05 : difficulty === 'hard' ? 0.10 : 0.18;
-
             lanes.forEach((lane, index) => {
                 if (index < currentStep) return; 
 
                 lane.cars.forEach(car => {
-                    car.y += lane.speed * lane.dir * speedMult * deltaTime;
+                    car.y += lane.speed * lane.dir * deltaTime;
 
                     if (car.y > canvas.height + 150) car.y = -200;
                     if (car.y < -200) car.y = canvas.height + 150;
@@ -279,11 +220,10 @@
                         let carBox = { x: lane.x - 30, y: car.y, w: 60, h: 75 };
 
                         if (
-                            (chickenBox.x < carBox.x + carBox.w &&
+                            chickenBox.x < carBox.x + carBox.w &&
                             chickenBox.x + chickenBox.w > carBox.x &&
                             chickenBox.y < carBox.y + carBox.h &&
-                            chickenBox.y + chickenBox.h > carBox.y) || 
-                            (Math.random() < crashRisk * deltaTime)
+                            chickenBox.y + chickenBox.h > carBox.y
                         ) {
                             gameState = 'GAMEOVER';
                             endGame("CRASHED! PLAY AGAIN", "#ef4444");
@@ -312,12 +252,12 @@
             ctx.translate(-cameraX, 0);
 
             ctx.fillStyle = '#374151';
-            ctx.fillRect(200, 0, 5000, canvas.height);
+            ctx.fillRect(200, 0, 4000, canvas.height);
 
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
             ctx.setLineDash([20, 20]);
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 25; i++) {
                 let dashX = 380 + (i * 160);
                 ctx.beginPath();
                 ctx.moveTo(dashX, 0);
