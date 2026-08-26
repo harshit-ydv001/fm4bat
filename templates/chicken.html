@@ -20,7 +20,7 @@
         }
         .game-wrapper {
             width: 100%;
-            max-width: 760px;
+            max-width: 480px;
             background: #1e293b;
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
@@ -36,14 +36,14 @@
             border-bottom: 2px solid #374151;
             font-size: 13px;
         }
-        .logo-main { color: #ffffff; font-weight: 900; font-size: 16px; }
-        .logo-sub { color: #ef4444; font-weight: 900; font-size: 16px; }
-        .balance-pill { color: #22c55e; font-weight: bold; font-size: 14px; }
+        .logo-main { color: #ffffff; font-weight: 900; font-size: 15px; }
+        .logo-sub { color: #ef4444; font-weight: 900; font-size: 15px; }
+        .balance-pill { color: #22c55e; font-weight: bold; font-size: 13px; }
         .canvas-area {
             position: relative;
             width: 100%;
-            background: #27272a;
-            aspect-ratio: 720 / 420;
+            background: #374151;
+            aspect-ratio: 9 / 13;
         }
         canvas {
             display: block;
@@ -58,9 +58,9 @@
             gap: 12px;
             border-top: 1px solid #334155;
         }
-        .bet-presets { display: flex; gap: 12px; align-items: center; justify-content: center; }
+        .bet-presets { display: flex; gap: 8px; align-items: center; justify-content: center; }
         .quick-bet-chips { display: flex; gap: 6px; }
-        .chip-btn { background: #334155; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .chip-btn { background: #334155; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .action-bar { display: flex; width: 100%; }
         .play-main-btn {
             width: 100%;
@@ -76,7 +76,7 @@
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
         .playing-btns-group { display: flex; width: 100%; gap: 10px; }
-        .cashout-action-btn { flex: 2; background: #eab308; color: #000; border: none; padding: 14px; font-size: 16px; font-weight: 900; border-radius: 8px; cursor: pointer; text-align: center; }
+        .cashout-action-btn { flex: 2; background: #eab308; color: #000; border: none; padding: 14px; font-size: 15px; font-weight: 900; border-radius: 8px; cursor: pointer; text-align: center; }
         .go-action-btn { flex: 1; background: #22c55e; color: #fff; border: none; padding: 14px; font-size: 18px; font-weight: 900; border-radius: 8px; cursor: pointer; text-align: center; }
     </style>
 </head>
@@ -87,11 +87,11 @@
             <div class="logo-area">
                 <span class="logo-main">CHICKEN</span><span class="logo-sub">2ROAD</span>
             </div>
-            <div class="balance-pill" id="balanceDisplay">999 693.3 Ⓢ</div>
+            <div class="balance-pill" id="balanceDisplay">1 000 000.00 Ⓢ</div>
         </div>
 
         <div class="canvas-area">
-            <canvas id="gameCanvas" width="720" height="420"></canvas>
+            <canvas id="gameCanvas" width="480" height="700"></canvas>
         </div>
 
         <div class="control-panel">
@@ -107,7 +107,7 @@
             <div class="action-bar">
                 <button id="playBtn" class="play-main-btn" onclick="startPlay()">PLAY</button>
                 <div id="playingActionBtns" class="playing-btns-group" style="display: none;">
-                    <button id="cashoutBtn" class="cashout-action-btn" onclick="cashOutGame()">CASH OUT <span id="cashoutAmt">28.8</span> $</button>
+                    <button id="cashoutBtn" class="cashout-action-btn" onclick="cashOutGame()">COLLECT TOKENS (<span id="cashoutAmt">0.0</span>)</button>
                     <button id="goBtn" class="go-action-btn" onclick="goNextLane()">GO</button>
                 </div>
             </div>
@@ -118,13 +118,13 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let balance = 999693.30;
+        let balance = 1000000.00;
         let gameState = 'IDLE'; 
-        let currentStep = 0; // 0 to 5 lanes
-        let betAmount = 20.00;
+        let currentLaneIdx = 0; // 0 to 4 lanes
+        let betAmount = 3.00;
         let lastTime = 0;
 
-        // Exact image filenames from your folder
+        // Exact Assets from your folder
         const imgBg = new Image(); imgBg.src = '/static/images/BG Chicken Road 2.png';
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
@@ -132,19 +132,17 @@
         const imgHatch = new Image(); imgHatch.src = '/static/images/hatch.png';
         const imgCar = new Image(); imgCar.src = '/static/images/car.png';
 
-        const multipliers = [1.44, 2.21, 3.45, 5.53, 9.09];
-        const laneXPositions = [185, 290, 395, 500, 605]; // Exact X positions matching reference background
+        const multipliers = [1.01, 1.03, 1.06, 1.10, 1.15, 1.19, 1.24, 1.30, 1.35, 1.42];
 
-        // 5 Traffic Lanes configuration matching video reference
-        let lanes = [
-            { x: 185, dir: 1, speed: 140, cars: [{y: 30}] },
-            { x: 290, dir: -1, speed: 170, cars: [{y: 320}] },
-            { x: 395, dir: 1, speed: 150, cars: [{y: 80}] },
-            { x: 500, dir: -1, speed: 190, cars: [{y: 280}] },
-            { x: 605, dir: 1, speed: 160, cars: [{y: 50}] }
+        // 5 Road Lanes (X positions exactly matching reference video layout)
+        const lanes = [
+            { x: 195, dir: 1, speed: 180, cars: [{y: -100}, {y: 400}] },
+            { x: 275, dir: -1, speed: 210, cars: [{y: 200}, {y: 700}] },
+            { x: 355, dir: 1, speed: 190, cars: [{y: 50}, {y: 550}] },
+            { x: 435, dir: -1, speed: 230, cars: [{y: 300}, {y: 800}] }
         ];
 
-        let chicken = { x: 75, y: 310 };
+        let chicken = { x: 75, y: 580 };
 
         function setBetVal(val) {
             if (gameState === 'PLAYING') return;
@@ -153,15 +151,21 @@
 
         function startPlay() {
             if (balance < betAmount) {
-                alert("Insufficient balance!");
+                alert("Balance exhausted!");
                 return;
             }
             balance -= betAmount;
-            document.getElementById('balanceDisplay').innerText = `${balance.toFixed(1)} Ⓢ`;
+            document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
             gameState = 'PLAYING';
-            currentStep = 0;
+            currentLaneIdx = 0;
             chicken.x = 75;
-            chicken.y = 310;
+            chicken.y = 580;
+
+            // Reset car positions
+            lanes.forEach(l => {
+                l.cars[0].y = -150 - Math.random() * 100;
+                l.cars[1].y = 500 + Math.random() * 100;
+            });
 
             document.getElementById('playBtn').style.display = 'none';
             document.getElementById('playingActionBtns').style.display = 'flex';
@@ -169,50 +173,51 @@
         }
 
         function goNextLane() {
-            if (gameState === 'PLAYING' && currentStep < 5) {
-                // Check collision on target lane
-                let targetLane = lanes[currentStep];
-                let hitCar = false;
+            if (gameState === 'PLAYING' && currentLaneIdx < lanes.length) {
+                // Check if car is currently hitting the chicken's target lane
+                let targetLane = lanes[currentLaneIdx];
+                let hit = false;
                 targetLane.cars.forEach(car => {
-                    if (car.y > 100 && car.y < 350) {
-                        hitCar = true;
-                    }
+                    if (Math.abs(chicken.y - car.y) < 45) hit = true;
                 });
 
-                if (hitCar || Math.random() < 0.05) {
+                if (hit || Math.random() < 0.05) {
                     gameState = 'GAMEOVER';
                     endGame("CRASHED! PLAY AGAIN", "#ef4444");
                     return;
                 }
 
-                currentStep++;
-                if (currentStep >= 5) {
-                    let winAmt = betAmount * multipliers[4];
-                    balance += winAmt;
+                currentLaneIdx++;
+                chicken.x = targetLane.x - 40; // Move chicken to next lane safe spot
+
+                if (currentLaneIdx >= lanes.length) {
                     gameState = 'WON';
+                    let mult = multipliers[lanes.length - 1];
+                    let winAmt = betAmount * mult;
+                    balance += winAmt;
+                    document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
                     endGame(`WON ₹${winAmt.toFixed(2)}! PLAY AGAIN`, "#22c55e");
                 } else {
-                    chicken.x = laneXPositions[currentStep - 1] - 15;
                     updateCashoutDisplay();
                 }
             }
         }
 
         function cashOutGame() {
-            if (gameState === 'PLAYING' && currentStep > 0) {
-                let mult = multipliers[currentStep - 1];
+            if (gameState === 'PLAYING' && currentLaneIdx > 0) {
+                let mult = multipliers[currentLaneIdx - 1];
                 let winAmt = betAmount * mult;
                 balance += winAmt;
-                document.getElementById('balanceDisplay').innerText = `${balance.toFixed(1)} Ⓢ`;
+                document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
                 gameState = 'WON';
-                endGame(`CASH OUT ₹${winAmt.toFixed(2)}! PLAY AGAIN`, "#22c55e");
+                endGame(`COLLECTED ₹${winAmt.toFixed(2)}! PLAY AGAIN`, "#22c55e");
             }
         }
 
         function updateCashoutDisplay() {
-            let mult = multipliers[Math.min(currentStep, multipliers.length - 1)];
+            let mult = multipliers[Math.min(currentLaneIdx, multipliers.length - 1)];
             let amt = betAmount * mult;
-            document.getElementById('cashoutAmt').innerText = `${amt.toFixed(1)} $`;
+            document.getElementById('cashoutAmt').innerText = amt.toFixed(2);
         }
 
         function endGame(text, bgColor) {
@@ -227,18 +232,16 @@
             if (gameState !== 'PLAYING') return;
 
             lanes.forEach((lane, index) => {
-                if (index < currentStep) return; // Stop active traffic check behind barriers
-
                 lane.cars.forEach(car => {
                     car.y += lane.speed * lane.dir * deltaTime;
 
-                    if (car.y > canvas.height + 60) car.y = -100;
-                    if (car.y < -100) car.y = canvas.height + 60;
+                    if (car.y > canvas.height + 100) car.y = -150;
+                    if (car.y < -150) car.y = canvas.height + 100;
 
-                    // Collision detection with chicken
-                    if (gameState === 'PLAYING' && currentStep === index) {
-                        let chickenBox = { x: chicken.x, y: chicken.y, w: 35, h: 35 };
-                        let carBox = { x: lane.x - 22, y: car.y, w: 44, h: 60 };
+                    // Real-time collision detection
+                    if (gameState === 'PLAYING' && currentLaneIdx === index) {
+                        let chickenBox = { x: chicken.x, y: chicken.y, w: 45, h: 45 };
+                        let carBox = { x: lane.x - 28, y: car.y, w: 56, h: 70 };
 
                         if (
                             chickenBox.x < carBox.x + carBox.w &&
@@ -257,41 +260,74 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Draw Reference Background (BG Chicken Road 2.png) perfectly fitted
-            if (imgBg.complete && imgBg.naturalWidth > 0) {
-                ctx.drawImage(imgBg, 0, 0, canvas.width, canvas.height);
-            }
+            // 1. Static Left Sidewalk & Grass Area (Exact reference layout)
+            ctx.fillStyle = '#15803d';
+            ctx.fillRect(0, 0, 140, canvas.height);
+            ctx.fillStyle = '#9ca3af';
+            ctx.fillRect(140, 0, 16, canvas.height);
 
-            // 2. Draw Barriers on crossed lanes (barrier (1).png)
-            for (let i = 0; i < currentStep; i++) {
-                let lx = laneXPositions[i];
+            ctx.font = '40px Arial';
+            ctx.fillText('🌳', 45, 120);
+            ctx.fillText('🌳', 45, 300);
+            ctx.fillText('🌳', 45, 520);
+
+            // 2. Road Area Background
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(156, 0, canvas.width - 156, canvas.height);
+
+            // Lane Divider Dashes
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([14, 14]);
+            for (let i = 0; i < 3; i++) {
+                let dashX = 236 + (i * 80);
+                ctx.beginPath();
+                ctx.moveTo(dashX, 0);
+                ctx.lineTo(dashX, canvas.height);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // 3. Draw Barriers behind chicken on crossed lanes
+            for (let i = 0; i < currentLaneIdx; i++) {
+                let lane = lanes[i];
                 if (imgBarrier.complete) {
-                    ctx.drawImage(imgBarrier, lx - 25, 230, 50, 32);
+                    ctx.drawImage(imgBarrier, lane.x - 30, chicken.y - 10, 60, 32);
                 }
             }
 
-            // 3. Draw Cars inside active road lanes (car.png)
+            // 4. Draw Cars (Strictly inside road lanes)
             lanes.forEach((lane, index) => {
-                if (index < currentStep) return;
                 lane.cars.forEach(car => {
                     if (imgCar.complete) {
                         ctx.save();
-                        ctx.translate(lane.x, car.y + 30);
+                        ctx.translate(lane.x, car.y + 35);
                         if (lane.dir === -1) ctx.scale(1, -1);
-                        ctx.drawImage(imgCar, -22, -30, 44, 60);
+                        ctx.drawImage(imgCar, -28, -35, 56, 70);
                         ctx.restore();
                     }
                 });
             });
 
-            // 4. Chicken positioning & rendering (chicken.png or cheken_rip.png)
+            // 5. Draw Multiplier Hatches (Manholes) for each lane
+            lanes.forEach((lane, index) => {
+                if (imgHatch.complete) {
+                    ctx.drawImage(imgHatch, lane.x - 32, 280, 64, 64);
+                }
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${multipliers[index]}x`, lane.x, 318);
+            });
+
+            // 6. Draw Chicken (or RIP chicken on crash)
             if (gameState === 'GAMEOVER') {
                 if (imgRip.complete) {
-                    ctx.drawImage(imgRip, chicken.x - 10, chicken.y - 10, 45, 45);
+                    ctx.drawImage(imgRip, chicken.x, chicken.y, 50, 50);
                 }
             } else {
                 if (imgChicken.complete) {
-                    ctx.drawImage(imgChicken, chicken.x, chicken.y, 40, 40);
+                    ctx.drawImage(imgChicken, chicken.x, chicken.y, 50, 50);
                 }
             }
         }
