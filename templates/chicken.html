@@ -168,7 +168,7 @@
         let betAmount = 3.00;
         let lastTime = 0;
 
-        // Loading exact user-provided PNG assets
+        // Assets
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
         const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
@@ -326,7 +326,6 @@
             }
             ctx.setLineDash([]);
 
-            // Rendering using barrier.png
             for (let i = 0; i < currentStep; i++) {
                 let lane = lanes[i];
                 if (imgBarrier.complete) {
@@ -334,7 +333,6 @@
                 }
             }
 
-            // Rendering cars using car-1.png sheet
             if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
                 let totalCars = 4;
                 let sw = imgCarSheet.naturalWidth / totalCars;
@@ -357,7 +355,6 @@
                 });
             }
 
-            // Rendering hatches using hatch_2.png
             lanes.forEach((lane, index) => {
                 if (index >= currentStep) {
                     if (imgHatch.complete) {
@@ -372,7 +369,7 @@
 
             ctx.restore();
 
-            // 3. Chicken on Left Sidewalk (using chicken.png and cheken_rip.png)
+            // 3. Chicken on Left Sidewalk
             let targetChickenX = 100 + (currentStep * 160);
             chicken.x += (targetChickenX - chicken.x) * 0.2;
 
