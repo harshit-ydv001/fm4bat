@@ -18,7 +18,7 @@
             </div>
             <div class="header-right">
                 <button class="info-btn">ⓘ How to play?</button>
-                <div class="balance-pill" id="balanceDisplay">1 000 000 Ⓢ</div>
+                <div class="balance-pill" id="balanceDisplay">1 000 001.32 Ⓢ</div>
                 <button class="fullscreen-btn">⛶</button>
             </div>
         </div>
@@ -58,7 +58,7 @@
             <div class="action-bar">
                 <button id="playBtn" class="play-main-btn" onclick="startPlay()">Play</button>
                 <div id="playingActionBtns" class="playing-btns-group" style="display: none;">
-                    <button id="cashoutBtn" class="cashout-action-btn" onclick="cashOutGame()">COLLECT TOKENS <span id="cashoutAmt">0.0</span> $</button>
+                    <button id="cashoutBtn" class="cashout-action-btn" onclick="cashOutGame()">CASH OUT <span id="cashoutAmt">0.0</span> $</button>
                     <button id="goBtn" class="go-action-btn" onclick="goNextLane()">GO</button>
                 </div>
             </div>
@@ -69,7 +69,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let balance = 1000000.00;
+        let balance = 1000001.32;
         let gameState = 'IDLE'; 
         let currentLane = 0; 
         let difficulty = 'easy';
@@ -81,17 +81,15 @@
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
         const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
-        
-        // Sprite sheet for cars (`car-1.png` has approx 6 cars side-by-side)
         const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
 
-        // 5 Lanes matching hatch positions
+        // 5 Lanes matching the background hatches
         const lanes = [
-            { x: 195, dir: 1, speed: 2.2, cars: [{y: 50, carIndex: 0}, {y: 280, carIndex: 1}] },
-            { x: 295, dir: -1, speed: 2.6, cars: [{y: 100, carIndex: 2}, {y: 320, carIndex: 3}] },
-            { x: 395, dir: 1, speed: 3.0, cars: [{y: 20, carIndex: 4}, {y: 240, carIndex: 5}] },
-            { x: 495, dir: -1, speed: 3.4, cars: [{y: 150, carIndex: 0}, {y: 350, carIndex: 2}] },
-            { x: 595, dir: 1, speed: 3.8, cars: [{y: 80, carIndex: 1}, {y: 300, carIndex: 4}] }
+            { x: 195, dir: 1, speed: 2.2, cars: [{y: 40, type: 0}, {y: 260, type: 1}] },
+            { x: 295, dir: -1, speed: 2.6, cars: [{y: 100, type: 2}, {y: 320, type: 3}] },
+            { x: 395, dir: 1, speed: 3.0, cars: [{y: 20, type: 1}, {y: 240, type: 2}] },
+            { x: 495, dir: -1, speed: 3.4, cars: [{y: 150, type: 3}, {y: 350, type: 0}] },
+            { x: 595, dir: 1, speed: 3.8, cars: [{y: 80, type: 2}, {y: 300, type: 1}] }
         ];
 
         let chicken = { x: 50, y: 340 };
@@ -174,7 +172,7 @@
         }
 
         function updateCashoutDisplay() {
-            let amt = (getBetAmount() * multipliers[currentLane]).toFixed(1);
+            let amt = (getBetAmount() * multipliers[currentLane]).toFixed(2);
             document.getElementById('cashoutAmt').innerText = amt;
         }
 
@@ -225,11 +223,11 @@
                 }
             }
 
-            // Draw individual cars by cropping the sprite sheet `car-1.png`
+            // Draw individual separate cars by cropping car-1.png sheet correctly
             if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
-                let totalCarsInSheet = 6;
-                let singleCarWidth = imgCarSheet.naturalWidth / totalCarsInSheet;
-                let singleCarHeight = imgCarSheet.naturalHeight;
+                let totalCars = 4; // Sheet contains 4 distinct cars side by side
+                let sw = imgCarSheet.naturalWidth / totalCars;
+                let sh = imgCarSheet.naturalHeight;
 
                 lanes.forEach((lane, index) => {
                     if (index < currentLane) return;
@@ -238,10 +236,9 @@
                         ctx.translate(lane.x, car.y + 25);
                         if (lane.dir === -1) ctx.scale(1, -1);
                         
-                        // Crop specific car from sprite sheet
                         ctx.drawImage(
                             imgCarSheet,
-                            car.carIndex * singleCarWidth, 0, singleCarWidth, singleCarHeight,
+                            car.type * sw, 0, sw, sh,
                             -20, -25, 40, 50
                         );
                         ctx.restore();
