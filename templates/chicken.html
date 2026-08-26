@@ -18,7 +18,7 @@
             </div>
             <div class="header-right">
                 <button class="info-btn">ⓘ How to play?</button>
-                <div class="balance-pill" id="balanceDisplay">1 000 980.32 Ⓢ</div>
+                <div class="balance-pill" id="balanceDisplay">1 000 000.32 Ⓢ</div>
                 <button class="fullscreen-btn">⛶</button>
             </div>
         </div>
@@ -69,27 +69,27 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let balance = 1000980.32;
+        let balance = 1000000.32;
         let gameState = 'IDLE'; 
         let currentStep = 0; 
-        let cameraX = 0; // Infinite scrolling camera
+        let cameraX = 0; 
         let difficulty = 'easy';
 
-        // Load all PNG assets
+        // Load all PNG assets with transparency support
         const imgBg = new Image(); imgBg.src = '/static/images/bg.png';
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
         const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
         const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
 
-        // Infinite Road Lanes Setup (Road X ranges strictly from 135 to 650)
+        // Infinite road lanes setup strictly confined within asphalt road (X: 150 to 620)
         let lanes = [];
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 30; i++) {
             lanes.push({
-                x: 175 + (i * 100),
+                x: 185 + (i * 100),
                 dir: i % 2 === 0 ? 1 : -1,
-                speed: 2.2 + (i % 3) * 0.4,
-                cars: [{y: 40, type: i % 4}, {y: 250, type: (i + 1) % 4}]
+                speed: 2.2 + (i % 3) * 0.5,
+                cars: [{y: 30, type: i % 4}, {y: 240, type: (i + 1) % 4}]
             });
         }
 
@@ -114,7 +114,7 @@
         }
 
         function getMultiplier(step) {
-            return (1.00 + (step * 0.18) + (step * step * 0.03)).toFixed(2);
+            return (1.00 + (step * 0.19) + (step * step * 0.04)).toFixed(2);
         }
 
         function startPlay() {
@@ -141,7 +141,7 @@
                 let hitCar = false;
 
                 targetLane.cars.forEach(car => {
-                    if (car.y > 140 && car.y < 320) {
+                    if (car.y > 120 && car.y < 320) {
                         hitCar = true;
                     }
                 });
@@ -154,7 +154,7 @@
                 }
 
                 currentStep++;
-                cameraX = currentStep * 100; // Smooth camera scroll forward
+                cameraX = currentStep * 100; // Smooth infinite camera progression forward
 
                 updateCashoutDisplay();
             }
@@ -167,7 +167,7 @@
                 balance += parseFloat(winAmt);
                 updateBalance();
                 gameState = 'WON';
-                endGame(`CASHED OUT ₹${winAmt}! PLAY AGAIN`, "#22c55e");
+                endGame(`WIN! ₹${winAmt}`, "#22c55e");
             }
         }
 
@@ -199,9 +199,8 @@
                     if (car.y > canvas.height + 50) car.y = -60;
                     if (car.y < -60) car.y = canvas.height + 50;
 
-                    // Real-time collision check
                     if (gameState === 'PLAYING' && currentStep === index) {
-                        if (Math.abs(340 - car.y) < 30) {
+                        if (Math.abs(340 - car.y) < 28) {
                             gameState = 'GAMEOVER';
                             endGame("CRASHED! PLAY AGAIN", "#ef4444");
                         }
@@ -214,24 +213,24 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
-            ctx.translate(-cameraX, 0); // Apply infinite scrolling camera offset
+            ctx.translate(-cameraX, 0); // Smooth camera scrolling
 
-            // Draw repeating background seamlessly
+            // Draw infinite repeating background seamlessly
             if (imgBg.complete) {
-                ctx.drawImage(imgBg, 0, 0, canvas.width, canvas.height);
-                ctx.drawImage(imgBg, canvas.width, 0, canvas.width, canvas.height);
-                ctx.drawImage(imgBg, canvas.width * 2, 0, canvas.width, canvas.height);
-            }
-
-            // Draw Barriers strictly inside road bounds (X: 135 to 650)
-            for (let i = 0; i < currentStep; i++) {
-                let barrierX = lanes[i].x;
-                if (imgBarrier.complete) {
-                    ctx.drawImage(imgBarrier, barrierX - 22, 170, 45, 28);
+                for (let i = 0; i < 5; i++) {
+                    ctx.drawImage(imgBg, i * canvas.width, 0, canvas.width, canvas.height);
                 }
             }
 
-            // Draw Cars strictly within road lanes
+            // Draw Barriers behind chicken on crossed lanes
+            for (let i = 0; i < currentStep; i++) {
+                let barrierX = lanes[i].x;
+                if (imgBarrier.complete) {
+                    ctx.drawImage(imgBarrier, barrierX - 22, 170, 44, 26);
+                }
+            }
+
+            // Draw Cars strictly inside road bounds with clean transparent rendering
             if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
                 let totalCars = 4;
                 let sw = imgCarSheet.naturalWidth / totalCars;
@@ -241,7 +240,7 @@
                     if (index < currentStep) return;
                     lane.cars.forEach(car => {
                         ctx.save();
-                        ctx.translate(lane.x, car.y + 25);
+                        ctx.translate(lane.x, car.y + 22);
                         if (lane.dir === -1) ctx.scale(1, -1);
                         
                         ctx.drawImage(
@@ -254,37 +253,36 @@
                 });
             }
 
-            // Draw Multiplier Hatches dynamically for infinite steps
+            // Draw Multiplier Hatches for upcoming steps
             lanes.forEach((lane, index) => {
                 if (index >= currentStep) {
                     ctx.fillStyle = '#1f2937';
                     ctx.beginPath();
-                    ctx.arc(lane.x, 340, 24, 0, Math.PI * 2);
+                    ctx.arc(lane.x, 340, 22, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.strokeStyle = '#4b5563';
-                    ctx.lineWidth = 3;
+                    ctx.lineWidth = 2.5;
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 11px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(`${getMultiplier(index + 1)}x`, lane.x, lane.y = 344);
+                    ctx.fillText(`${getMultiplier(index + 1)}x`, lane.x, 344);
                 }
             });
 
-            // Smooth Chicken Movement & Positioning
+            // Chicken Movement & Clean Rendering without black boxes
             let targetX = currentStep === 0 ? 50 : lanes[currentStep - 1].x;
             chicken.x += (targetX - chicken.x) * 0.2;
             chicken.y = 340;
 
             if (gameState === 'GAMEOVER') {
                 if (imgRip.complete) {
-                    ctx.drawImage(imgRip, chicken.x + cameraX - 22, chicken.y - 22, 44, 44);
+                    ctx.drawImage(imgRip, chicken.x + cameraX - 20, chicken.y - 20, 40, 40);
                 }
             } else {
                 if (imgChicken.complete) {
-                    // Lock chicken to screen viewport so it moves forward with camera
-                    ctx.drawImage(imgChicken, chicken.x - 20, chicken.y - 20, 40, 40);
+                    ctx.drawImage(imgChicken, chicken.x - 18, chicken.y - 18, 36, 36);
                 }
             }
 
