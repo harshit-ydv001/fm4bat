@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chicken Road Game - Fm4bat</title>
+    <title>Chicken Road 2 - Fm4bat</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -15,7 +15,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: 100vh;
         }
         .game-wrapper {
@@ -122,28 +122,30 @@
         let gameState = 'IDLE'; 
         let currentStep = 0;
         let cameraX = 0; 
+        let betAmount = 3.00;
         let lastTime = 0;
 
-        // Assets
+        // Loading exact filenames from your static/images folder
+        const imgBg = new Image(); imgBg.src = '/static/images/BG Chicken Road 2.png';
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
-        const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
-        const imgHatch = new Image(); imgHatch.src = '/static/images/hatch_2.png';
-        const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
+        const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier (1).png';
+        const imgHatch = new Image(); imgHatch.src = '/static/images/hatch.png';
+        const imgCar = new Image(); imgCar.src = '/static/images/car.png';
 
         const multipliers = [1.00, 1.09, 1.25, 1.43, 1.66, 1.94, 2.30, 2.80, 3.50, 4.50];
 
         let lanes = [];
         function initLanes() {
             lanes = [];
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 30; i++) {
                 lanes.push({
                     x: 300 + (i * 160),
                     dir: i % 2 === 0 ? 1 : -1,
-                    speed: 180 + (i % 3) * 45,
+                    speed: 160 + (i % 3) * 40,
                     cars: [
-                        { y: -150 - (i * 110), type: i % 4 },
-                        { y: 650 + (i * 110), type: (i + 1) % 4 }
+                        { y: -150 - (i * 110) },
+                        { y: 650 + (i * 110) }
                     ]
                 });
             }
@@ -154,10 +156,15 @@
 
         function setBetVal(val) {
             if (gameState === 'PLAYING') return;
+            betAmount = val;
         }
 
         function startPlay() {
-            balance -= 3.00;
+            if (balance < betAmount) {
+                alert("Balance exhausted!");
+                return;
+            }
+            balance -= betAmount;
             document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
             gameState = 'PLAYING';
             currentStep = 0;
@@ -181,7 +188,7 @@
         function cashOutGame() {
             if (gameState === 'PLAYING' && currentStep > 0) {
                 let mult = multipliers[Math.min(currentStep, multipliers.length - 1)];
-                let winAmt = 3.00 * mult;
+                let winAmt = betAmount * mult;
                 balance += winAmt;
                 document.getElementById('balanceDisplay').innerText = `${balance.toFixed(2)} Ⓢ`;
                 gameState = 'WON';
@@ -191,7 +198,7 @@
 
         function updateCashoutDisplay() {
             let mult = multipliers[Math.min(currentStep + 1, multipliers.length - 1)];
-            let amt = 3.00 * mult;
+            let amt = betAmount * mult;
             document.getElementById('cashoutAmt').innerText = amt.toFixed(2);
         }
 
@@ -236,7 +243,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 1. Fixed Left Sidewalk Area
+            // 1. Fixed Left Sidewalk Area & Trees
             ctx.fillStyle = '#15803d';
             ctx.fillRect(0, 0, 180, canvas.height);
             ctx.fillStyle = '#9ca3af';
@@ -252,12 +259,12 @@
             ctx.translate(-cameraX, 0);
 
             ctx.fillStyle = '#374151';
-            ctx.fillRect(200, 0, 4000, canvas.height);
+            ctx.fillRect(200, 0, 5000, canvas.height);
 
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
             ctx.setLineDash([20, 20]);
-            for (let i = 0; i < 25; i++) {
+            for (let i = 0; i < 30; i++) {
                 let dashX = 380 + (i * 160);
                 ctx.beginPath();
                 ctx.moveTo(dashX, 0);
@@ -266,6 +273,7 @@
             }
             ctx.setLineDash([]);
 
+            // Draw barrier using barrier (1).png
             for (let i = 0; i < currentStep; i++) {
                 let lane = lanes[i];
                 if (imgBarrier.complete) {
@@ -273,28 +281,21 @@
                 }
             }
 
-            if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
-                let totalCars = 4;
-                let sw = imgCarSheet.naturalWidth / totalCars;
-                let sh = imgCarSheet.naturalHeight;
-
-                lanes.forEach((lane, index) => {
-                    if (index < currentStep) return;
-                    lane.cars.forEach(car => {
+            // Draw cars using car.png
+            lanes.forEach((lane, index) => {
+                if (index < currentStep) return;
+                lane.cars.forEach(car => {
+                    if (imgCar.complete) {
                         ctx.save();
                         ctx.translate(lane.x, car.y + 35);
                         if (lane.dir === -1) ctx.scale(1, -1);
-                        
-                        ctx.drawImage(
-                            imgCarSheet,
-                            car.type * sw, 0, sw, sh,
-                            -30, -35, 60, 75
-                        );
+                        ctx.drawImage(imgCar, -30, -35, 60, 75);
                         ctx.restore();
-                    });
+                    }
                 });
-            }
+            });
 
+            // Draw hatch using hatch.png
             lanes.forEach((lane, index) => {
                 if (index >= currentStep) {
                     if (imgHatch.complete) {
@@ -309,7 +310,7 @@
 
             ctx.restore();
 
-            // 3. Chicken on Left Sidewalk
+            // 3. Chicken on Left Sidewalk using chicken.png / cheken_rip.png
             let targetChickenX = 100 + (currentStep * 160);
             chicken.x += (targetChickenX - chicken.x) * 0.2;
 
