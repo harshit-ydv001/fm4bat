@@ -18,7 +18,7 @@
             </div>
             <div class="header-right">
                 <button class="info-btn">ⓘ How to play?</button>
-                <div class="balance-pill" id="balanceDisplay">1 000 001.32 Ⓢ</div>
+                <div class="balance-pill" id="balanceDisplay">1 000 980.32 Ⓢ</div>
                 <button class="fullscreen-btn">⛶</button>
             </div>
         </div>
@@ -69,28 +69,29 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        let balance = 1000001.32;
+        let balance = 1000980.32;
         let gameState = 'IDLE'; 
-        let currentLane = 0; 
+        let currentStep = 0; 
+        let cameraX = 0; // Infinite scrolling camera
         let difficulty = 'easy';
 
-        const multipliers = [1.00, 1.09, 1.25, 1.43, 1.66, 1.94];
-
-        // Load background and assets
+        // Load all PNG assets
         const imgBg = new Image(); imgBg.src = '/static/images/bg.png';
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
         const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
         const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
 
-        // 5 Lanes matching the background hatches
-        const lanes = [
-            { x: 195, dir: 1, speed: 2.2, cars: [{y: 40, type: 0}, {y: 260, type: 1}] },
-            { x: 295, dir: -1, speed: 2.6, cars: [{y: 100, type: 2}, {y: 320, type: 3}] },
-            { x: 395, dir: 1, speed: 3.0, cars: [{y: 20, type: 1}, {y: 240, type: 2}] },
-            { x: 495, dir: -1, speed: 3.4, cars: [{y: 150, type: 3}, {y: 350, type: 0}] },
-            { x: 595, dir: 1, speed: 3.8, cars: [{y: 80, type: 2}, {y: 300, type: 1}] }
-        ];
+        // Infinite Road Lanes Setup (Road X ranges strictly from 135 to 650)
+        let lanes = [];
+        for (let i = 0; i < 20; i++) {
+            lanes.push({
+                x: 175 + (i * 100),
+                dir: i % 2 === 0 ? 1 : -1,
+                speed: 2.2 + (i % 3) * 0.4,
+                cars: [{y: 40, type: i % 4}, {y: 250, type: (i + 1) % 4}]
+            });
+        }
 
         let chicken = { x: 50, y: 340 };
 
@@ -112,6 +113,10 @@
             return parseFloat(document.getElementById('betMultiplierInput').value) || 3.00;
         }
 
+        function getMultiplier(step) {
+            return (1.00 + (step * 0.18) + (step * step * 0.03)).toFixed(2);
+        }
+
         function startPlay() {
             let bet = getBetAmount();
             if (balance < bet) {
@@ -121,7 +126,8 @@
             balance -= bet;
             updateBalance();
             gameState = 'PLAYING';
-            currentLane = 0;
+            currentStep = 0;
+            cameraX = 0;
             chicken.x = 50;
 
             document.getElementById('playBtn').style.display = 'none';
@@ -130,49 +136,44 @@
         }
 
         function goNextLane() {
-            if (gameState === 'PLAYING' && currentLane < 5) {
-                let targetLaneIdx = currentLane;
-                let lane = lanes[targetLaneIdx];
+            if (gameState === 'PLAYING') {
+                let targetLane = lanes[currentStep];
                 let hitCar = false;
 
-                lane.cars.forEach(car => {
+                targetLane.cars.forEach(car => {
                     if (car.y > 140 && car.y < 320) {
                         hitCar = true;
                     }
                 });
 
-                let risk = difficulty === 'easy' ? 0.03 : difficulty === 'medium' ? 0.10 : difficulty === 'hard' ? 0.20 : 0.35;
-                if (hitCar || (currentLane >= 1 && Math.random() < risk)) {
+                let risk = difficulty === 'easy' ? 0.02 : difficulty === 'medium' ? 0.08 : difficulty === 'hard' ? 0.15 : 0.25;
+                if (hitCar || (currentStep >= 1 && Math.random() < risk)) {
                     gameState = 'GAMEOVER';
                     endGame("CRASHED! PLAY AGAIN", "#ef4444");
                     return;
                 }
 
-                currentLane++;
-                if (currentLane === 5) {
-                    gameState = 'WON';
-                    let winAmt = (getBetAmount() * multipliers[5]).toFixed(2);
-                    balance += parseFloat(winAmt);
-                    updateBalance();
-                    endGame(`WON ₹${winAmt}! PLAY AGAIN`, "#22c55e");
-                } else {
-                    updateCashoutDisplay();
-                }
+                currentStep++;
+                cameraX = currentStep * 100; // Smooth camera scroll forward
+
+                updateCashoutDisplay();
             }
         }
 
         function cashOutGame() {
-            if (gameState === 'PLAYING' && currentLane > 0) {
-                let winAmt = (getBetAmount() * multipliers[currentLane]).toFixed(2);
+            if (gameState === 'PLAYING' && currentStep > 0) {
+                let mult = parseFloat(getMultiplier(currentStep));
+                let winAmt = (getBetAmount() * mult).toFixed(2);
                 balance += parseFloat(winAmt);
                 updateBalance();
                 gameState = 'WON';
-                endGame(`COLLECTED ₹${winAmt}! PLAY AGAIN`, "#22c55e");
+                endGame(`CASHED OUT ₹${winAmt}! PLAY AGAIN`, "#22c55e");
             }
         }
 
         function updateCashoutDisplay() {
-            let amt = (getBetAmount() * multipliers[currentLane]).toFixed(2);
+            let mult = getMultiplier(currentStep + 1);
+            let amt = (getBetAmount() * mult).toFixed(2);
             document.getElementById('cashoutAmt').innerText = amt;
         }
 
@@ -190,7 +191,7 @@
 
         function update() {
             lanes.forEach((lane, index) => {
-                if (index < currentLane) return; 
+                if (index < currentStep) return; 
 
                 let speedMult = difficulty === 'medium' ? 1.3 : difficulty === 'hard' ? 1.6 : difficulty === 'hardcore' ? 2.0 : 1.0;
                 lane.cars.forEach(car => {
@@ -198,7 +199,8 @@
                     if (car.y > canvas.height + 50) car.y = -60;
                     if (car.y < -60) car.y = canvas.height + 50;
 
-                    if (gameState === 'PLAYING' && currentLane === index + 1) {
+                    // Real-time collision check
+                    if (gameState === 'PLAYING' && currentStep === index) {
                         if (Math.abs(340 - car.y) < 30) {
                             gameState = 'GAMEOVER';
                             endGame("CRASHED! PLAY AGAIN", "#ef4444");
@@ -211,26 +213,32 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            ctx.save();
+            ctx.translate(-cameraX, 0); // Apply infinite scrolling camera offset
+
+            // Draw repeating background seamlessly
             if (imgBg.complete) {
                 ctx.drawImage(imgBg, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(imgBg, canvas.width, 0, canvas.width, canvas.height);
+                ctx.drawImage(imgBg, canvas.width * 2, 0, canvas.width, canvas.height);
             }
 
-            // Barriers on crossed lanes
-            for (let i = 0; i < currentLane; i++) {
+            // Draw Barriers strictly inside road bounds (X: 135 to 650)
+            for (let i = 0; i < currentStep; i++) {
                 let barrierX = lanes[i].x;
                 if (imgBarrier.complete) {
-                    ctx.drawImage(imgBarrier, barrierX - 25, 170, 50, 30);
+                    ctx.drawImage(imgBarrier, barrierX - 22, 170, 45, 28);
                 }
             }
 
-            // Draw individual separate cars by cropping car-1.png sheet correctly
+            // Draw Cars strictly within road lanes
             if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
-                let totalCars = 4; // Sheet contains 4 distinct cars side by side
+                let totalCars = 4;
                 let sw = imgCarSheet.naturalWidth / totalCars;
                 let sh = imgCarSheet.naturalHeight;
 
                 lanes.forEach((lane, index) => {
-                    if (index < currentLane) return;
+                    if (index < currentStep) return;
                     lane.cars.forEach(car => {
                         ctx.save();
                         ctx.translate(lane.x, car.y + 25);
@@ -239,27 +247,48 @@
                         ctx.drawImage(
                             imgCarSheet,
                             car.type * sw, 0, sw, sh,
-                            -20, -25, 40, 50
+                            -18, -22, 36, 44
                         );
                         ctx.restore();
                     });
                 });
             }
 
-            // Chicken position & animation
-            let targetX = currentLane === 0 ? 50 : lanes[currentLane - 1].x;
+            // Draw Multiplier Hatches dynamically for infinite steps
+            lanes.forEach((lane, index) => {
+                if (index >= currentStep) {
+                    ctx.fillStyle = '#1f2937';
+                    ctx.beginPath();
+                    ctx.arc(lane.x, 340, 24, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#4b5563';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 11px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${getMultiplier(index + 1)}x`, lane.x, lane.y = 344);
+                }
+            });
+
+            // Smooth Chicken Movement & Positioning
+            let targetX = currentStep === 0 ? 50 : lanes[currentStep - 1].x;
             chicken.x += (targetX - chicken.x) * 0.2;
             chicken.y = 340;
 
             if (gameState === 'GAMEOVER') {
                 if (imgRip.complete) {
-                    ctx.drawImage(imgRip, chicken.x - 22, chicken.y - 22, 44, 44);
+                    ctx.drawImage(imgRip, chicken.x + cameraX - 22, chicken.y - 22, 44, 44);
                 }
             } else {
                 if (imgChicken.complete) {
+                    // Lock chicken to screen viewport so it moves forward with camera
                     ctx.drawImage(imgChicken, chicken.x - 20, chicken.y - 20, 40, 40);
                 }
             }
+
+            ctx.restore();
         }
 
         function loop() {
