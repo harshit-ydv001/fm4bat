@@ -76,32 +76,22 @@
 
         const multipliers = [1.00, 1.09, 1.25, 1.43, 1.66, 1.94];
 
-        // Load background and all 3 Car PNGs + Chicken assets
+        // Load background and assets
         const imgBg = new Image(); imgBg.src = '/static/images/bg.png';
         const imgChicken = new Image(); imgChicken.src = '/static/images/chicken.png';
         const imgRip = new Image(); imgRip.src = '/static/images/cheken_rip.png';
         const imgBarrier = new Image(); imgBarrier.src = '/static/images/barrier.png';
         
-        const carImages = [
-            (new Image()).src = '/static/images/car-1.png',
-            (new Image()).src = '/static/images/car.png',
-            (new Image()).src = '/static/images/car_2.png'
-        ];
-        
-        // Proper Image objects array for rendering
-        const loadedCars = [
-            Object.assign(new Image(), { src: '/static/images/car-1.png' }),
-            Object.assign(new Image(), { src: '/static/images/car.png' }),
-            Object.assign(new Image(), { src: '/static/images/car_2.png' })
-        ];
+        // Sprite sheet for cars (`car-1.png` has approx 6 cars side-by-side)
+        const imgCarSheet = new Image(); imgCarSheet.src = '/static/images/car-1.png';
 
-        // 5 Lanes matching the background hatch positions
+        // 5 Lanes matching hatch positions
         const lanes = [
-            { x: 195, dir: 1, speed: 2.2, cars: [{y: 50, imgIdx: 0}, {y: 280, imgIdx: 1}] },
-            { x: 295, dir: -1, speed: 2.6, cars: [{y: 100, imgIdx: 2}, {y: 320, imgIdx: 0}] },
-            { x: 395, dir: 1, speed: 3.0, cars: [{y: 20, imgIdx: 1}, {y: 240, imgIdx: 2}] },
-            { x: 495, dir: -1, speed: 3.4, cars: [{y: 150, imgIdx: 0}, {y: 350, imgIdx: 1}] },
-            { x: 595, dir: 1, speed: 3.8, cars: [{y: 80, imgIdx: 2}, {y: 300, imgIdx: 0}] }
+            { x: 195, dir: 1, speed: 2.2, cars: [{y: 50, carIndex: 0}, {y: 280, carIndex: 1}] },
+            { x: 295, dir: -1, speed: 2.6, cars: [{y: 100, carIndex: 2}, {y: 320, carIndex: 3}] },
+            { x: 395, dir: 1, speed: 3.0, cars: [{y: 20, carIndex: 4}, {y: 240, carIndex: 5}] },
+            { x: 495, dir: -1, speed: 3.4, cars: [{y: 150, carIndex: 0}, {y: 350, carIndex: 2}] },
+            { x: 595, dir: 1, speed: 3.8, cars: [{y: 80, carIndex: 1}, {y: 300, carIndex: 4}] }
         ];
 
         let chicken = { x: 50, y: 340 };
@@ -235,20 +225,29 @@
                 }
             }
 
-            // Moving Cars using 3 different loaded car images
-            lanes.forEach((lane, index) => {
-                if (index < currentLane) return;
-                lane.cars.forEach(car => {
-                    let carImg = loadedCars[car.imgIdx] || loadedCars[0];
-                    if (carImg.complete) {
+            // Draw individual cars by cropping the sprite sheet `car-1.png`
+            if (imgCarSheet.complete && imgCarSheet.naturalWidth > 0) {
+                let totalCarsInSheet = 6;
+                let singleCarWidth = imgCarSheet.naturalWidth / totalCarsInSheet;
+                let singleCarHeight = imgCarSheet.naturalHeight;
+
+                lanes.forEach((lane, index) => {
+                    if (index < currentLane) return;
+                    lane.cars.forEach(car => {
                         ctx.save();
                         ctx.translate(lane.x, car.y + 25);
                         if (lane.dir === -1) ctx.scale(1, -1);
-                        ctx.drawImage(carImg, -20, -25, 40, 50);
+                        
+                        // Crop specific car from sprite sheet
+                        ctx.drawImage(
+                            imgCarSheet,
+                            car.carIndex * singleCarWidth, 0, singleCarWidth, singleCarHeight,
+                            -20, -25, 40, 50
+                        );
                         ctx.restore();
-                    }
+                    });
                 });
-            });
+            }
 
             // Chicken position & animation
             let targetX = currentLane === 0 ? 50 : lanes[currentLane - 1].x;
