@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jackpot Fishing - Fm4bat</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 16 / 9;
+            background: radial-gradient(circle, #0284c7 0%, #0369a1 50%, #0f172a 100%);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+            overflow: hidden;
+            border: 2px solid #38bdf8;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .top-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+        .badge {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #38bdf8;
+        }
+        .jackpot-box {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
+        }
+        .bottom-ui {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .powers-group {
+            display: flex;
+            gap: 8px;
+        }
+        .power-btn {
+            background: #1e293b;
+            color: #38bdf8;
+            border: 2px solid #38bdf8;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .power-btn:hover { background: #38bdf8; color: #000; }
+        .cannon-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid #38bdf8;
+        }
+        .bet-btn {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .bet-display {
+            font-weight: 900;
+            color: #eab308;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="gameBox">
+        <div class="top-ui">
+            <div class="badge" style="color: #22c55e;">Balance: <span id="balanceDisplay">10,000.00</span> Ⓢ</div>
+            <div class="jackpot-box">JILI JACKPOT: <span id="jackpotDisplay">26,462.18</span></div>
+        </div>
+
+        <canvas id="fishCanvas" width="960" height="540"></canvas>
+
+        <div class="bottom-ui">
+            <div class="powers-group">
+                <button class="power-btn" onclick="usePower('frozen')">❄️ Frozen</button>
+                <button class="power-btn" onclick="usePower('auto')">⚡ Auto</button>
+                <button class="power-btn" onclick="usePower('torpedo')">💣 Torpedo</button>
+            </div>
+            <div class="cannon-controls">
+                <button class="bet-btn" onclick="changeBet(-1)">-</button>
+                <span class="bet-display">Bet: <span id="betDisplay">1.0</span> Ⓢ</span>
+                <button class="bet-btn" onclick="changeBet(1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('fishCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let balance = 10000.00;
+        let bet = 1.00;
+        let jackpot = 26462.18;
+        let isFrozen = false;
+
+        let fishes = [];
+        let bullets = [];
+        let particles = [];
+
+        // Fish types
+        const fishTypes = [
+            { name: 'Clownfish', radius: 18, speed: 2.2, reward: 2, color: '#f97316' },
+            { name: 'Goldfish', radius: 28, speed: 1.5, reward: 5, color: '#eab308' },
+            { name: 'Lionfish', radius: 35, speed: 1.2, reward: 10, color: '#ec4899' },
+            { name: 'Boss Crab', radius: 55, speed: 0.8, reward: 50, color: '#ef4444' }
+        ];
+
+        function initFishes() {
+            for (let i = 0; i < 12; i++) {
+                spawnFish();
+            }
+        }
+
+        function spawnFish() {
+            let type = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+            fishes.push({
+                x: Math.random() > 0.5 ? -50 : canvas.width + 50,
+                y: Math.random() * (canvas.height - 150) + 50,
+                vx: (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1),
+                vy: (Math.random() - 0.5) * 0.5,
+                type: type,
+                health: type.reward
+            });
+        }
+
+        initFishes();
+
+        function changeBet(amount) {
+            bet += amount;
+            if (bet < 1) bet = 1;
+            if (bet > 50) bet = 50;
+            document.getElementById('betDisplay').innerText = bet.toFixed(1);
+        }
+
+        function usePower(type) {
+            if (type === 'frozen') {
+                isFrozen = true;
+                setTimeout(() => { isFrozen = false; }, 4000);
+            } else if (type === 'torpedo') {
+                // Clear random fish
+                if (fishes.length > 0) {
+                    let f = fishes[0];
+                    balance += f.type.reward * bet * 2;
+                    fishes.shift();
+                    spawnFish();
+                    updateUI();
+                }
+            }
+        }
+
+        // Shoot bullet towards click/tap
+        canvas.addEventListener('click', (e) => {
+            if (balance < bet) {
+                alert("Insufficient balance!");
+                return;
+            }
+            balance -= bet;
+            updateUI();
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+            const startX = canvas.width / 2;
+            const startY = canvas.height;
+
+            const angle = Math.atan2(clickY - startY, clickX - startX);
+            const speed = 12;
+
+            bullets.push({
+                x: startX,
+                y: startY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed
+            });
+        });
+
+        function updateUI() {
+            document.getElementById('balanceDisplay').innerText = balance.toFixed(2);
+            document.getElementById('jackpotDisplay').innerText = jackpot.toFixed(2);
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update & Draw Fishes
+            fishes.forEach((f, index) => {
+                if (!isFrozen) {
+                    f.x += f.vx;
+                    f.y += f.vy;
+                }
+
+                // Wrap around screen
+                if (f.x < -100) f.x = canvas.width + 100;
+                if (f.x > canvas.width + 100) f.x = -100;
+
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.type.radius, 0, Math.PI * 2);
+                ctx.fillStyle = f.type.color;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+
+                // Draw Reward Text
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${f.type.reward}x`, f.x, f.y - f.type.radius - 4);
+            });
+
+            // Update & Draw Bullets
+            bullets.forEach((b, bIndex) => {
+                b.x += b.vx;
+                b.y += b.vy;
+
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fill();
+
+                // Check collision with fishes
+                fishes.forEach((f, fIndex) => {
+                    let dist = Math.hypot(b.x - f.x, b.y - f.y);
+                    if (dist < f.type.radius + 5) {
+                        // Bullet hits fish
+                        bullets.splice(bIndex, 1);
+                        f.health -= 1;
+
+                        if (f.health <= 0) {
+                            let win = f.type.reward * bet;
+                            balance += win;
+                            jackpot += win * 0.1;
+                            updateUI();
+                            fishes.splice(fIndex, 1);
+                            spawnFish();
+                        }
+                    }
+                });
+
+                // Remove out of bounds bullets
+                if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+                    bullets.splice(bIndex, 1);
+                }
+            });
+
+            // Draw Cannon at bottom center
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height, 35, Math.PI, 0);
+            ctx.fillStyle = '#eab308';
+            ctx.fill();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

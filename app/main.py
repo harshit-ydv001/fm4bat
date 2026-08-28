@@ -292,6 +292,19 @@ async def chicken_game_page(request: Request):
         return HTMLResponse(content=f"<h3>Internal Error: {e}</h3>", status_code=500)
 
 
+# --- JACKPOT FISHING GAME ROUTE ---
+@app.get("/fishing", response_class=HTMLResponse)
+async def fishing_game_page(request: Request):
+    try:
+        html_path = os.path.join("templates", "fishing.html")
+        if os.path.exists(html_path):
+            return templates.TemplateResponse("fishing.html", {"request": request})
+        else:
+            return HTMLResponse(content="<h3>Error: fishing.html file not found!</h3>", status_code=404)
+    except Exception as e:  # noqa: BLE001
+        return HTMLResponse(content=f"<h3>Internal Error: {e}</h3>", status_code=500)
+
+
 @app.websocket("/ws/crash")
 @app.websocket("/ws/crash/")
 async def crash_websocket(websocket: WebSocket):
